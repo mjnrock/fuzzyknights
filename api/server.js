@@ -20,6 +20,15 @@ app.listen(PORT, () => {
 	console.log(`FuzzyKnights API is now listening on port: ${PORT}`);
 });
 
+app.get("/validate", function (req, res) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.set("Content-Type", "Application/json");
+    res.status(200).send({
+        "verified": false,
+        "cats": "(cheese) => 5"
+    });
+});
+
 //! Use this and/or a GET/POST API to coordinate Save/Load for the Player
 app.ws("/ws", function (client, req) {
 	console.log(`[CLIENT CONNECTED]: { Timestamp: ${Date.now()}, IP: ${req.connection.remoteAddress} }`);
