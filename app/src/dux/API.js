@@ -1,3 +1,6 @@
+import { ofType } from "redux-observable";
+import { switchMap } from 'rxjs/operators'
+
 export const ModuleID = "XAPI";
 export const Enum = {
     REQUEST_GAME: "REQUEST_GAME",
@@ -7,6 +10,7 @@ export const Enum = {
 
 export const RequestGame = () => ({
     type: Enum.REQUEST_GAME,
+    url: "http://localhost:3099/validate"
 });
 
 export const RequestGameSuccess = (payload) => ({
@@ -20,9 +24,7 @@ export const RequestGameFailure = (payload) => ({
 });
 
 const initialState = {
-    whiskies: [], // for this example we"ll make an app that fetches and lists whiskies
-    isLoading: false,
-    error: false
+    Payload: null
 };
 
 export function Reducer(state = initialState, action) {
@@ -33,11 +35,13 @@ export function Reducer(state = initialState, action) {
             };
         case Enum.REQUEST_GAME_SUCCESS:
             return {
-                ...state
+                ...state,
+                Payload: action.payload
             };
         case Enum.REQUEST_GAME_FAILURE:
             return {
-                ...state
+                ...state,
+                Payload: action.payload
             };
         default:
             return state;
@@ -45,12 +49,13 @@ export function Reducer(state = initialState, action) {
 }
 
 export function RequestGameEpic(action$) {
-    return action$
-        .ofType("REQUEST_GAME")
-        .switchMap(({ url }) =>
+    return action$.pipe(
+        ofType("REQUEST_GAME"),
+        switchMap(({ url }) =>
             fetch(url)
                 .then(response => response.ok ? response.json() : RequestGameFailure())
                 .then(result => result.type === "REQUEST_GAME_FAILURE" ? result : RequestGameSuccess(result))
                 .catch(() => RequestGameFailure())
-        );
+        )
+    );
 }

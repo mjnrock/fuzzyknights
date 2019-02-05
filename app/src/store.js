@@ -1,19 +1,24 @@
 import { createStore, applyMiddleware, combineReducers } from "redux";
-import { combineEpics, createEpicMiddleware } from "redux-observable";
+import { createEpicMiddleware, combineEpics  } from 'redux-observable';
 
 import { Reducer as APIReducer, RequestGameEpic as APIRequestGameEpic } from "./dux/API";
 
-const epicMiddleware = createEpicMiddleware(combineEpics(
+export const rootReducer = combineReducers({
+    API: APIReducer
+});
+
+const epicMiddleware = createEpicMiddleware();
+export const rootEpic = combineEpics(
     APIRequestGameEpic
-));
+);
 
-export default function init() {
-	let store = createStore(
-		combineReducers({
-            API: APIReducer
-        }),
-		applyMiddleware(epicMiddleware)
-	);
+export default function configureStore() {
+    const store = createStore(
+        rootReducer,
+        applyMiddleware(epicMiddleware)
+    );
 
-	return store;
+    epicMiddleware.run(rootEpic);
+
+    return store;
 }
