@@ -8,11 +8,10 @@ class App extends Component {
     componentDidMount() {
         this.props.RequestGame();
     }
-    
+
 	render() {
-        console.log(this.props.API.Payload);
 		return (
-            <div>cat</div>
+            <div>{ JSON.stringify(this.props.API) }</div>
 		);
 	}
 }
