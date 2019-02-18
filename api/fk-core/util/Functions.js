@@ -4,3 +4,7 @@ export function NewUUID() {
 		return v.toString(16);
 	});
 };
+
+export default {
+    NewUUID
+};
