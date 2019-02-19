@@ -7,6 +7,9 @@ const app = expressWS.app;
 
 const PORT = 3099;
 
+import TestSuite from "./test/Main";
+TestSuite.Run();
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(function(req, res, next) {

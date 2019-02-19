@@ -1,4 +1,4 @@
-import { NewUUID } from "./Functions";
+import { NewUUID } from "../Functions";
 
 class DataListItem {
     constructor(key, value, { order = 1, weight = 1, uuid = NewUUID() }) {

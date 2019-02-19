@@ -1,4 +1,4 @@
-import { NewUUID } from "./Functions";
+import { NewUUID } from "../Functions";
 import DataListItem from "./DataListItem";
 
 class DataList {

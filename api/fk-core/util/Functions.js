@@ -5,6 +5,35 @@ export function NewUUID() {
 	});
 };
 
+export function Clamp(value, min, max) {
+	if(value > max) {
+		value = max;
+	}
+	if(value < min) {
+		value = min;
+	}
+
+	return value;
+}
+export function MinClamp(value, min) {
+	if(value < min) {
+		value = min;
+	}
+
+	return value;
+}
+export function MaxClamp(value, max) {
+	if(value > max) {
+		value = max;
+	}
+
+	return value;
+}
+
 export default {
-    NewUUID
+	NewUUID,
+	
+	Clamp,
+	MinClamp,
+	MaxClamp
 };

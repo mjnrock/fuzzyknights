@@ -1,7 +1,9 @@
 import Functions from "./Functions";
-import DataList from "./DataList";
+
+import Plane from "./Plane";
 
 export default {
-    Functions,
-    DataList
+	Functions,
+	
+	Plane
 };
