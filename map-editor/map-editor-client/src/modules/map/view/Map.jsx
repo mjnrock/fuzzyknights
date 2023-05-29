@@ -77,14 +77,14 @@ export function Map({ ...props }) {
 		<div className="p-2 m-2 bg-neutral-50 border border-solid rounded border-neutral-200 flex flex-row items-center justify-center" { ...props }>
 			<div className="flex flex-col">
 				<div
-					className="p-2 bg-blue-500 text-white text-center cursor-pointer"
+					className="p-2 bg-gray-500 text-white text-center cursor-pointer mb-2"
 					onClick={ () => {
 						dispatch({
 							type: "RANDOMIZE"
 						});
 					} }
 				>
-					Click Me
+					Randomize Seed
 				</div>
 				<Canvas
 					width={ 600 }
