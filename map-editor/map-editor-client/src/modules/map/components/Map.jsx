@@ -3,8 +3,8 @@ import { MapModuleReact, EnumActions } from "../main.js";
 
 import { Canvas } from "./Canvas.jsx";
 
-export function Map({ network, ...props }) {
-	const { module, state, dispatch } = MapModuleReact.useModule();
+export function Map({ textures, ...props }) {
+	const { dispatch, network } = MapModuleReact.useModule();
 
 	return (
 		<div className="flex flex-row items-center justify-center p-2 m-2 border border-solid rounded bg-neutral-50 border-neutral-200" { ...props }>
@@ -27,12 +27,7 @@ export function Map({ network, ...props }) {
 					</div>
 				</div>
 
-				<Canvas
-					state={ state }
-					dispatch={ dispatch }
-					module={ module }
-					network={ network }
-				/>
+				<Canvas textures={ textures } />
 			</div>
 		</div>
 	);

@@ -3,9 +3,9 @@ import { TextureMap } from "../components/TextureMap.jsx";
 
 import { TextureMap as EnumTextureMap } from "../../../data/stub/EnumTerrainType.js";
 
-export function ViewTexturePicker() {
+export function ViewTexturePicker({ network }) {
 	return (
-		<TextureModuleReact.Provider>
+		<TextureModuleReact.Provider network={ network }>
 			<TextureMap map={ EnumTextureMap } />
 		</TextureModuleReact.Provider>
 	)

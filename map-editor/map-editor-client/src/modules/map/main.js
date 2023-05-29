@@ -32,6 +32,7 @@ export const MapModule = new Module({
 export const MapModuleReact = bindReact(MapModule);
 
 export default {
+	EnumActions,
 	MapModule,
 	MapModuleReact,
 };

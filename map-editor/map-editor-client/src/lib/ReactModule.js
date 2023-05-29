@@ -3,7 +3,7 @@ import { useContext, useState, useEffect, createContext } from "react";
 export function bindReact(module) {
 	const Context = createContext();
 
-	function Provider({ children }) {
+	function Provider({ network, children }) {
 		const [ state, setState ] = useState(module.state);
 
 		useEffect(() => {
@@ -19,6 +19,7 @@ export function bindReact(module) {
 		}, []);
 
 		const value = {
+			network,
 			module,
 			state,
 			dispatch: (...args) => module.dispatch(...args),
@@ -32,7 +33,7 @@ export function bindReact(module) {
 		);
 	};
 
-	function RenderProps({ children }) {
+	function RenderProps({ network, children }) {
 		const [ state, setState ] = useState(module.state);
 
 		useEffect(() => {
@@ -48,6 +49,7 @@ export function bindReact(module) {
 		}, []);
 
 		const value = {
+			network,
 			module,
 			state,
 			dispatch: (...args) => module.dispatch(...args),
