@@ -29,9 +29,8 @@ export function Map({ ...props }) {
 						Solid Fill
 					</div>
 				</div>
+
 				<Canvas
-					width={ 600 }
-					height={ 600 }
 					state={ state }
 					dispatch={ dispatch }
 					module={ module }
