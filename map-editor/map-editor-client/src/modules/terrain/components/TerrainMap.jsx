@@ -2,11 +2,11 @@ import { TextureModuleReact } from "../main";
 
 import { TextureMap } from "../../../data/stub/EnumTerrainType.js";;
 
-export function TexturePicker({ ...props }) {
+export function TerrainMap({ ...props }) {
 	const { module, state, dispatch, emit } = TextureModuleReact.useModule();
 
 	return (
-		<div className="flex flex-col items-center justify-center m-2 p-2 border border-solid rounded border-neutral-200 bg-neutral-50" { ...props }>
+		<div className="flex flex-col items-center justify-center p-2 m-2 border border-solid rounded border-neutral-200 bg-neutral-50" { ...props }>
 			{
 				Object.keys(TextureMap).map((key) => {
 					return (
@@ -22,7 +22,7 @@ export function TexturePicker({ ...props }) {
 						>
 							<div className="text-neutral-800">{ key }</div>
 							<div
-								className="w-16 h-16 m-1 cursor-pointer rounded border border-solid border-gray-800"
+								className="w-16 h-16 m-1 border border-gray-800 border-solid rounded cursor-pointer"
 								style={ {
 									backgroundColor: TextureMap[ key ],
 								} }
@@ -35,4 +35,4 @@ export function TexturePicker({ ...props }) {
 	);
 };
 
-export default TexturePicker;
+export default TerrainMap;

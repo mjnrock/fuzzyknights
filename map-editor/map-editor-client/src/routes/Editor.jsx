@@ -1,10 +1,10 @@
 import React from "react";
 
-import { MapModule, MapModuleReact } from "../modules/map/main.js";
-import { Map as MapJSX } from "../modules/map/components/Map.jsx";
+import { MapModule } from "../modules/map/main.js";
+import { ViewTileMap } from "../modules/map/view/ViewTileMap.jsx";
 
-import { TextureModule, TextureModuleReact } from "../modules/terrain/main.js";
-import { TexturePicker } from "../modules/terrain/components/TexturePicker.jsx";
+import { TextureModule } from "../modules/terrain/main.js";
+import { ViewTexturePicker } from "../modules/terrain/view/ViewTexturePicker.jsx";
 
 import { ViewPort } from "../components/ViewPort.js";
 
@@ -17,14 +17,10 @@ export function Editor() {
 				map: MapModule,
 				terrain: TextureModule,
 			} }
-			// className=""
+			//TODO: Manage the meta content (e.g. grid, flex, etc.)
 		>
-			<MapModuleReact.Provider>
-				<MapJSX />
-			</MapModuleReact.Provider>
-			<TextureModuleReact.Provider>
-				<TexturePicker />
-			</TextureModuleReact.Provider>
+			<ViewTileMap />
+			<ViewTexturePicker />
 		</ViewPort>
 	);
 };
