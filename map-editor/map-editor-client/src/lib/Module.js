@@ -6,7 +6,7 @@ export class Module {
 		STATE_CHANGE: "statechange",
 	};
 
-	constructor ({ state = {}, events = {}, config = {}, reducers = [], effects = [], listeners = [], $init } = {}) {
+	constructor ({ state = {}, events = {}, config = {}, reducers = [], effects = [], listeners = [], $init, $self = {} } = {}) {
 		this.state = state;
 		this.events = {
 			reducers: [],
@@ -27,6 +27,14 @@ export class Module {
 		if(Array.isArray($init)) {
 			this.init(...$init);
 		}
+
+		for(const [ key, value ] of Object.entries($self)) {
+			this[ key ] = value;
+
+			if(typeof value === "function") {
+				this[ key ] = this[ key ].bind(this);
+			}
+		}
 	}
 
 	init(...args) {
@@ -42,7 +50,7 @@ export class Module {
 			next = this.state;
 
 		for(const reducer of this.events.reducers) {
-			next = reducer(structuredClone(next), ...args);
+			next = reducer(next, ...args);
 		}
 
 		if(JSON.stringify(previous) !== JSON.stringify(next)) {
@@ -50,8 +58,8 @@ export class Module {
 		}
 
 		this.state = next;
-
-		const effectState = structuredClone(next);
+		
+		const effectState = typeof next === "object" && "clone" in next ? next.clone() : structuredClone(next);
 		for(const effect of this.events.effects) {
 			effect(effectState, ...args);
 		}

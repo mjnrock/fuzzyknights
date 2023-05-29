@@ -1,34 +1,33 @@
 import { Module } from "../../lib/Module.js";
 import { bindReact } from "../../lib/ReactModule.js";
 
+import { Seed as MapRandomSeedData } from "./../../data/modules/map/seed.js";
+
 export const MapModule = new Module({
-	state: {
-		rows: 10,
-		columns: 10,
-		tiles: {},
-	},
+	state: MapRandomSeedData(),
 	reducers: [
-		(state, ...args) => {
-			console.log("[MapModule::Reducer]", state, args);
-			return {
-				...state,
-				now: Date.now(),
-			};
+		(state, payload) => {
+			switch(payload && payload.type) {
+				case "RANDOMIZE":
+					return MapRandomSeedData();
+				case "SET_TILE_DATA":
+					state.setTile(payload.data.x, payload.data.y, payload.data.data);
+
+					return state;
+				default:
+					return state;
+			}
 		},
 	],
-	effects: [
-		(state, ...args) => {
-			console.log("[MapModule::Effect]", state, args);
-		},
-	],
+	// effects: [
+	// ],
 	listeners: {
 		[ Module.EventTypes.PRE_INIT ]: () => console.log("[MapModule::pre]"),
 		[ Module.EventTypes.INIT ]: () => console.log("[MapModule::init]"),
 		[ Module.EventTypes.POST_INIT ]: () => console.log("[MapModule::post]"),
-
-		test: () => console.log("[MapModule::test]"),
 	},
 	$init: [],
+	$self: {}
 });
 
 export const MapModuleReact = bindReact(MapModule);

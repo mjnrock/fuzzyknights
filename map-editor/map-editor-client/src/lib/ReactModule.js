@@ -7,7 +7,9 @@ export function bindReact(module) {
 		const [ state, setState ] = useState(module.state);
 
 		useEffect(() => {
-			const fn = () => { setState(module.state); };
+			const fn = (next) => {
+				setState(next);
+			};
 
 			module.addEffect(fn);
 
@@ -17,6 +19,7 @@ export function bindReact(module) {
 		}, []);
 
 		const value = {
+			module,
 			state,
 			dispatch: (...args) => module.dispatch(...args),
 			emit: (...args) => module.emit(...args),
@@ -33,7 +36,9 @@ export function bindReact(module) {
 		const [ state, setState ] = useState(module.state);
 
 		useEffect(() => {
-			const fn = () => { setState(module.state); };
+			const fn = (next) => {
+				setState(next);
+			};
 
 			module.addEffect(fn);
 
@@ -43,6 +48,7 @@ export function bindReact(module) {
 		}, []);
 
 		const value = {
+			module,
 			state,
 			dispatch: (...args) => module.dispatch(...args),
 			emit: (...args) => module.emit(...args),
