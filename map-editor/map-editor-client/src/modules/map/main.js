@@ -25,6 +25,8 @@ export const MapModule = new Module({
 		[ Module.EventTypes.PRE_INIT ]: () => console.log("[MapModule::pre]"),
 		[ Module.EventTypes.INIT ]: () => console.log("[MapModule::init]"),
 		[ Module.EventTypes.POST_INIT ]: () => console.log("[MapModule::post]"),
+
+		test: () => console.log("[MapModule::test]"),
 	},
 	$init: [],
 });

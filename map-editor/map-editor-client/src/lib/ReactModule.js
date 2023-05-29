@@ -3,10 +3,6 @@ import { useContext, useState, useEffect, createContext } from "react";
 export function bindReact(module) {
 	const Context = createContext();
 
-	function useModule() {
-		return useContext(Context);
-	};
-
 	function Provider({ children }) {
 		const [ state, setState ] = useState(module.state);
 
@@ -23,6 +19,7 @@ export function bindReact(module) {
 		const value = {
 			state,
 			dispatch: (...args) => module.dispatch(...args),
+			emit: (...args) => module.emit(...args),
 		};
 
 		return (
@@ -45,7 +42,27 @@ export function bindReact(module) {
 			};
 		}, []);
 
-		return children({ state, dispatch: (...args) => module.dispatch(...args) });
+		const value = {
+			state,
+			dispatch: (...args) => module.dispatch(...args),
+			emit: (...args) => module.emit(...args),
+		};
+
+		return children({ ...value });
+	};
+
+	function useModule() {
+		return useContext(Context);
+	};
+
+	function useEventWatcher(event, fn) {
+		useEffect(() => {
+			module.addEventListener(event, fn);
+
+			return () => {
+				module.removeEventListener(event, fn);
+			};
+		}, []);
 	};
 
 	return {
@@ -53,6 +70,7 @@ export function bindReact(module) {
 		Provider,
 		RenderProps,
 		useModule,
+		useEventWatcher,
 	};
 };
 
