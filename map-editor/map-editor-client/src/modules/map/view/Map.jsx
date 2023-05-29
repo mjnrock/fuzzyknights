@@ -69,31 +69,32 @@ export function Canvas({ module, state, dispatch }) {
 	);
 };
 
-export function Map() {
+export function Map({ ...props }) {
 	const { module, state, dispatch, emit } = MapModuleReact.useModule();
 
 	// console.log(state);
 
 	return (
-		<div className="map">
-			<div
-				className="p-2 bg-blue-500 text-white"
-				onClick={ () => {
-					dispatch({
-						type: "RANDOMIZE"
-					});
-				} }
-			>
-				Click Me
+		<div className="p-2 m-2 bg-neutral-50 border border-solid rounded border-neutral-200 flex flex-row items-center justify-center">
+			<div className="flex flex-col">
+				<div
+					className="p-2 bg-blue-500 text-white text-center cursor-pointer"
+					onClick={ () => {
+						dispatch({
+							type: "RANDOMIZE"
+						});
+					} }
+				>
+					Click Me
+				</div>
+				<Canvas
+					width={ 600 }
+					height={ 600 }
+					state={ state }
+					dispatch={ dispatch }
+					module={ module }
+				/>
 			</div>
-			<div>{ state.toJson() }</div>
-			<Canvas
-				width={ 600 }
-				height={ 600 }
-				state={ state }
-				dispatch={ dispatch }
-				module={ module }
-			/>
 		</div>
 	);
 };
