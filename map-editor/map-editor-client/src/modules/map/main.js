@@ -9,6 +9,7 @@ export const MapModule = new Module({
 	},
 	reducers: [
 		(state, ...args) => {
+			console.log("[MapModule::Reducer]", state, args);
 			return {
 				...state,
 				now: Date.now(),
@@ -17,13 +18,13 @@ export const MapModule = new Module({
 	],
 	effects: [
 		(state, ...args) => {
-			console.log("MapModule effect", state, args);
+			console.log("[MapModule::Effect]", state, args);
 		},
 	],
 	listeners: {
-		[Module.EventTypes.PRE_INIT]: () => console.log("MapModule pre"),
-		[Module.EventTypes.INIT]: () => console.log("MapModule init"),
-		[Module.EventTypes.POST_INIT]: () => console.log("MapModule post"),
+		[ Module.EventTypes.PRE_INIT ]: () => console.log("[MapModule::pre]"),
+		[ Module.EventTypes.INIT ]: () => console.log("[MapModule::init]"),
+		[ Module.EventTypes.POST_INIT ]: () => console.log("[MapModule::post]"),
 	},
 	$init: [],
 });
