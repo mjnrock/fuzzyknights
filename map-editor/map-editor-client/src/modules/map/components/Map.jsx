@@ -1,12 +1,9 @@
 import React from "react";
 import { MapModuleReact, EnumActions } from "../main.js";
 
-import { NetworkContext } from "../../../routes/Editor.jsx";
-
 import { Canvas } from "./Canvas.jsx";
 
-export function Map({ ...props }) {
-	const network = React.useContext(NetworkContext);
+export function Map({ network, ...props }) {
 	const { module, state, dispatch } = MapModuleReact.useModule();
 
 	return (

@@ -19,8 +19,12 @@ export function Editor() {
 			} }
 			//TODO: Manage the meta content (e.g. grid, flex, etc.)
 		>
-			<ViewTileMap />
-			<ViewTexturePicker />
+			{ ({ network }) => (
+				<>
+					<ViewTileMap network={ network } />
+					<ViewTexturePicker />
+				</>
+			) }
 		</ViewPort>
 	);
 };

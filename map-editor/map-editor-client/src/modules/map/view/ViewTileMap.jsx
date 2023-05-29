@@ -1,10 +1,10 @@
 import { MapModuleReact } from "../main.js";
-import { Map as MapJSX } from "../components/Map.jsx";
+import { Map } from "../components/Map.jsx";
 
-export function ViewTileMap() {
+export function ViewTileMap({ network }) {
 	return (
 		<MapModuleReact.Provider>
-			<MapJSX />
+			<Map network={ network } />
 		</MapModuleReact.Provider>
 	)
 };

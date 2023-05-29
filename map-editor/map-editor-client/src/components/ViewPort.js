@@ -10,10 +10,12 @@ import { Network } from "../lib/Network.js";
  * @returns 
  */
 export function ViewPort({ network, registry = {}, children, ...props }) {
+	const networkInstance = new Network({ modules: registry });
+
 	return (
-		<network.Provider value={ new Network({ modules: registry }) }>
+		<network.Provider value={ networkInstance }>
 			<div className="flex items-center justify-center min-h-screen select-none bg-neutral-100" { ...props }>
-				{ children }
+				{ children({ network: networkInstance }) }
 			</div>
 		</network.Provider>
 	);
