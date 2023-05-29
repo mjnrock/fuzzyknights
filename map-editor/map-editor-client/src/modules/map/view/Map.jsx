@@ -1,13 +1,12 @@
 import React from "react";
 import { MapModuleReact } from "../main";
 
-export const TextureMap = {
-	0: `rgba(0, 255, 0, 1.0)`,
-	1: `rgba(255, 0, 0, 1.0)`,
-	2: `rgba(0, 0, 255, 1.0)`,
-}
+import { NetworkContext } from "../../../routes/Editor.jsx";
+
+import { TextureMap } from "../../../data/stub/EnumTerrainType.js";;
 
 export function Canvas({ module, state, dispatch }) {
+	const network = React.useContext(NetworkContext);
 	const canvas = React.useRef(document.createElement("canvas"));
 	const tw = 64;
 	const th = 64;
@@ -27,7 +26,7 @@ export function Canvas({ module, state, dispatch }) {
 				data: {
 					x,
 					y,
-					data: 0,
+					data: network.execute("terrain", "state", [ "selected" ]),
 				},
 			});
 		};
@@ -75,7 +74,7 @@ export function Map({ ...props }) {
 	// console.log(state);
 
 	return (
-		<div className="p-2 m-2 bg-neutral-50 border border-solid rounded border-neutral-200 flex flex-row items-center justify-center">
+		<div className="p-2 m-2 bg-neutral-50 border border-solid rounded border-neutral-200 flex flex-row items-center justify-center" { ...props }>
 			<div className="flex flex-col">
 				<div
 					className="p-2 bg-blue-500 text-white text-center cursor-pointer"

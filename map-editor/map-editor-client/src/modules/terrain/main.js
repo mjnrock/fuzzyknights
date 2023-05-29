@@ -3,7 +3,7 @@ import { bindReact } from "../../lib/ReactModule.js";
 
 export const TextureModule = new Module({
 	state: {
-		selected: null,
+		selected: 0,
 		textures: new Map(),
 	},
 	reducers: [

@@ -1,18 +1,12 @@
-import { useState } from "react";
-
 import { TextureModuleReact } from "../main";
 
-export const TextureMap = {
-	0: `rgba(0, 255, 0, 1.0)`,
-	1: `rgba(255, 0, 0, 1.0)`,
-	2: `rgba(0, 0, 255, 1.0)`,
-};
+import { TextureMap } from "../../../data/stub/EnumTerrainType.js";;
 
-export function TexturePicker({ }) {
+export function TexturePicker({ ...props }) {
 	const { module, state, dispatch, emit } = TextureModuleReact.useModule();
 
 	return (
-		<div className="flex flex-col items-center justify-center m-2 p-2 border border-solid rounded border-neutral-200 bg-neutral-50">
+		<div className="flex flex-col items-center justify-center m-2 p-2 border border-solid rounded border-neutral-200 bg-neutral-50" { ...props }>
 			{
 				Object.keys(TextureMap).map((key) => {
 					return (
