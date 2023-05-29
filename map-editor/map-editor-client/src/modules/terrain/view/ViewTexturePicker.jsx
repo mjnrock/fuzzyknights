@@ -5,9 +5,9 @@ import { TextureMap as EnumTextureMap } from "../../../data/stub/EnumTerrainType
 
 export function ViewTexturePicker({ network }) {
 	return (
-		<TextureModuleReact.Provider network={ network }>
+		<TextureModuleReact.Subscription network={ network }>
 			<TextureMap map={ EnumTextureMap } />
-		</TextureModuleReact.Provider>
+		</TextureModuleReact.Subscription>
 	)
 };
 

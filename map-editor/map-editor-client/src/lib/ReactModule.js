@@ -3,7 +3,7 @@ import { useContext, useState, useEffect, createContext } from "react";
 export function bindReact(module) {
 	const Context = createContext();
 
-	function Provider({ network, children }) {
+	function Subscription({ network, children }) {
 		const [ state, setState ] = useState(module.state);
 
 		useEffect(() => {
@@ -75,7 +75,7 @@ export function bindReact(module) {
 
 	return {
 		Context,
-		Provider,
+		Subscription,
 		RenderProps,
 		useModule,
 		useEventWatcher,

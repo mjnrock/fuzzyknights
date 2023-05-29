@@ -5,11 +5,11 @@ import { TextureMap as EnumTextureMap } from "../../../data/stub/EnumTerrainType
 
 export function ViewTileMap({ network }) {
 	return (
-		<MapModuleReact.Provider network={ network }>
+		<MapModuleReact.Subscription network={ network }>
 			<Map
 				textures={ EnumTextureMap }
 			/>
-		</MapModuleReact.Provider>
+		</MapModuleReact.Subscription>
 	)
 };
 
