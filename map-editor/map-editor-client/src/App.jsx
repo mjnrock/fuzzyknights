@@ -1,11 +1,11 @@
 import { Routes, Route } from "react-router-dom";
 
-import { Default } from "./routes/Default.jsx";
+import { Editor } from "./routes/Editor.jsx";
 
 export function App() {
 	return (
 		<Routes>
-			<Route index element={ <Default /> } />
+			<Route index element={ <Editor /> } />
 		</Routes>
 	);
 }
