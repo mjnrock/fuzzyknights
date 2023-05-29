@@ -3,7 +3,7 @@ import { Tile } from "./../../../modules/map/models/Tile.js";
 
 import { TextureMap } from "../../stub/EnumTerrainType.js";
 
-export function Seed() {
+export function Seed({ tileData } = {}) {
 	const rows = 10;
 	const columns = 10;
 	const tiles = [];
@@ -11,7 +11,7 @@ export function Seed() {
 	for(let y = 0; y < rows; y++) {
 		tiles.push([]);
 		for(let x = 0; x < columns; x++) {
-			const data = Math.floor(Math.random() * Object.keys(TextureMap).length);
+			const data = tileData != null ? tileData : Math.floor(Math.random() * Object.keys(TextureMap).length);
 
 			tiles[ y ].push(new Tile({ x, y, data }));
 		}

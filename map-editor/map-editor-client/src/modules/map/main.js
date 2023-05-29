@@ -10,6 +10,8 @@ export const MapModule = new Module({
 			switch(payload && payload.type) {
 				case "RANDOMIZE":
 					return MapRandomSeedData();
+				case "SOLID_FILL":
+					return MapRandomSeedData({ tileData: payload.data});
 				case "SET_TILE_DATA":
 					state.setTile(payload.data.x, payload.data.y, payload.data.data);
 
@@ -19,15 +21,6 @@ export const MapModule = new Module({
 			}
 		},
 	],
-	// effects: [
-	// ],
-	listeners: {
-		[ Module.EventTypes.PRE_INIT ]: () => console.log("[MapModule::pre]"),
-		[ Module.EventTypes.INIT ]: () => console.log("[MapModule::init]"),
-		[ Module.EventTypes.POST_INIT ]: () => console.log("[MapModule::post]"),
-	},
-	$init: [],
-	$self: {}
 });
 
 export const MapModuleReact = bindReact(MapModule);

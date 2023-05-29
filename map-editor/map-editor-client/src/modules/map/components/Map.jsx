@@ -12,6 +12,8 @@ export function Canvas({ module, state, dispatch }) {
 	const th = 64;
 
 	React.useEffect(() => {
+		if(!canvas.current) return;
+
 		const mousemove = (event) => {
 			if(event.buttons !== 1) return;
 
@@ -21,12 +23,16 @@ export function Canvas({ module, state, dispatch }) {
 			if(x < 0 || x >= state.columns) return;
 			if(y < 0 || y >= state.rows) return;
 
+			const data = network.execute("terrain", "state", [ "selected" ]);
+			const current = network.execute("map", "state", [ "tiles", y, x, "data" ]);
+			if(current === data) return;
+
 			dispatch({
 				type: "SET_TILE_DATA",
 				data: {
 					x,
 					y,
-					data: network.execute("terrain", "state", [ "selected" ]),
+					data,
 				},
 			});
 		};
@@ -35,6 +41,8 @@ export function Canvas({ module, state, dispatch }) {
 		canvas.current.addEventListener("mousedown", mousemove);
 
 		return () => {
+			if(!canvas.current) return;
+
 			canvas.current.removeEventListener("mousemove", mousemove);
 			canvas.current.removeEventListener("mousedown", mousemove);
 		};
@@ -69,22 +77,36 @@ export function Canvas({ module, state, dispatch }) {
 };
 
 export function Map({ ...props }) {
+	const network = React.useContext(NetworkContext);
 	const { module, state, dispatch, emit } = MapModuleReact.useModule();
 
 	// console.log(state);
 
 	return (
-		<div className="p-2 m-2 bg-neutral-50 border border-solid rounded border-neutral-200 flex flex-row items-center justify-center" { ...props }>
+		<div className="flex flex-row items-center justify-center p-2 m-2 border border-solid rounded bg-neutral-50 border-neutral-200" { ...props }>
 			<div className="flex flex-col">
-				<div
-					className="p-2 bg-gray-500 text-white text-center cursor-pointer mb-2"
-					onClick={ () => {
-						dispatch({
-							type: "RANDOMIZE"
-						});
-					} }
-				>
-					Randomize Seed
+				<div className="flex flex-row gap-2">
+					<div
+						className="flex-1 p-2 mb-2 text-center text-white bg-gray-500 rounded cursor-pointer"
+						onClick={ () => {
+							dispatch({
+								type: "RANDOMIZE"
+							});
+						} }
+					>
+						Randomize Seed
+					</div>
+					<div
+						className="flex-1 p-2 mb-2 text-center text-white bg-gray-500 rounded cursor-pointer"
+						onClick={ () => {
+							dispatch({
+								type: "SOLID_FILL",
+								data: network.execute("terrain", "state", [ "selected" ]),
+							});
+						} }
+					>
+						Solid Fill
+					</div>
 				</div>
 				<Canvas
 					width={ 600 }
