@@ -60,6 +60,7 @@ export class Module {
 		this.state = next;
 		
 		const effectState = typeof next === "object" && "clone" in next ? next.clone() : structuredClone(next);
+
 		for(const effect of this.events.effects) {
 			effect(effectState, ...args);
 		}

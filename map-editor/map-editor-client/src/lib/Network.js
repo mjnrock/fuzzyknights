@@ -18,15 +18,15 @@ export class Network {
 		return this;
 	}
 
-	execute(module, trigger, ...args) {
-		if(!this.modules.has(module)) {
-			throw new Error(`Module ${ module } does not exist`);
+	execute(name, trigger, ...args) {		
+		if(!this.modules.has(name)) {
+			throw new Error(`Module ${ name } does not exist`);
 		}
-
-		const instance = this.modules.get(module);
+		
+		const instance = this.modules.get(name);
 
 		if(!instance[ trigger ]) {
-			throw new Error(`Trigger ${ trigger } does not exist on module ${ module }`);
+			throw new Error(`Trigger ${ trigger } does not exist on module ${ name }`);
 		}
 
 		if(trigger === "state") {

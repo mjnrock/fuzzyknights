@@ -1,15 +1,15 @@
-import { Map } from "../components/Map.jsx";
+import { TextureMap } from "../components/TextureMap.jsx";
 
 import { TextureMap as EnumTextureMap } from "../../../data/stub/EnumTerrainType.js";
 
-export function ViewTileMap({ module, network }) {
+export function ViewTexturePicker({ module, network }) {
 	return (
-		<Map
+		<TextureMap
 			module={ module }
 			network={ network }
 			textures={ EnumTextureMap }
 		/>
-	);
+	)
 };
 
-export default ViewTileMap;
+export default ViewTexturePicker;

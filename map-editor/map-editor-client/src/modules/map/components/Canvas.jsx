@@ -1,8 +1,10 @@
 import React from "react";
-import { MapModuleReact, EnumActions } from "../main.js";
+import { useModule } from "../../../lib/ReactModule.js";
+import { EnumActions } from "../main.js";
 
-export function Canvas({ textures, ...props }) {
-	const { state, dispatch, network } = MapModuleReact.useModule();
+export function Canvas({ module, network, textures, ...props }) {
+	const { state, dispatch } = useModule(module);
+
 	const canvas = React.useRef(document.createElement("canvas"));
 	const tw = 64;
 	const th = 64;
@@ -16,7 +18,7 @@ export function Canvas({ textures, ...props }) {
 		if(x < 0 || x >= state.columns) return;
 		if(y < 0 || y >= state.rows) return;
 
-		const data = network.execute("terrain", "state", [ "selected" ]);
+		const data = network.execute("texture", "state", [ "selected" ]);
 		const current = network.execute("map", "state", [ "tiles", y, x, "data" ]);
 		if(current === data) return;
 

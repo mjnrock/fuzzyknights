@@ -1,85 +1,42 @@
-import { useContext, useState, useEffect, createContext } from "react";
+import { useState, useEffect } from "react";
 
-export function bindReact(module) {
-	const Context = createContext();
+export function useModule(module) {
+	const [ state, setState ] = useState(module.state);
 
-	function Subscription({ network, children }) {
-		const [ state, setState ] = useState(module.state);
-
-		useEffect(() => {
-			const fn = (next) => {
-				setState(next);
-			};
-
-			module.addEffect(fn);
-
-			return () => {
-				module.removeEffect(fn);
-			};
-		}, []);
-
-		const value = {
-			network,
-			module,
-			state,
-			dispatch: (...args) => module.dispatch(...args),
-			emit: (...args) => module.emit(...args),
+	useEffect(() => {
+		const fn = (next) => {
+			setState(next);
 		};
 
-		return (
-			<Context.Provider value={ value }>
-				{ children }
-			</Context.Provider>
-		);
-	};
+		module.addEffect(fn);
 
-	function RenderProps({ network, children }) {
-		const [ state, setState ] = useState(module.state);
-
-		useEffect(() => {
-			const fn = (next) => {
-				setState(next);
-			};
-
-			module.addEffect(fn);
-
-			return () => {
-				module.removeEffect(fn);
-			};
-		}, []);
-
-		const value = {
-			network,
-			module,
-			state,
-			dispatch: (...args) => module.dispatch(...args),
-			emit: (...args) => module.emit(...args),
+		return () => {
+			module.removeEffect(fn);
 		};
-
-		return children({ ...value });
-	};
-
-	function useModule() {
-		return useContext(Context);
-	};
-
-	function useEventWatcher(event, fn) {
-		useEffect(() => {
-			module.addEventListener(event, fn);
-
-			return () => {
-				module.removeEventListener(event, fn);
-			};
-		}, []);
-	};
+	}, [ module ]);
 
 	return {
-		Context,
-		Subscription,
-		RenderProps,
-		useModule,
-		useEventWatcher,
+		state,
+		dispatch: module.dispatch.bind(module),
+		emit: module.emit.bind(module),
 	};
 };
 
-export default bindReact;
+export function Subscription({ module, network, children }) {
+	const { state, dispatch, emit } = useModule(module);
+
+	const value = {
+		network,
+		module,
+		state,
+		dispatch,
+		emit,
+	};
+
+	return children({ ...value });
+};
+
+export default {
+	useModule,
+	Subscription,
+};

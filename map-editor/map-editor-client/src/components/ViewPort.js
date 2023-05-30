@@ -15,7 +15,7 @@ export function ViewPort({ network, registry = {}, children, ...props }) {
 	return (
 		<network.Provider value={ networkInstance }>
 			<div className="flex items-center justify-center min-h-screen select-none bg-neutral-100" { ...props }>
-				{ children({ network: networkInstance }) }
+				{ children({ network: networkInstance, registry }) }
 			</div>
 		</network.Provider>
 	);
