@@ -1,10 +1,29 @@
+import { v4 as uuid } from "uuid";
+
 export class Network {
-	constructor ({ modules = {} } = {}) {
+	static Registry = new Map();
+
+	constructor ({ modules = {}, id, $self = {} } = {}) {
+		this.id = id || uuid();
 		this.modules = new Map();
 
 		for(const [ name, module ] of Object.entries(modules)) {
 			this.register(name, module);
 		}
+
+		for(const [ key, value ] of Object.entries($self)) {
+			this[ key ] = value;
+
+			if(typeof value === "function") {
+				this[ key ] = this[ key ].bind(this);
+			}
+		}
+
+		Network.Registry.set(this.id, this);
+	}
+
+	deconstructor() {
+		Network.Registry.delete(this.id);
 	}
 
 	register(name, module) {
