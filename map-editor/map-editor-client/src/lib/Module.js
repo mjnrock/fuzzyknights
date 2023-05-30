@@ -1,3 +1,5 @@
+import { v4 as uuid } from "uuid";
+
 export class Module {
 	static EventTypes = {
 		PRE_INIT: "preinit",
@@ -6,7 +8,9 @@ export class Module {
 		STATE_CHANGE: "statechange",
 	};
 
-	constructor ({ state = {}, events = {}, config = {}, reducers = [], effects = [], listeners = [], $init, $self = {} } = {}) {
+	constructor ({ state = {}, events = {}, config = {}, reducers = [], effects = [], listeners = [], id, $init, $self = {} } = {}) {
+		this.id = id || uuid();
+
 		this.state = state;
 		this.events = {
 			reducers: [],
@@ -58,7 +62,7 @@ export class Module {
 		}
 
 		this.state = next;
-		
+
 		const effectState = typeof next === "object" && "clone" in next ? next.clone() : structuredClone(next);
 
 		for(const effect of this.events.effects) {
