@@ -22,9 +22,9 @@ export const Registry = {
 
 export function EditorRoute() {
 	/**!SECTION
-	 * 1) Create a NetworkContext for IMM
-	 * 2) Create a Module Registry map using their given name and Generator functions
-	 * 		- You should actually initialize the modules here, as it is the application's de facto instantiation mechanism for a module, at large
+	//  * 1) Create a NetworkContext for IMM
+	//  * 2) Create a Module Registry map using their given name and Generator functions
+	//  * 		- You should actually initialize the modules here, as it is the application's de facto instantiation mechanism for a module, at large
 	 * 3) Create an enrichment mechanism for initialization arguments
 	 * 4) Create a ViewPort object, which will be the stateful base for the rendering
 	 * 		- { network, registry, meta }

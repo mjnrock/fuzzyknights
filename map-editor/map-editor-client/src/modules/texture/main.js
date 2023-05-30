@@ -14,8 +14,10 @@ export const Generate = ({ ...args } = {}) => {
 			(state, payload) => {
 				switch(payload && payload.type) {
 					case EnumActions.SELECT_TEXTURE:
+						const next = structuredClone(state);
+
 						return {
-							...state,
+							...next,
 							selected: payload.data,
 						};
 					default:

@@ -11,7 +11,10 @@ export class Map {
 		return this.tiles[ y ][ x ];
 	}
 	setTile(x, y, data) {
-		this.tiles[ y ][ x ] = new Tile({ x, y, data });
+		const next = this.clone();
+		next.tiles[ y ][ x ] = new Tile({ x, y, data });
+
+		return next;
 	}
 
 	toArray() {
