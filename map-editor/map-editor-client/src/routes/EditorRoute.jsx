@@ -39,12 +39,11 @@ export function EditorRoute() {
 		<ViewPort
 			network={ NetworkContext }
 			registry={ Registry }
-		//TODO: Manage the meta content (e.g. grid, flex, etc.)
 		>
-			{ ({ registry, network }) => (
+			{ ({ registry }) => (
 				<>
-					<ViewTileMap module={ registry[ "map" ] } network={ network } />
-					<ViewTexturePicker module={ registry[ "texture" ] } network={ network } />
+					<ViewTileMap registry={ registry } />
+					<ViewTexturePicker registry={ registry } />
 				</>
 			) }
 		</ViewPort>

@@ -8,8 +8,9 @@ export class Module {
 		STATE_CHANGE: "statechange",
 	};
 
-	constructor ({ state = {}, events = {}, config = {}, reducers = [], effects = [], listeners = [], id, $init, $self = {} } = {}) {
+	constructor ({ state = {}, events = {}, config = {}, reducers = [], effects = [], listeners = [], network = null, id, $init, $self = {} } = {}) {
 		this.id = id || uuid();
+		this.network = network;
 
 		this.state = state;
 		this.events = {

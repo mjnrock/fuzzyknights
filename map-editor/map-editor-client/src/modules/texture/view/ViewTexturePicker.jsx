@@ -2,11 +2,10 @@ import { TextureMap } from "../components/TextureMap.jsx";
 
 import { TextureMap as EnumTextureMap } from "../../../data/stub/EnumTerrainType.js";
 
-export function ViewTexturePicker({ module, network }) {
+export function ViewTexturePicker({ registry }) {
 	return (
 		<TextureMap
-			module={ module }
-			network={ network }
+			module={ registry[ "texture" ] }
 			textures={ EnumTextureMap }
 		/>
 	)

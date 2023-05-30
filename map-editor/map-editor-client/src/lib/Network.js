@@ -10,11 +10,15 @@ export class Network {
 	register(name, module) {
 		this.modules.set(name, module);
 
+		module.network = this;
+		
 		return this;
 	}
 	unregister(name) {
 		this.modules.delete(name);
 
+		module.network = null;
+		
 		return this;
 	}
 

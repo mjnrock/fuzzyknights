@@ -4,7 +4,7 @@ import { useModule } from "../../../lib/ReactModule.js";
 
 import { Canvas } from "./Canvas.jsx";
 
-export function Map({ module, network, textures, ...props }) {
+export function Map({ module, textures, ...props }) {
 	const { dispatch } = useModule(module);
 
 	return (
@@ -21,18 +21,21 @@ export function Map({ module, network, textures, ...props }) {
 						className="flex-1 p-2 mb-2 text-center text-white bg-gray-500 rounded cursor-pointer"
 						onClick={ () => dispatch({
 							type: EnumActions.SOLID_FILL,
-							data: network.execute("texture", "state", [ "selected" ]),
+							data: module.network.execute("texture", "state", [ "selected" ]),
 						}) }
 					>
 						Solid Fill
 					</div>
 				</div>
 
-				<Canvas
-					module={ module }
-					network={ network }
-					textures={ textures }
-				/>
+				<div className="m-auto">
+					<Canvas
+						className="cursor-crosshair"
+						module={ module }
+						textures={ textures }
+						tiles={ 64 }
+					/>
+				</div>
 			</div>
 		</div>
 	);

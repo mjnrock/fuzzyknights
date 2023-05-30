@@ -2,12 +2,11 @@ import React from "react";
 import { useModule } from "../../../lib/ReactModule.js";
 import { EnumActions } from "../main.js";
 
-export function Canvas({ module, network, textures, ...props }) {
+export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 	const { state, dispatch } = useModule(module);
 
 	const canvas = React.useRef(document.createElement("canvas"));
-	const tw = 64;
-	const th = 64;
+	const [ tw, th ] = Array.isArray(tiles) ? tiles : [ tiles, tiles ];
 
 	const onMouseMove = (e) => {
 		if(e.buttons !== 1) return;
@@ -18,8 +17,8 @@ export function Canvas({ module, network, textures, ...props }) {
 		if(x < 0 || x >= state.columns) return;
 		if(y < 0 || y >= state.rows) return;
 
-		const data = network.execute("texture", "state", [ "selected" ]);
-		const current = network.execute("map", "state", [ "tiles", y, x, "data" ]);
+		const data = module.network.execute("texture", "state", [ "selected" ]);
+		const current = module.network.execute("map", "state", [ "tiles", y, x, "data" ]);
 		if(current === data) return;
 
 		dispatch({
@@ -58,12 +57,10 @@ export function Canvas({ module, network, textures, ...props }) {
 				ctx.fillRect(x, y, tw, th);
 			}
 		}
-
-	}, [ state ]);
+	}, [ state, tiles ]);
 
 	return (
 		<canvas
-			className="cursor-crosshair"
 			ref={ canvas }
 			{ ...props }
 		/>
