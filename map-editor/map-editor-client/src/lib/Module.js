@@ -42,6 +42,13 @@ export class Module {
 		}
 	}
 
+	get $query() {
+		return this.network.query.bind(this.network);
+	}
+	get $execute() {
+		return this.network.execute.bind(this.network);
+	}
+
 	init(...args) {
 		this.emit(Module.EventTypes.PRE_INIT, ...args);
 		this.emit(Module.EventTypes.INIT, ...args);

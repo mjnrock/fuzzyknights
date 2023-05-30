@@ -17,8 +17,8 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 		if(x < 0 || x >= state.columns) return;
 		if(y < 0 || y >= state.rows) return;
 
-		const data = module.network.execute("texture", "state", [ "selected" ]);
-		const current = module.network.execute("map", "state", [ "tiles", y, x, "data" ]);
+		const data = module.$query("texture", [ "selected" ]);
+		const current = module.$query("map", [ "tiles", y, x, "data" ]);
 		if(current === data) return;
 
 		dispatch({

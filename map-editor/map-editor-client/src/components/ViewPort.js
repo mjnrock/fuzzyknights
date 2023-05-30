@@ -20,3 +20,5 @@ export function ViewPort({ network, registry = {}, children, ...props }) {
 		</network.Provider>
 	);
 };
+
+export default ViewPort;

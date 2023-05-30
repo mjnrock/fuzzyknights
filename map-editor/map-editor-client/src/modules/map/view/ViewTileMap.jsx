@@ -2,10 +2,10 @@ import { Map } from "../components/Map.jsx";
 
 import { TextureMap as EnumTextureMap } from "../../../data/stub/EnumTerrainType.js";
 
-export function ViewTileMap({ registry }) {
+export function ViewTileMap({ module }) {
 	return (
 		<Map
-			module={ registry[ "map" ] }
+			module={ module }
 			textures={ EnumTextureMap }
 		/>
 	);

@@ -19,6 +19,11 @@ export const Registry = {
 	map: GenerateMap(),
 	texture: GenerateTexture(),
 };
+export const NetworkContext2 = React.createContext();
+export const Registry2 = {
+	map: GenerateMap(),
+	texture: GenerateTexture(),
+};
 
 export function EditorRoute() {
 	/**!SECTION
@@ -36,17 +41,32 @@ export function EditorRoute() {
 	 * 6) Render the ViewTileMap object
 	 */
 	return (
-		<ViewPort
-			network={ NetworkContext }
-			registry={ Registry }
-		>
-			{ ({ registry }) => (
-				<>
-					<ViewTileMap registry={ registry } />
-					<ViewTexturePicker registry={ registry } />
-				</>
-			) }
-		</ViewPort>
+		<>
+			<ViewPort
+				className=""
+				network={ NetworkContext }
+				registry={ Registry }
+			>
+				{ ({ registry }) => (
+					<>
+						<ViewTileMap module={ registry[ "map" ] } />
+						<ViewTexturePicker module={ registry[ "texture" ] } />
+					</>
+				) }
+			</ViewPort>
+			<ViewPort
+				className=""
+				network={ NetworkContext2 }
+				registry={ Registry2 }
+			>
+				{ ({ registry }) => (
+					<>
+						<ViewTileMap module={ registry[ "map" ] } />
+						<ViewTexturePicker module={ registry[ "texture" ] } />
+					</>
+				) }
+			</ViewPort>
+		</>
 	);
 };
 
