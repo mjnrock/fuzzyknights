@@ -63,4 +63,19 @@ export class Network {
 
 		return item;
 	}
-}
+
+	/**
+	 * If the primary purpose of the Network's instantiation is functionally to allow
+	 * a "multi-module" context, then this method is a convenience for creating a
+	 * Network instance, given a registry of (instantiated) Modules.  It will return
+	 * an object with the original registry, as well as the Network instance, if needed.
+	 */
+	static CreateSimple(modules = {}) {
+		return {
+			registry: modules,
+			network: new Network({ modules }),
+		};
+	}
+};
+
+export default Network;
