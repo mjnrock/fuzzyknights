@@ -1,12 +1,14 @@
-import { MapModuleReact } from "../main.js";
-import { Map as MapJSX } from "../components/Map.jsx";
+import { Map } from "../components/Map.jsx";
 
-export function ViewTileMap() {
+import { TextureMap as EnumTextureMap } from "../../../data/stub/EnumTerrainType.js";
+
+export function ViewTileMap({ module }) {
 	return (
-		<MapModuleReact.Provider>
-			<MapJSX />
-		</MapModuleReact.Provider>
-	)
+		<Map
+			module={ module }
+			textures={ EnumTextureMap }
+		/>
+	);
 };
 
 export default ViewTileMap;

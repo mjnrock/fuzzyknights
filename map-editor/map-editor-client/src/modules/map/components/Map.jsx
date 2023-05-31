@@ -1,13 +1,11 @@
 import React from "react";
-import { MapModuleReact, EnumActions } from "../main.js";
-
-import { NetworkContext } from "../../../routes/Editor.jsx";
+import { EnumActions } from "../main.js";
+import { useModule } from "../../../lib/ReactModule.js";
 
 import { Canvas } from "./Canvas.jsx";
 
-export function Map({ ...props }) {
-	const network = React.useContext(NetworkContext);
-	const { module, state, dispatch } = MapModuleReact.useModule();
+export function Map({ module, textures, ...props }) {
+	const { dispatch } = useModule(module);
 
 	return (
 		<div className="flex flex-row items-center justify-center p-2 m-2 border border-solid rounded bg-neutral-50 border-neutral-200" { ...props }>
@@ -15,7 +13,7 @@ export function Map({ ...props }) {
 				<div className="flex flex-row gap-2">
 					<div
 						className="flex-1 p-2 mb-2 text-center text-white bg-gray-500 rounded cursor-pointer"
-						onClick={ () => dispatch({ type: EnumActions.RANDOMIZE }) }
+						onClick={ () => dispatch({ type: EnumActions.RANDOMIZE, module }) }
 					>
 						Randomize Seed
 					</div>
@@ -23,19 +21,22 @@ export function Map({ ...props }) {
 						className="flex-1 p-2 mb-2 text-center text-white bg-gray-500 rounded cursor-pointer"
 						onClick={ () => dispatch({
 							type: EnumActions.SOLID_FILL,
-							data: network.execute("terrain", "state", [ "selected" ]),
+							module,
+							data: module.$query("texture", [ "selected" ]),
 						}) }
 					>
 						Solid Fill
 					</div>
 				</div>
 
-				<Canvas
-					state={ state }
-					dispatch={ dispatch }
-					module={ module }
-					network={ network }
-				/>
+				<div className="m-auto">
+					<Canvas
+						className="cursor-crosshair"
+						module={ module }
+						textures={ textures }
+						tiles={ 64 }
+					/>
+				</div>
 			</div>
 		</div>
 	);

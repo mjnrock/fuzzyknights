@@ -1,3 +1,5 @@
+import { v4 as uuid } from "uuid";
+
 export class Module {
 	static EventTypes = {
 		PRE_INIT: "preinit",
@@ -6,7 +8,10 @@ export class Module {
 		STATE_CHANGE: "statechange",
 	};
 
-	constructor ({ state = {}, events = {}, config = {}, reducers = [], effects = [], listeners = [], $init, $self = {} } = {}) {
+	constructor ({ state = {}, events = {}, config = {}, reducers = [], effects = [], listeners = [], network = null, id, $init, $self = {} } = {}) {
+		this.id = id || uuid();
+		this.network = network;
+
 		this.state = state;
 		this.events = {
 			reducers: [],
@@ -37,6 +42,13 @@ export class Module {
 		}
 	}
 
+	get $query() {
+		return this.network.query.bind(this.network);
+	}
+	get $execute() {
+		return this.network.execute.bind(this.network);
+	}
+
 	init(...args) {
 		this.emit(Module.EventTypes.PRE_INIT, ...args);
 		this.emit(Module.EventTypes.INIT, ...args);
@@ -58,8 +70,9 @@ export class Module {
 		}
 
 		this.state = next;
-		
+
 		const effectState = typeof next === "object" && "clone" in next ? next.clone() : structuredClone(next);
+
 		for(const effect of this.events.effects) {
 			effect(effectState, ...args);
 		}

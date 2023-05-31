@@ -1,13 +1,13 @@
-import { TextureModuleReact } from "../main.js";
 import { TextureMap } from "../components/TextureMap.jsx";
 
 import { TextureMap as EnumTextureMap } from "../../../data/stub/EnumTerrainType.js";
 
-export function ViewTexturePicker() {
+export function ViewTexturePicker({ module }) {
 	return (
-		<TextureModuleReact.Provider>
-			<TextureMap map={ EnumTextureMap } />
-		</TextureModuleReact.Provider>
+		<TextureMap
+			module={ module }
+			textures={ EnumTextureMap }
+		/>
 	)
 };
 

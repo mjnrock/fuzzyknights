@@ -1,9 +1,9 @@
 import { Default } from "./Default";
 
-import { Editor } from "./Editor";
+import { EditorRoute } from "./EditorRoute";
 
 export default {
 	Default,
 
-	Editor,
+	EditorRoute,
 };
