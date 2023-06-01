@@ -2,44 +2,40 @@ import React from "react";
 import { useModule } from "../../../lib/ReactModule.js";
 import { EnumActions } from "../main.js";
 
+import { EnumActions as EnumBrushesActions } from "../../brushes/main.js";
+
 export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 	const { state, dispatch } = useModule(module);
 
 	const canvas = React.useRef(document.createElement("canvas"));
 	const [ tw, th ] = Array.isArray(tiles) ? tiles : [ tiles, tiles ];
 
-	const onMouseMove = (e) => {
-		if(e.buttons !== 1) return;
-
+	const onMouseEvent = (e, type) => {
 		const x = Math.floor(e.offsetX / tw);
 		const y = Math.floor(e.offsetY / th);
 
 		if(x < 0 || x >= state.columns) return;
 		if(y < 0 || y >= state.rows) return;
 
-		const data = module.$query("texture", [ "selected" ]);
-		const current = module.$query("map", [ "tiles", y, x, "data" ]);
-		if(current === data) return;
-
-		dispatch({
-			type: EnumActions.SET_TILE_DATA,
-			data: {
-				x,
-				y,
-				data,
-			},
-		});
+		module.$dispatch("brushes", { type, x, y });
 	};
+	const onMouseMove = (e) => onMouseEvent(e, EnumBrushesActions.MOVE);
+	const onMouseDown = (e) => onMouseEvent(e, EnumBrushesActions.DOWN);
+	const onMouseUp = (e) => onMouseEvent(e, EnumBrushesActions.UP);
 
 	React.useEffect(() => {
 		if(!canvas.current) return;
 		canvas.current.addEventListener("mousemove", onMouseMove);
 		canvas.current.addEventListener("mousedown", onMouseMove);
+		canvas.current.addEventListener("mousedown", onMouseDown);
+		canvas.current.addEventListener("mouseup", onMouseUp);
 
 		return () => {
 			if(!canvas.current) return;
 			canvas.current.removeEventListener("mousemove", onMouseMove);
 			canvas.current.removeEventListener("mousedown", onMouseMove);
+			canvas.current.removeEventListener("mousedown", onMouseDown);
+			canvas.current.removeEventListener("mouseup", onMouseUp);
 		};
 	}, [ canvas.current ]);
 

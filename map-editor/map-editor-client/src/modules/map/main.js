@@ -19,7 +19,7 @@ export const Generate = ({ ...args } = {}) => {
 					case EnumActions.SOLID_FILL:
 						return MapRandomSeedData({ tileData: payload.data });
 					case EnumActions.SET_TILE_DATA:
-						return state.setTile(payload.data.x, payload.data.y, payload.data.data);
+						return state.setTiles(...payload.data);
 					default:
 						return state;
 				}

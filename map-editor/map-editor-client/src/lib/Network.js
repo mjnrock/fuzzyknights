@@ -83,6 +83,18 @@ export class Network {
 		return item;
 	}
 
+	dispatch(name, ...args) {
+		if(!this.modules.has(name)) {
+			throw new Error(`Module ${ name } does not exist`);
+		}
+
+		const instance = this.modules.get(name);
+
+		instance.dispatch(...args);
+
+		return this;
+	}
+
 	/**
 	 * If the primary purpose of the Network's instantiation is functionally to allow
 	 * a "multi-module" context, then this method is a convenience for creating a

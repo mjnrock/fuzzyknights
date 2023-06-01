@@ -16,6 +16,19 @@ export class Map {
 
 		return next;
 	}
+	getTiles(...tileData) {
+		return tileData.map(({ x, y }) => this.tiles[ y ][ x ]);
+	}
+	setTiles(...tileData) {
+		const next = this.clone();
+		for(let { x, y, data } of tileData) {
+			if(next.tiles[ y ] == null || next.tiles[ y ][ x ] == null) continue;
+
+			next.tiles[ y ][ x ] = new Tile({ x, y, data });
+		}
+
+		return next;
+	}
 
 	toArray() {
 		return [ this.rows, this.columns, this.tiles.map(tile => tile.toArray()) ];
