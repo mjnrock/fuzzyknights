@@ -51,9 +51,9 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 				const data = state.getTile(column, row).data;
 				if(data === null) {
 					// Fill with 4 transparent, alternatiing white and gray squares (like a chessboard)
-					ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+					ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
 					ctx.fillRect(x, y, tw, th);
-					ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+					ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
 					ctx.fillRect(x, y, tw / 2, th / 2);
 					ctx.fillRect(x + tw / 2, y + th / 2, tw / 2, th / 2);
 				} else {
