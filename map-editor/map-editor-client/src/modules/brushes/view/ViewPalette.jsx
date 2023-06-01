@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { BsPen, BsPlus, BsSquare } from "react-icons/bs";
+import { BsPen, BsPlus, BsSquare, BsEraser } from "react-icons/bs";
 import { EnumActions } from "../main.js";
 
 export function Button({ text, active, children, ...props } = {}) {
@@ -21,6 +21,9 @@ export function ViewPalette({ module }) {
 
 	return (
 		<div className="flex flex-row gap-2 mt-2">
+			<Button onClick={ dispatch(EnumActions.ERASER) } active={ active === EnumActions.ERASER }>
+				<BsEraser className="text-2xl" />
+			</Button>
 			<Button onClick={ dispatch(EnumActions.POINT) } active={ active === EnumActions.POINT }>
 				<BsPen className="text-2xl" />
 			</Button>

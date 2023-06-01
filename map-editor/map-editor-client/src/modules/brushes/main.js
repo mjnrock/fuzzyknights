@@ -47,6 +47,13 @@ export const Generate = ({ ...args } = {}) => {
 						const currentTexture = self.$query("texture", "selected");
 
 						switch(state.brush) {
+							case EnumActions.ERASER:
+								self.$dispatch("map", {
+									type: EnumMapActions.SET_TILE_DATA,
+									data: [ { x: state.x, y: state.y, data: null } ],
+								});
+
+								break;
 							case EnumActions.POINT:
 								self.$dispatch("map", {
 									type: EnumMapActions.SET_TILE_DATA,
@@ -105,6 +112,11 @@ export const Generate = ({ ...args } = {}) => {
 						return {
 							...state,
 							isActive: false,
+						};
+					case EnumActions.ERASER:
+						return {
+							...state,
+							brush: EnumActions.ERASER,
 						};
 					case EnumActions.POINT:
 						return {
