@@ -1,11 +1,10 @@
 import React from "react";
 import { useModule } from "../../../lib/ReactModule.js";
-import { EnumActions } from "../main.js";
 
 import { EnumActions as EnumBrushesActions } from "../../brushes/main.js";
 
 export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
-	const { state, dispatch } = useModule(module);
+	const { state } = useModule(module);
 
 	const canvas = React.useRef(document.createElement("canvas"));
 	const [ tw, th ] = Array.isArray(tiles) ? tiles : [ tiles, tiles ];

@@ -18,7 +18,6 @@ export const EnumActions = {
 	ERASER: "ERASER",
 	POINT: "POINT",
 	PLUS: "PLUS",
-	LINE: "LINE",
 	RECTANGLE: "RECTANGLE",
 	ELLIPSE: "ELLIPSE",
 	POLYGON: "POLYGON",
@@ -45,7 +44,6 @@ export const Generate = ({ ...args } = {}) => {
 							y: payload.y,
 						};
 					case EnumActions.DOWN:
-						console.log(state.brush);
 						const currentTexture = self.$query("texture", "selected");
 
 						switch(state.brush) {
@@ -71,6 +69,32 @@ export const Generate = ({ ...args } = {}) => {
 								});
 
 								break;
+							case EnumActions.RECTANGLE:
+								const { size: { width, height } } = state;
+								const rectangle = [];
+
+								const x = state.x - Math.floor(width / 2);
+								const y = state.y - Math.floor(height / 2);
+
+								// create the rectangle, using the x, y as the closest point to center
+								for(let i = 0; i < width; i++) {
+									for(let j = 0; j < height; j++) {
+										rectangle.push({
+											x: x + i,
+											y: y + j,
+											data: currentTexture,
+										});
+									}
+								}
+
+								self.$dispatch("map", {
+									type: EnumMapActions.SET_TILE_DATA,
+									data: rectangle,
+								});
+
+								break;
+							default:
+								break;
 						}
 
 						return {
@@ -91,6 +115,12 @@ export const Generate = ({ ...args } = {}) => {
 						return {
 							...state,
 							brush: EnumActions.PLUS,
+						};
+					case EnumActions.RECTANGLE:
+						return {
+							...state,
+							size: payload.data,
+							brush: EnumActions.RECTANGLE,
 						};
 					default:
 						return state;
