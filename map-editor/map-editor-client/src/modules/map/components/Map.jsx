@@ -4,7 +4,7 @@ import { useModule } from "../../../lib/ReactModule.js";
 
 import { TerrainCanvas } from "./TerrainCanvas.jsx";
 
-import { BsDice5, BsPaintBucket } from "react-icons/bs";
+import { BsDice5, BsPaintBucket, BsEasel, BsBoundingBoxCircles } from "react-icons/bs";
 
 export function Map({ module, textures, ...props }) {
 	const { dispatch } = useModule(module);
@@ -13,6 +13,7 @@ export function Map({ module, textures, ...props }) {
 		<div className="flex flex-row items-center justify-center p-2 m-2 border border-solid rounded bg-neutral-50 border-neutral-200" { ...props }>
 			<div className="flex flex-col">
 				<div className="flex flex-row gap-2">
+					<BsEasel className="m-auto text-2xl text-gray-400" />
 					<div className="flex flex-row flex-1 p-2 mb-2 text-center">
 						<input
 							type="number"
@@ -37,6 +38,7 @@ export function Map({ module, textures, ...props }) {
 				</div>
 
 				<div className="flex flex-row gap-2">
+					<BsBoundingBoxCircles className="m-auto text-2xl text-gray-400" />
 					<div className="flex flex-row flex-1 p-2 mb-2 text-center">
 						<input
 							type="number"

@@ -30,20 +30,24 @@ export const { registry: Registry2 } = Network.CreateSimple({
 
 export function EditorRoute() {
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen select-none">
-			<div className="flex flex-row items-center justify-center">
+		<div className="flex flex-col select-none">
+			<div className="flex flex-row">
 				<div className="flex flex-col items-center justify-center">
 					<ViewPalette module={ Registry1[ "brushes" ] } />
 					<ViewTileMap module={ Registry1[ "map" ] } />
 				</div>
-				<ViewTexturePicker module={ Registry1[ "texture" ] } />
+				<div className="flex flex-col items-center justify-center">
+					<ViewTexturePicker module={ Registry1[ "texture" ] } />
+				</div>
 			</div>
-			<div className="flex flex-row items-center justify-center">
+			<div className="flex flex-row">
 				<div className="flex flex-col items-center justify-center">
 					<ViewPalette module={ Registry2[ "brushes" ] } />
 					<ViewTileMap module={ Registry2[ "map" ] } />
 				</div>
-				<ViewTexturePicker module={ Registry2[ "texture" ] } />
+				<div className="flex flex-col items-center justify-center">
+					<ViewTexturePicker module={ Registry2[ "texture" ] } />
+				</div>
 			</div>
 		</div>
 	);
