@@ -20,7 +20,7 @@ export function ViewPalette({ module }) {
 	};
 
 	return (
-		<div className="flex flex-row gap-2 mt-2">
+		<div className="flex flex-row items-center justify-center gap-2 p-2 m-2 border border-solid rounded bg-neutral-50 border-neutral-200">
 			<Button onClick={ dispatch(EnumActions.POINT) } active={ active === EnumActions.POINT }>
 				<BsPen className="text-2xl" />
 			</Button>
