@@ -47,10 +47,8 @@ export function TerrainCanvas({ module, textures, tiles = [ 64, 64 ], ...props }
 			const ty = e.offsetY / th;
 
 			if(
-				// Break out of the selection if the mouse is released outside of the canvas
-				(e.type === "mouseup" && e.target !== canvas.current)
-				// Ignore selection if the mouse hasn't moved tiles
-				|| (e.type === "mouseup" && x === sx && y === sy)
+				(e.type === "mouseup" && e.target !== canvas.current)	// Break out of the selection if the mouse is released outside of the canvas
+				|| (e.type === "mouseup" && x === sx && y === sy)		// Ignore selection if the mouse hasn't moved tiles
 			) {
 				drawTerrain();
 				module.$dispatch("brushes", { type: EnumBrushesActions.DESELECT });
