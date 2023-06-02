@@ -50,8 +50,6 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 	};
 	const onMouseMove = (e) => {
 		if(Array.isArray(module.$query("brushes", "special"))) {
-			const x = Math.floor(e.offsetX / tw);
-			const y = Math.floor(e.offsetY / th);
 			const [ , sx, sy ] = module.$query("brushes", "special");
 
 			drawTerrain(state);
