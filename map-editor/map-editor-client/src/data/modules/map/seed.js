@@ -9,12 +9,13 @@ export function Seed({ tileData } = {}) {
 	const tiles = [];
 
 	for(let y = 0; y < rows; y++) {
-		tiles.push([]);
+		const row = [];
 		for(let x = 0; x < columns; x++) {
-			const data = tileData != null ? tileData : Math.floor(Math.random() * Object.keys(TextureMap).length);
+			const data = tileData !== void 0 ? tileData : ~~(Math.random() * Object.keys(TextureMap).slice(1).length) + 1;	// Remove "null", which is also key 0, so +1 for "key floor".
 
-			tiles[ y ].push(new Tile({ x, y, data }));
+			row.push(new Tile({ x, y, data }));
 		}
+		tiles.push(row);
 	}
 
 	return new Map({ rows, columns, tiles });

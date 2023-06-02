@@ -12,9 +12,17 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 	const onMouseEvent = (e, type) => {
 		const x = Math.floor(e.offsetX / tw);
 		const y = Math.floor(e.offsetY / th);
+		const cx = module.$query("brushes", "x");
+		const cy = module.$query("brushes", "y");
 
-		if(x < 0 || x >= state.columns) return;
-		if(y < 0 || y >= state.rows) return;
+		if(type === EnumBrushesActions.MOVE && x === cx && y === cy) return;
+		if(type === EnumBrushesActions.UP && e.buttons) return;
+
+		if(x < 0 || x >= state.columns || y < 0 || y >= state.rows) return;
+
+		if(type === EnumBrushesActions.DOWN) {
+			console.log(state.getTile(x, y));
+		}
 
 		module.$dispatch("brushes", { type, x, y });
 	};
@@ -28,6 +36,8 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 		canvas.current.addEventListener("mousedown", onMouseMove);
 		canvas.current.addEventListener("mousedown", onMouseDown);
 		canvas.current.addEventListener("mouseup", onMouseUp);
+		canvas.current.addEventListener("mouseout", onMouseUp);
+		canvas.current.addEventListener("mouseenter", onMouseUp);
 
 		return () => {
 			if(!canvas.current) return;
@@ -35,6 +45,8 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 			canvas.current.removeEventListener("mousedown", onMouseMove);
 			canvas.current.removeEventListener("mousedown", onMouseDown);
 			canvas.current.removeEventListener("mouseup", onMouseUp);
+			canvas.current.removeEventListener("mouseout", onMouseUp);
+			canvas.current.removeEventListener("mouseenter", onMouseUp);
 		};
 	}, [ canvas.current ]);
 
@@ -50,7 +62,6 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 
 				const data = state.getTile(column, row).data;
 				if(data === null) {
-					// Fill with 4 transparent, alternatiing white and gray squares (like a chessboard)
 					ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
 					ctx.fillRect(x, y, tw, th);
 					ctx.fillStyle = "rgba(0, 0, 0, 0.05)";

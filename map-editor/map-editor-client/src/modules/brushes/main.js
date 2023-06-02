@@ -26,7 +26,7 @@ export const EnumActions = {
 export const Generate = ({ ...args } = {}) => {
 	const module = new Module({
 		state: {
-			brush: EnumActions.POINT,
+			brush: EnumActions.PLUS,
 			x: null,
 			y: null,
 			size: 1,
@@ -44,64 +44,53 @@ export const Generate = ({ ...args } = {}) => {
 							y: payload.y,
 						};
 					case EnumActions.DOWN:
-						const currentTexture = self.$query("texture", "selected");
+						const currentTexture = self.$query("texture", "selected") || null;	// This assumes that 0 is the null texture key (i.e. { 0: null }.
 
-						switch(state.brush) {
-							case EnumActions.ERASER:
-								self.$dispatch("map", {
-									type: EnumMapActions.SET_TILE_DATA,
-									data: [ { x: state.x, y: state.y, data: null } ],
-								});
+						if(state.brush === EnumActions.ERASER) {
+							self.$dispatch("map", {
+								type: EnumMapActions.SET_TILE_DATA,
+								data: [ { x: state.x, y: state.y, data: null } ],
+							});
+						} else if(state.brush === EnumActions.POINT) {
+							self.$dispatch("map", {
+								type: EnumMapActions.SET_TILE_DATA,
+								data: [ { x: state.x, y: state.y, data: currentTexture } ],
+							});
+						} else if(state.brush === EnumActions.PLUS) {
+							const { x, y } = state;
+							const plus = [
+								{ x: x, y: y, data: currentTexture },
+								{ x: x - 1, y: y, data: currentTexture },
+								{ x: x + 1, y: y, data: currentTexture },
+								{ x: x, y: y - 1, data: currentTexture },
+								{ x: x, y: y + 1, data: currentTexture },
+							];
 
-								break;
-							case EnumActions.POINT:
-								self.$dispatch("map", {
-									type: EnumMapActions.SET_TILE_DATA,
-									data: [ { x: state.x, y: state.y, data: currentTexture } ],
-								});
+							self.$dispatch("map", {
+								type: EnumMapActions.SET_TILE_DATA,
+								data: plus,
+							});
+						} else if(state.brush === EnumActions.RECTANGLE) {
+							const { size: { width, height } } = state;
+							const rectangle = [];
 
-								break;
-							case EnumActions.PLUS:
-								const plus = [
-									{ x: state.x, y: state.y, data: currentTexture },
-									{ x: state.x - 1, y: state.y, data: currentTexture },
-									{ x: state.x + 1, y: state.y, data: currentTexture },
-									{ x: state.x, y: state.y - 1, data: currentTexture },
-									{ x: state.x, y: state.y + 1, data: currentTexture },
-								];
+							const x = state.x - Math.floor(width / 2);
+							const y = state.y - Math.floor(height / 2);
 
-								self.$dispatch("map", {
-									type: EnumMapActions.SET_TILE_DATA,
-									data: plus,
-								});
-
-								break;
-							case EnumActions.RECTANGLE:
-								const { size: { width, height } } = state;
-								const rectangle = [];
-
-								const x = state.x - Math.floor(width / 2);
-								const y = state.y - Math.floor(height / 2);
-
-								// create the rectangle, using the x, y as the closest point to center
-								for(let i = 0; i < width; i++) {
-									for(let j = 0; j < height; j++) {
-										rectangle.push({
-											x: x + i,
-											y: y + j,
-											data: currentTexture,
-										});
-									}
+							for(let i = 0; i < width; i++) {
+								for(let j = 0; j < height; j++) {
+									rectangle.push({
+										x: x + i,
+										y: y + j,
+										data: currentTexture,
+									});
 								}
+							}
 
-								self.$dispatch("map", {
-									type: EnumMapActions.SET_TILE_DATA,
-									data: rectangle,
-								});
-
-								break;
-							default:
-								break;
+							self.$dispatch("map", {
+								type: EnumMapActions.SET_TILE_DATA,
+								data: rectangle,
+							});
 						}
 
 						return {

@@ -11,6 +11,8 @@ export class Map {
 		return this.tiles[ y ][ x ];
 	}
 	setTile(x, y, data) {
+		if(x < 0 || x >= this.columns || y < 0 || y >= this.rows) return this;
+
 		const next = this.clone();
 		next.tiles[ y ][ x ] = new Tile({ x, y, data });
 
@@ -22,7 +24,7 @@ export class Map {
 	setTiles(...tileData) {
 		const next = this.clone();
 		for(let { x, y, data } of tileData) {
-			if(next.tiles[ y ] == null || next.tiles[ y ][ x ] == null) continue;
+			if(x < 0 || x >= this.columns || y < 0 || y >= this.rows) continue;
 
 			next.tiles[ y ][ x ] = new Tile({ x, y, data });
 		}
@@ -31,13 +33,13 @@ export class Map {
 	}
 
 	toArray() {
-		return [ this.rows, this.columns, this.tiles.map(tile => tile.toArray()) ];
+		return [ this.rows, this.columns, this.tiles.map(row => row.map(tile => tile.toArray())) ];
 	}
 	toObject() {
 		return {
 			rows: this.rows,
 			columns: this.columns,
-			tiles: this.tiles.map(tiles => tiles.map(tile => tile.toObject())),
+			tiles: this.tiles.map(row => row.map(tile => tile.toObject())),
 		};
 	}
 	toJson(...args) {
@@ -48,10 +50,10 @@ export class Map {
 	}
 
 	static FromArray([ rows, columns, tiles ]) {
-		return new Map({ rows, columns, tiles: tiles.map(tiles => tiles.map(tile => Tile.FromArray(tile))) });
+		return new Map({ rows, columns, tiles: tiles.map(row => row.map(tile => Tile.FromArray(tile))) });
 	}
 	static FromObject({ rows, columns, tiles }) {
-		return new Map({ rows, columns, tiles: tiles.map(tiles => tiles.map(tile => Tile.FromObject(tile))) });
+		return new Map({ rows, columns, tiles: tiles.map(row => row.map(tile => Tile.FromObject(tile))) });
 	}
 };
 

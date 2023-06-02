@@ -12,7 +12,7 @@ export function Button({ text, active, children, ...props } = {}) {
 }
 
 export function ViewPalette({ module }) {
-	const [ active, setActive ] = useState(null);
+	const [ active, setActive ] = useState(module.state.brush);
 
 	const dispatch = (type, data) => () => {
 		module.dispatch({ type, data });
