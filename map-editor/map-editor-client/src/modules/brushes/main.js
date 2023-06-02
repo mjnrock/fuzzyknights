@@ -29,7 +29,7 @@ export const Generate = ({ ...args } = {}) => {
 			brush: EnumActions.PLUS,
 			x: null,
 			y: null,
-			size: 1,
+			special: 1,
 			theta: 0,
 			selection: null,
 			isActive: false,
@@ -71,17 +71,28 @@ export const Generate = ({ ...args } = {}) => {
 								data: plus,
 							});
 						} else if(state.brush === EnumActions.RECTANGLE) {
-							const { size: { width, height } } = state;
+							return {
+								...state,
+								special: [ EnumActions.RECTANGLE, state.x, state.y ]
+							};
+						}
+
+						return {
+							...state,
+							isActive: true,
+						};
+					case EnumActions.UP:
+						if(Array.isArray(state.special)) {
+							const currentTexture = self.$query("texture", "selected") || null;	// This assumes that 0 is the null texture key (i.e. { 0: null }.
+							const [ , x, y ] = state.special;
+							const { x: x2, y: y2 } = state;
+
 							const rectangle = [];
-
-							const x = state.x - Math.floor(width / 2);
-							const y = state.y - Math.floor(height / 2);
-
-							for(let i = 0; i < width; i++) {
-								for(let j = 0; j < height; j++) {
+							for(let i = Math.min(x, x2); i <= Math.max(x, x2); i++) {
+								for(let j = Math.min(y, y2); j <= Math.max(y, y2); j++) {
 									rectangle.push({
-										x: x + i,
-										y: y + j,
+										x: i,
+										y: j,
 										data: currentTexture,
 									});
 								}
@@ -91,13 +102,13 @@ export const Generate = ({ ...args } = {}) => {
 								type: EnumMapActions.SET_TILE_DATA,
 								data: rectangle,
 							});
+
+							return {
+								...state,
+								special: 1,
+							};
 						}
 
-						return {
-							...state,
-							isActive: true,
-						};
-					case EnumActions.UP:
 						return {
 							...state,
 							isActive: false,
@@ -120,7 +131,7 @@ export const Generate = ({ ...args } = {}) => {
 					case EnumActions.RECTANGLE:
 						return {
 							...state,
-							size: payload.data,
+							special: payload.data,
 							brush: EnumActions.RECTANGLE,
 						};
 					default:
