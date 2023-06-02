@@ -48,6 +48,9 @@ export class Module {
 	get $execute() {
 		return this.network.execute.bind(this.network);
 	}
+	get $dispatch() {
+		return this.network.dispatch.bind(this.network);
+	}
 
 	init(...args) {
 		this.emit(Module.EventTypes.PRE_INIT, ...args);
@@ -62,11 +65,11 @@ export class Module {
 			next = this.state;
 
 		for(const reducer of this.events.reducers) {
-			next = reducer(next, ...args);
+			next = reducer(next, ...args, this);
 		}
 
 		if(JSON.stringify(previous) !== JSON.stringify(next)) {
-			this.emit(Module.EventTypes.STATE_CHANGE, next, previous);
+			this.emit(Module.EventTypes.STATE_CHANGE, next, previous, this);
 		}
 
 		this.state = next;
@@ -74,7 +77,7 @@ export class Module {
 		const effectState = typeof next === "object" && "clone" in next ? next.clone() : structuredClone(next);
 
 		for(const effect of this.events.effects) {
-			effect(effectState, ...args);
+			effect(effectState, ...args, this);
 		}
 
 		return this;

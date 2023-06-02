@@ -3,21 +3,32 @@ import { Tile } from "./../../../modules/map/models/Tile.js";
 
 import { TextureMap } from "../../stub/EnumTerrainType.js";
 
-export function Seed({ tileData } = {}) {
-	const rows = 10;
-	const columns = 10;
-	const tiles = [];
+export function Seed({ rows = 10, columns = 10, tileData, tw, th, tiles, ...rest } = {}, excludeTiles = false) {
+	const nextTiles = [];
 
 	for(let y = 0; y < rows; y++) {
-		tiles.push([]);
+		const row = [];
 		for(let x = 0; x < columns; x++) {
-			const data = tileData != null ? tileData : Math.floor(Math.random() * Object.keys(TextureMap).length);
+			if(!excludeTiles && tiles !== void 0 && tiles[ y ] !== void 0 && tiles[ y ][ x ] !== void 0) {
+				row.push(tiles[ y ][ x ]);
+				continue;
+			}
 
-			tiles[ y ].push(new Tile({ x, y, data }));
+			const data = tileData !== void 0 ? tileData : ~~(Math.random() * Object.keys(TextureMap).slice(1).length) + 1;	// Remove "null", which is also key 0, so +1 for "key floor".
+
+			row.push(new Tile({ x, y, data }));
 		}
+		nextTiles.push(row);
 	}
 
-	return new Map({ rows, columns, tiles });
+	return new Map({
+		rows,
+		columns,
+		tw,
+		th,
+		tiles: nextTiles,
+		...rest,
+	});
 }
 
 export default Seed;

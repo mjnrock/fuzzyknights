@@ -7,7 +7,7 @@ export const EnumActions = {
 export const Generate = ({ ...args } = {}) => {
 	const module = new Module({
 		state: {
-			selected: 0,
+			selected: 2,
 			textures: new Map(),
 		},
 		reducers: [
