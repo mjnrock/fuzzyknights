@@ -3,7 +3,7 @@ import { useModule } from "../../../lib/ReactModule.js";
 
 import { EnumActions as EnumBrushesActions } from "../../brushes/main.js";
 
-export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
+export function TerrainCanvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 	const canvas = useRef(document.createElement("canvas"));
 	const { state } = useModule(module);
 
@@ -35,10 +35,27 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 	};
 
 	const onMouseEvent = (e) => {
-		if((e.type === "mousemove" || e.type === "mousedown") && Array.isArray(module.$query("brushes", "special"))) {
+		const x = Math.floor(e.offsetX / tw);
+		const y = Math.floor(e.offsetY / th);
+		const cx = module.$query("brushes", "x");
+		const cy = module.$query("brushes", "y");
+		drawTerrain();
+
+		if(Array.isArray(module.$query("brushes", "special"))) {
 			const [ , sx, sy ] = module.$query("brushes", "special");
 			const tx = e.offsetX / tw;
 			const ty = e.offsetY / th;
+
+			if(
+				// Break out of the selection if the mouse is released outside of the canvas
+				(e.type === "mouseup" && e.target !== canvas.current)
+				// Ignore selection if the mouse hasn't moved tiles
+				|| (e.type === "mouseup" && x === sx && y === sy)
+			) {
+				drawTerrain();
+				module.$dispatch("brushes", { type: EnumBrushesActions.DESELECT });
+				return;
+			}
 
 			let startX, startY, rectWidth, rectHeight;
 
@@ -57,8 +74,6 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 				startY = Math.floor(sy * th);
 				rectHeight = (Math.ceil(ty) - sy) * th;
 			}
-
-			drawTerrain();
 
 			const ctx = canvas.current.getContext("2d");
 			ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
@@ -86,17 +101,12 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 				return;
 		}
 
-		const x = Math.floor(e.offsetX / tw);
-		const y = Math.floor(e.offsetY / th);
-		const cx = module.$query("brushes", "x");
-		const cy = module.$query("brushes", "y");
-
 		if(type === EnumBrushesActions.MOVE && x === cx && y === cy) return;
 		if(type === EnumBrushesActions.UP && e.buttons) return;
-
-		if(x < 0 || x >= state.columns || y < 0 || y >= state.rows) return;
+		if(x < 0 || x >= module.state.columns || y < 0 || y >= module.state.rows) return;
 
 		module.$dispatch("brushes", { type, x, y });
+		drawTerrain();
 	};
 
 	useEffect(() => {
@@ -104,7 +114,7 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 		canvas.current.addEventListener("mousemove", onMouseEvent);
 		canvas.current.addEventListener("mousedown", onMouseEvent);
 		canvas.current.addEventListener("mousedown", onMouseEvent);
-		canvas.current.addEventListener("mouseup", onMouseEvent);
+		window.addEventListener("mouseup", onMouseEvent);
 		canvas.current.addEventListener("mouseout", onMouseEvent);
 		canvas.current.addEventListener("mouseenter", onMouseEvent);
 
@@ -113,7 +123,7 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 			canvas.current.removeEventListener("mousemove", onMouseEvent);
 			canvas.current.removeEventListener("mousedown", onMouseEvent);
 			canvas.current.removeEventListener("mousedown", onMouseEvent);
-			canvas.current.removeEventListener("mouseup", onMouseEvent);
+			window.removeEventListener("mouseup", onMouseEvent);
 			canvas.current.removeEventListener("mouseout", onMouseEvent);
 			canvas.current.removeEventListener("mouseenter", onMouseEvent);
 		};
@@ -134,4 +144,4 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 	);
 };
 
-export default Canvas;
+export default TerrainCanvas;

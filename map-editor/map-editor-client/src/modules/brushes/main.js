@@ -3,6 +3,7 @@ import { Module } from "../../lib/Module.js";
 import { EnumActions as EnumMapActions } from "../map/main.js";
 
 export const EnumActions = {
+	DESELECT: "DESELECT",
 	MOVE: "MOVE",
 	DOWN: "DOWN",
 	UP: "UP",
@@ -36,6 +37,12 @@ export const Generate = ({ ...args } = {}) => {
 		reducers: [
 			(state, payload, self) => {
 				switch(payload && payload.type) {
+					case EnumActions.DESELECT:
+						return {
+							...state,
+							special: 1,
+							isActive: false,
+						};
 					case EnumActions.MOVE:
 						return {
 							...state,

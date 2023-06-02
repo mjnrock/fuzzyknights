@@ -2,7 +2,7 @@ import React from "react";
 import { EnumActions } from "../main.js";
 import { useModule } from "../../../lib/ReactModule.js";
 
-import { Canvas } from "./Canvas.jsx";
+import { TerrainCanvas } from "./TerrainCanvas.jsx";
 
 export function Map({ module, textures, ...props }) {
 	const { dispatch } = useModule(module);
@@ -30,7 +30,7 @@ export function Map({ module, textures, ...props }) {
 				</div>
 
 				<div className="m-auto">
-					<Canvas
+					<TerrainCanvas
 						className="cursor-crosshair"
 						module={ module }
 						textures={ textures }
