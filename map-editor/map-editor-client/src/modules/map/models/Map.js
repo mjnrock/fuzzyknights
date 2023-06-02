@@ -1,9 +1,11 @@
 import { Tile } from "./Tile.js";
 
 export class Map {
-	constructor ({ rows, columns, tiles } = {}) {
+	constructor ({ rows, columns, tw = 64, th = 64, tiles } = {}) {
 		this.rows = rows;			// Number
 		this.columns = columns;		// Number
+		this.tw = tw;				// Number
+		this.th = th;				// Number
 		this.tiles = tiles;			// Array<Tile>
 	}
 
@@ -33,12 +35,14 @@ export class Map {
 	}
 
 	toArray() {
-		return [ this.rows, this.columns, this.tiles.map(row => row.map(tile => tile.toArray())) ];
+		return [ this.rows, this.columns, this.tw, this.th, this.tiles.map(row => row.map(tile => tile.toArray())) ];
 	}
 	toObject() {
 		return {
 			rows: this.rows,
 			columns: this.columns,
+			tw: this.tw,
+			th: this.th,
 			tiles: this.tiles.map(row => row.map(tile => tile.toObject())),
 		};
 	}
@@ -49,11 +53,11 @@ export class Map {
 		return Map.FromObject(this.toObject());
 	}
 
-	static FromArray([ rows, columns, tiles ]) {
-		return new Map({ rows, columns, tiles: tiles.map(row => row.map(tile => Tile.FromArray(tile))) });
+	static FromArray([ rows, columns, tw, th, tiles ]) {
+		return new Map({ rows, columns, tw, th, tiles: tiles.map(row => row.map(tile => Tile.FromArray(tile))) });
 	}
-	static FromObject({ rows, columns, tiles }) {
-		return new Map({ rows, columns, tiles: tiles.map(row => row.map(tile => Tile.FromObject(tile))) });
+	static FromObject({ rows, columns, tw, th, tiles }) {
+		return new Map({ rows, columns, tw, th, tiles: tiles.map(row => row.map(tile => Tile.FromObject(tile))) });
 	}
 };
 

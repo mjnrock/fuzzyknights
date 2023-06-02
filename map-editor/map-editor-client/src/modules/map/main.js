@@ -4,6 +4,7 @@ import { Seed as MapRandomSeedData } from "./../../data/modules/map/seed.js";
 
 export const EnumActions = {
 	RESIZE: "RESIZE",
+	RESIZE_TILES: "RESIZE_TILES",
 
 	RANDOMIZE: "RANDOMIZE",
 	SOLID_FILL: "SOLID_FILL",
@@ -15,23 +16,31 @@ export const Generate = ({ ...args } = {}) => {
 		state: MapRandomSeedData(),
 		reducers: [
 			(state, payload) => {
-				switch(payload && payload.type) {
-					case EnumActions.RESIZE:
-						const [ newWidth, newHeight ] = payload.data;
+				if(payload.type === EnumActions.RESIZE) {
+					const [ newCols, newRows ] = payload.data;
 
-						return MapRandomSeedData({
-							rows: newHeight || state.rows,
-							columns: newWidth || state.columns,
-						});
-					case EnumActions.RANDOMIZE:
-						return MapRandomSeedData({ ...state });
-					case EnumActions.SOLID_FILL:
-						return MapRandomSeedData({ ...state, tileData: payload.data });
-					case EnumActions.SET_TILE_DATA:
-						return state.setTiles(...payload.data);
-					default:
-						return state;
+					return MapRandomSeedData({
+						...state,
+						rows: newRows || state.rows,
+						columns: newCols || state.columns,
+					});
+				} else if(payload.type === EnumActions.RESIZE_TILES) {
+					const [ tw, th ] = payload.data;
+
+					return MapRandomSeedData({
+						...state,
+						tw: tw || state.tw,
+						th: th || state.th,
+					});
+				} else if(payload.type === EnumActions.RANDOMIZE) {
+					return MapRandomSeedData({ ...state }, true);
+				} else if(payload.type === EnumActions.SOLID_FILL) {
+					return MapRandomSeedData({ ...state, tileData: payload.data }, true);
+				} else if(payload.type === EnumActions.SET_TILE_DATA) {
+					return state.setTiles(...payload.data);
 				}
+
+				return state;
 			},
 		],
 		...args,

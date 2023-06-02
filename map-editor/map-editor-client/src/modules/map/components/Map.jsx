@@ -37,9 +37,33 @@ export function Map({ module, textures, ...props }) {
 				</div>
 
 				<div className="flex flex-row gap-2">
+					<div className="flex flex-row flex-1 p-2 mb-2 text-center">
+						<input
+							type="number"
+							className="w-full p-2 text-center border border-gray-300 border-solid rounded"
+							value={ module.state.tw }
+							onChange={ (e) => dispatch({
+								type: EnumActions.RESIZE_TILES,
+								data: [ +e.target.value, module.state.th ],
+							}) }
+						/>
+						<div className="m-auto text-gray-400">&nbsp;x&nbsp;</div>
+						<input
+							type="number"
+							className="w-full p-2 text-center border border-gray-300 border-solid rounded"
+							value={ module.state.th }
+							onChange={ (e) => dispatch({
+								type: EnumActions.RESIZE_TILES,
+								data: [ module.state.tw, +e.target.value ],
+							}) }
+						/>
+					</div>
+				</div>
+
+				<div className="flex flex-row gap-2">
 					<div
 						className="flex-1 p-2 mb-2 text-center text-gray-400 border border-gray-300 border-solid rounded cursor-pointer bg-neutral-50 hover:bg-gray-400 hover:text-neutral-100 active:bg-gray-500"
-						onClick={ () => dispatch({ type: EnumActions.RANDOMIZE, module }) }
+						onClick={ () => dispatch({ type: EnumActions.RANDOMIZE }) }
 					>
 						<BsDice5 className="mx-auto text-2xl" />
 					</div>
@@ -59,7 +83,6 @@ export function Map({ module, textures, ...props }) {
 						className="cursor-crosshair"
 						module={ module }
 						textures={ textures }
-						tiles={ 64 }
 					/>
 				</div>
 			</div>
