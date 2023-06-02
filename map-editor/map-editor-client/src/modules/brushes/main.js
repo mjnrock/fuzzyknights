@@ -15,7 +15,6 @@ export const EnumActions = {
 	SELECTION_PASTE: "SELECTION_PASTE",
 	SELECTION_CUT: "SELECTION_CUT",
 
-	ERASER: "ERASER",
 	POINT: "POINT",
 	PLUS: "PLUS",
 	RECTANGLE: "RECTANGLE",
@@ -26,7 +25,7 @@ export const EnumActions = {
 export const Generate = ({ ...args } = {}) => {
 	const module = new Module({
 		state: {
-			brush: EnumActions.PLUS,
+			brush: EnumActions.RECTANGLE,
 			x: null,
 			y: null,
 			special: 1,
@@ -112,11 +111,6 @@ export const Generate = ({ ...args } = {}) => {
 						return {
 							...state,
 							isActive: false,
-						};
-					case EnumActions.ERASER:
-						return {
-							...state,
-							brush: EnumActions.ERASER,
 						};
 					case EnumActions.POINT:
 						return {

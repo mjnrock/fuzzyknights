@@ -1,5 +1,5 @@
 export const TextureMap = {
-	0: null,
+	N: null,
 	1: `#222222`,
 	2: `#2587be`,
 	3: `#DAD5B6`,

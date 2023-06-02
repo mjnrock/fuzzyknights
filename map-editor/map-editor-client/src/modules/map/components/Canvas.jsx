@@ -51,33 +51,35 @@ export function Canvas({ module, textures, tiles = [ 64, 64 ], ...props }) {
 	const onMouseMove = (e) => {
 		if(Array.isArray(module.$query("brushes", "special"))) {
 			const [ , sx, sy ] = module.$query("brushes", "special");
-
+			const tx = e.offsetX / tw;
+			const ty = e.offsetY / th;
+		
 			drawTerrain(state);
-
+		
 			const ctx = canvas.current.getContext("2d");
 			ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-
+		
 			let startX, startY, rectWidth, rectHeight;
-
-			if(sx > e.offsetX / tw) { // Mouse moving left
-				startX = Math.floor(e.offsetX / tw) * tw;
-				rectWidth = (sx - Math.floor(e.offsetX / tw)) * tw;
+		
+			if(sx > tx) { // Mouse moving left
+				startX = Math.floor(tx) * tw;
+				rectWidth = (Math.ceil(sx) - Math.floor(tx) + 1) * tw;
 			} else { // Mouse moving right
-				startX = sx * tw;
-				rectWidth = Math.ceil((e.offsetX / tw - sx)) * tw;
+				startX = Math.floor(sx * tw);
+				rectWidth = (Math.ceil(tx) - sx) * tw;
 			}
-
-			if(sy > e.offsetY / th) { // Mouse moving up
-				startY = Math.floor(e.offsetY / th) * th;
-				rectHeight = (sy - Math.floor(e.offsetY / th)) * th;
+		
+			if(sy > ty) { // Mouse moving up
+				startY = Math.floor(ty) * th;
+				rectHeight = (Math.ceil(sy) - Math.floor(ty) + 1) * th;
 			} else { // Mouse moving down
-				startY = sy * th;
-				rectHeight = Math.ceil((e.offsetY / th - sy)) * th;
+				startY = Math.floor(sy * th);
+				rectHeight = (Math.ceil(ty) - sy) * th;
 			}
-
+		
 			ctx.fillRect(startX, startY, rectWidth, rectHeight);
-
 		}
+		
 
 		onMouseEvent(e, EnumBrushesActions.MOVE);
 	};
