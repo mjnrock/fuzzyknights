@@ -11,18 +11,7 @@ import { Generate as GenerateBrushes } from "../modules/brushes/main.js";
 import { Network } from "../lib/Network.js";
 import ViewPalette from "../modules/brushes/view/ViewPalette.jsx";
 
-/**
- * For a given Route, there will only ever be one NetworkContext, which will be the IMM Network
- * since the Registry can be expanded to accommodate multiple instantiations of a given Module.
- * As such, the Context of the parent *file* should dictate the NetworkContext, and the Registry
- * should be passed as a prop to the ViewPort data object.
- */
 export const { registry: Registry1 } = Network.CreateSimple({
-	brushes: GenerateBrushes(),
-	map: GenerateMap(),
-	texture: GenerateTexture(),
-});
-export const { registry: Registry2 } = Network.CreateSimple({
 	brushes: GenerateBrushes(),
 	map: GenerateMap(),
 	texture: GenerateTexture(),
@@ -38,15 +27,6 @@ export function EditorRoute() {
 				</div>
 				<div className="flex flex-col items-center justify-center">
 					<ViewTexturePicker module={ Registry1[ "texture" ] } />
-				</div>
-			</div>
-			<div className="flex flex-row">
-				<div className="flex flex-col items-center justify-center">
-					<ViewPalette module={ Registry2[ "brushes" ] } />
-					<ViewTileMap module={ Registry2[ "map" ] } />
-				</div>
-				<div className="flex flex-col items-center justify-center">
-					<ViewTexturePicker module={ Registry2[ "texture" ] } />
 				</div>
 			</div>
 		</div>
