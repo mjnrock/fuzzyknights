@@ -71,8 +71,10 @@ export class Network {
 			throw new Error(`Module ${ name } does not exist`);
 		}
 
-
 		const instance = this.modules.get(name);
+
+		if(!args.length) return instance.state;
+
 		const keys = Array.isArray(args[ 0 ]) ? args[ 0 ] : args[ 0 ].split(".");
 		let item = instance.state;
 
