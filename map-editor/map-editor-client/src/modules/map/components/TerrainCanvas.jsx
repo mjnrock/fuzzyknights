@@ -39,7 +39,6 @@ export function TerrainCanvas({ module, textures, tiles = [ 64, 64 ], ...props }
 		const y = Math.floor(e.offsetY / th);
 		const cx = module.$query("brushes", "x");
 		const cy = module.$query("brushes", "y");
-		drawTerrain();
 
 		if(Array.isArray(module.$query("brushes", "special"))) {
 			const [ , sx, sy ] = module.$query("brushes", "special");
@@ -74,6 +73,7 @@ export function TerrainCanvas({ module, textures, tiles = [ 64, 64 ], ...props }
 			}
 
 			const ctx = canvas.current.getContext("2d");
+			drawTerrain();
 			ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
 			ctx.fillRect(startX, startY, rectWidth, rectHeight);
 		}

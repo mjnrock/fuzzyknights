@@ -3,6 +3,8 @@ import { Module } from "../../lib/Module.js";
 import { Seed as MapRandomSeedData } from "./../../data/modules/map/seed.js";
 
 export const EnumActions = {
+	RESIZE: "RESIZE",
+
 	RANDOMIZE: "RANDOMIZE",
 	SOLID_FILL: "SOLID_FILL",
 	SET_TILE_DATA: "SET_TILE_DATA",
@@ -14,10 +16,17 @@ export const Generate = ({ ...args } = {}) => {
 		reducers: [
 			(state, payload) => {
 				switch(payload && payload.type) {
+					case EnumActions.RESIZE:
+						const [ newWidth, newHeight ] = payload.data;
+
+						return MapRandomSeedData({
+							rows: newHeight || state.rows,
+							columns: newWidth || state.columns,
+						});
 					case EnumActions.RANDOMIZE:
-						return MapRandomSeedData();
+						return MapRandomSeedData({ ...state });
 					case EnumActions.SOLID_FILL:
-						return MapRandomSeedData({ tileData: payload.data });
+						return MapRandomSeedData({ ...state, tileData: payload.data });
 					case EnumActions.SET_TILE_DATA:
 						return state.setTiles(...payload.data);
 					default:
