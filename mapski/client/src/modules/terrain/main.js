@@ -5,11 +5,11 @@ import { Terrain } from "./lib/Terrain.js";
 import { TerrainMap } from "../../data/stub/TerrainMap.js";
 
 // STUB
-const terrainMap = new Map();
+const terrainMap = {};
 for(const [ key, terrainObj ] of Object.entries(TerrainMap)) {
 	const terrain = new Terrain(terrainObj);
 
-	terrainMap.set(key, terrain);
+	terrainMap[ key ] = terrain;
 }
 
 export const EnumActions = {
@@ -28,27 +28,30 @@ export const Generate = ({ ...args } = {}) => {
 			(state, payload) => {
 				if(payload && payload.type) {
 					if(payload.type === EnumActions.SELECT_TERRAIN) {
-						const next = structuredClone(state);
+						const next = state;//structuredClone(state);
 
 						return {
 							...next,
 							selected: payload.data,
 						};
 					} else if(payload.type === EnumActions.SET_TERRAIN_TEXTURE) {
-						const { texture } = payload.data;
+						const { key, texture } = payload.data;
 
-						const next = structuredClone(state);
+						const next = state;//structuredClone(state);
 
-						//FIXME: "selected" isn't relevant here -- it should be the "texture" (i.e. the image file) (though also decide if file, or canvas instead here)
-						const terrain = next.terrains.get(next.selected);
-						next.terrains.set(next.selected, terrain.setTexture(texture));
+						const terrain = next.terrains[ key ];
+						next.terrains[ key ] = new Terrain({
+							...terrain,
+							texture,
+						});
+
+						console.log("SET_TERRAIN_TEXTURE", next.terrains[ key ])
 
 						return {
 							...next,
-							terrains: new Map(next.terrains),
 						};
 					} else if(payload.type === EnumActions.SET_TERRAIN_MAP) {
-						const next = structuredClone(state);
+						const next = state;//structuredClone(state);
 
 						const map = new Map(next.terrains);
 						for(const [ key, terrainObj ] of payload.data) {

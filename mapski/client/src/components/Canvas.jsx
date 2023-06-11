@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export function Canvas({ source, width, height }) {
+export function Canvas({ source, width, height, ...props }) {
 	const canvasRef = useRef(null);
 
 	useEffect(() => {
@@ -17,7 +17,7 @@ export function Canvas({ source, width, height }) {
 		context.drawImage(source, 0, 0, canvas.width, canvas.height);
 	}, [ source, width, height ]);
 
-	return <canvas ref={ canvasRef } />;
+	return <canvas ref={ canvasRef } width={ width } height={ height } { ...props } />;
 };
 
 export default Canvas;

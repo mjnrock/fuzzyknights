@@ -61,7 +61,8 @@ export class Module {
 	}
 
 	dispatch(...args) {
-		let previous = structuredClone(this.state),
+		// let previous = structuredClone(this.state),
+		let previous = { ...this.state },
 			next = this.state;
 
 		for(const reducer of this.events.reducers) {
@@ -74,7 +75,8 @@ export class Module {
 
 		this.state = next;
 
-		const effectState = typeof next === "object" && "clone" in next ? next.clone() : structuredClone(next);
+		// const effectState = typeof next === "object" && "clone" in next ? next.clone() : structuredClone(next);
+		const effectState = typeof next === "object" && "clone" in next ? next.clone() : { ...next };
 
 		for(const effect of this.events.effects) {
 			effect(effectState, ...args, this);

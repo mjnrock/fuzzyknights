@@ -1,16 +1,25 @@
 import { useModule } from "../../../lib/ReactModule";
 import { EnumActions } from "../main";
 
-import { Canvas } from "../../../components/Canvas";
+import { TerrainPreview } from "../components/TerrainPreview";
 
-export function TerrainMap({ module, terrains, ...props }) {
+import { BitMask } from "../../../components/BitMask";
+
+// STUB: Import from data network
+export const EnumMask = {
+	IsNavigable: 1 << 0,
+	IsBuildable: 1 << 1,
+	IsHarvestable: 1 << 2,
+};
+
+export function TerrainMap({ module, ...props }) {
 	const { state, dispatch } = useModule(module);
 
 	return (
 		<div className="flex flex-col items-center justify-center p-2 m-2 border border-solid rounded border-neutral-200 bg-neutral-50" { ...props }>
 			{
-				Object.keys(terrains).map((key, i) => {
-					const terrain = terrains[ key ];
+				Object.keys(state.terrains).map((key, i) => {
+					const terrain = state.terrains[ key ];
 
 					return (
 						<div
@@ -19,20 +28,41 @@ export function TerrainMap({ module, terrains, ...props }) {
 							onClick={ () => {
 								dispatch({
 									type: EnumActions.SELECT_TERRAIN,
-									data: +key
+									data: key
 								});
 							} }
 						>
-							<div className="text-neutral-800">{ key }</div>
-							<div
-								className="w-16 h-16 m-1 border border-gray-800 border-solid rounded cursor-pointer"
-								style={ {
-									backgroundColor: "#999",
+							<TerrainPreview
+								terrain={ terrain }
+								colorHandler={ (color) => {
+									dispatch({
+										type: EnumActions.SET_TERRAIN_TEXTURE,
+										data: { key, texture: color }
+									});
 								} }
-							>
-								{ i }
+								imageHandler={ (image) => {
+									dispatch({
+										type: EnumActions.SET_TERRAIN_TEXTURE,
+										data: { key, texture: image }
+									});
+								} }
+							/>
+
+							<div className="flex flex-col space-y-2">
+								<div className="flex">
+									<p className="font-bold">type:</p>
+									<p className="ml-2 italic">{ terrain.type }</p>
+								</div>
+								<div className="flex">
+									<p className="font-bold">cost:</p>
+									<p className="ml-2 italic">{ terrain.cost }</p>
+								</div>
+								<div className="flex">
+									<p className="font-bold">mask:</p>
+									<p className="ml-2 italic">{ terrain.mask }</p>
+								</div>
+								<BitMask mask={ terrain.mask } dict={ EnumMask } />
 							</div>
-							<Canvas source={ terrain.texture } />
 						</div>
 					);
 				})
