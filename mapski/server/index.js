@@ -18,7 +18,6 @@ app.use(cors());
 app.use(express.json());
 
 // Data Endpoint
-// app.use("/data", (req, res, next) => console.log(req.url) || next());
 app.use("/data", dataRouter(__dirname));
 
 // Starting server
