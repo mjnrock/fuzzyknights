@@ -1,6 +1,6 @@
 import { Map } from "../components/Map.jsx";
 
-import { TerrainMap as EnumTerrainMap } from "../../../data/stub/EnumTerrainType.js";
+import { TerrainMap as EnumTerrainMap } from "../../../data/stub/TerrainMap.js";
 
 export function ViewTileMap({ module }) {
 	return (

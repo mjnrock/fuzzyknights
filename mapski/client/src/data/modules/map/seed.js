@@ -1,7 +1,7 @@
 import { Map } from "./../../../modules/map/models/Map.js";
 import { Tile } from "./../../../modules/map/models/Tile.js";
 
-import { TerrainMap } from "../../stub/EnumTerrainType.js";
+import { TerrainMap } from "../../stub/TerrainMap.js";
 
 export function Seed({ rows = 10, columns = 10, tileData, tw, th, tiles, ...rest } = {}, excludeTiles = false) {
 	const nextTiles = [];
@@ -14,7 +14,7 @@ export function Seed({ rows = 10, columns = 10, tileData, tw, th, tiles, ...rest
 				continue;
 			}
 
-			const data = tileData !== void 0 ? tileData : ~~(Math.random() * Object.keys(TerrainMap).slice(1).length) + 1;	// Remove "null", which is also key 0, so +1 for "key floor".
+			const data = tileData !== void 0 ? tileData : ~~(Math.random() * Object.keys(TerrainMap).length) + 1;	// Remove "null", which is also key 0, so +1 for "key floor".
 
 			row.push(new Tile({ x, y, data }));
 		}

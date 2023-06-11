@@ -1,6 +1,6 @@
 import { TerrainMap } from "../components/TerrainMap.jsx";
 
-import { TerrainMap as EnumTerrainMap } from "../../../data/stub/EnumTerrainType.js";
+import { TerrainMap as EnumTerrainMap } from "../../../data/stub/TerrainMap.js";
 
 export function ViewTerrainPicker({ module }) {
 	return (
