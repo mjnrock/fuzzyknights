@@ -15,7 +15,9 @@ export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 	// 	e.target.click();
 	// };
 
-	const handleCanvasClick = () => {
+	const handleCanvasClick = (e) => {
+		e.preventDefault();
+
 		fileInputRef.current.click();
 	};
 
@@ -45,9 +47,10 @@ export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 			/>
 			{ typeof terrain.texture === "string" ? (
 				<div
-					className="w-16 h-16 m-1 border border-gray-800 border-solid rounded cursor-pointer"
+					className="w-16 h-16 m-2 border border-gray-800 border-solid rounded cursor-pointer"
 					style={ { backgroundColor: terrain.texture } }
-					onClick={ handleCanvasClick }
+					onContextMenu={ handleCanvasClick }
+					title="Right-Click preview box to change texture"
 				/>
 			) : (
 				<Canvas
@@ -55,7 +58,8 @@ export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 					width={ 64 }
 					height={ 64 }
 					className="m-2 border border-solid rounded cursor-pointer border-neutral-200 hover:border-neutral-300"
-					onClick={ handleCanvasClick }
+					onContextMenu={ handleCanvasClick }
+					title="Right-Click preview box to change texture"
 				/>
 			) }
 		</>
