@@ -1,4 +1,4 @@
-export const TextureMap = {
+export const TerrainMap = {
 	N: null,
 	1: `#222222`,
 	2: `#2587be`,

@@ -3,7 +3,7 @@ import { useModule } from "../../../lib/ReactModule.js";
 
 import { EnumActions as EnumBrushesActions } from "../../brushes/main.js";
 
-export function TerrainCanvas({ module, textures, ...props }) {
+export function TerrainCanvas({ module, terrains, ...props }) {
 	useModule(module);
 	const canvas = useRef(document.createElement("canvas"));
 
@@ -25,7 +25,7 @@ export function TerrainCanvas({ module, textures, ...props }) {
 					ctx.fillRect(x, y, module.state.tw / 2, module.state.th / 2);
 					ctx.fillRect(x + module.state.tw / 2, y + module.state.th / 2, module.state.tw / 2, module.state.th / 2);
 				} else {
-					ctx.fillStyle = textures[ data ];
+					ctx.fillStyle = terrains[ data ];
 					ctx.fillRect(x, y, module.state.tw, module.state.th);
 				}
 			}

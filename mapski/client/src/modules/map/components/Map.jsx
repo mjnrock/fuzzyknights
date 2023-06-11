@@ -6,7 +6,7 @@ import { TerrainCanvas } from "./TerrainCanvas.jsx";
 
 import { BsDice5, BsPaintBucket, BsEasel, BsBoundingBoxCircles } from "react-icons/bs";
 
-export function Map({ module, textures, ...props }) {
+export function Map({ module, terrains, ...props }) {
 	const { dispatch } = useModule(module);
 
 	return (
@@ -73,7 +73,7 @@ export function Map({ module, textures, ...props }) {
 						className="flex-1 p-2 mb-2 text-center text-gray-400 border border-gray-300 border-solid rounded cursor-pointer bg-neutral-50 hover:bg-gray-400 hover:text-neutral-100 active:bg-gray-500"
 						onClick={ () => dispatch({
 							type: EnumActions.SOLID_FILL,
-							data: module.$query("texture", [ "selected" ]),
+							data: module.$query("terrain", [ "selected" ]),
 						}) }
 					>
 						<BsPaintBucket className="mx-auto text-2xl" />
@@ -84,7 +84,7 @@ export function Map({ module, textures, ...props }) {
 					<TerrainCanvas
 						className="cursor-crosshair"
 						module={ module }
-						textures={ textures }
+						terrains={ terrains }
 					/>
 				</div>
 			</div>

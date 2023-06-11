@@ -50,7 +50,7 @@ export const Generate = ({ ...args } = {}) => {
 							y: payload.y,
 						};
 					case EnumActions.DOWN:
-						const currentTexture = self.$query("texture", "selected") || null;	// This assumes that 0 is the null texture key (i.e. { 0: null }.
+						const currentTerrain = self.$query("terrain", "selected") || null;	// This assumes that 0 is the null terrain key (i.e. { 0: null }.
 
 						if(state.brush === EnumActions.ERASER) {
 							self.$dispatch("map", {
@@ -60,16 +60,16 @@ export const Generate = ({ ...args } = {}) => {
 						} else if(state.brush === EnumActions.POINT) {
 							self.$dispatch("map", {
 								type: EnumMapActions.SET_TILE_DATA,
-								data: [ { x: state.x, y: state.y, data: currentTexture } ],
+								data: [ { x: state.x, y: state.y, data: currentTerrain } ],
 							});
 						} else if(state.brush === EnumActions.PLUS) {
 							const { x, y } = state;
 							const plus = [
-								{ x: x, y: y, data: currentTexture },
-								{ x: x - 1, y: y, data: currentTexture },
-								{ x: x + 1, y: y, data: currentTexture },
-								{ x: x, y: y - 1, data: currentTexture },
-								{ x: x, y: y + 1, data: currentTexture },
+								{ x: x, y: y, data: currentTerrain },
+								{ x: x - 1, y: y, data: currentTerrain },
+								{ x: x + 1, y: y, data: currentTerrain },
+								{ x: x, y: y - 1, data: currentTerrain },
+								{ x: x, y: y + 1, data: currentTerrain },
 							];
 
 							self.$dispatch("map", {
@@ -89,7 +89,7 @@ export const Generate = ({ ...args } = {}) => {
 						};
 					case EnumActions.UP:
 						if(Array.isArray(state.special)) {
-							const currentTexture = self.$query("texture", "selected") || null;	// This assumes that 0 is the null texture key (i.e. { 0: null }.
+							const currentTerrain = self.$query("terrain", "selected") || null;	// This assumes that 0 is the null terrain key (i.e. { 0: null }.
 							const [ , x, y ] = state.special;
 							const { x: x2, y: y2 } = state;
 
@@ -99,7 +99,7 @@ export const Generate = ({ ...args } = {}) => {
 									rectangle.push({
 										x: i,
 										y: j,
-										data: currentTexture,
+										data: currentTerrain,
 									});
 								}
 							}

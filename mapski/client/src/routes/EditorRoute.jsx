@@ -3,8 +3,8 @@ import React from "react";
 import { Generate as GenerateMap } from "../modules/map/main.js";
 import { ViewTileMap } from "../modules/map/view/ViewTileMap.jsx";
 
-import { Generate as GenerateTexture } from "../modules/texture/main.js";
-import { ViewTexturePicker } from "../modules/texture/view/ViewTexturePicker.jsx";
+import { Generate as GenerateTerrain } from "../modules/terrain/main.js";
+import { ViewTerrainPicker } from "../modules/terrain/view/ViewTerrainPicker.jsx";
 
 import { Generate as GenerateBrushes } from "../modules/brushes/main.js";
 
@@ -14,7 +14,7 @@ import ViewPalette from "../modules/brushes/view/ViewPalette.jsx";
 export const { registry: Registry1 } = Network.CreateSimple({
 	brushes: GenerateBrushes(),
 	map: GenerateMap(),
-	texture: GenerateTexture(),
+	terrain: GenerateTerrain(),
 });
 
 export function EditorRoute() {
@@ -26,7 +26,7 @@ export function EditorRoute() {
 					<ViewTileMap module={ Registry1[ "map" ] } />
 				</div>
 				<div className="flex flex-col items-center justify-center">
-					<ViewTexturePicker module={ Registry1[ "texture" ] } />
+					<ViewTerrainPicker module={ Registry1[ "terrain" ] } />
 				</div>
 			</div>
 		</div>

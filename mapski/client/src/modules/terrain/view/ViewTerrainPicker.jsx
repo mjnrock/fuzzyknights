@@ -1,14 +1,14 @@
-import { Map } from "../components/Map.jsx";
+import { TerrainMap } from "../components/TerrainMap.jsx";
 
 import { TerrainMap as EnumTerrainMap } from "../../../data/stub/EnumTerrainType.js";
 
-export function ViewTileMap({ module }) {
+export function ViewTerrainPicker({ module }) {
 	return (
-		<Map
+		<TerrainMap
 			module={ module }
 			terrains={ EnumTerrainMap }
 		/>
-	);
+	)
 };
 
-export default ViewTileMap;
+export default ViewTerrainPicker;

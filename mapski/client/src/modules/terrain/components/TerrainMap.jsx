@@ -1,20 +1,20 @@
 import { useModule } from "../../../lib/ReactModule";
 import { EnumActions } from "../main";
 
-export function TextureMap({ module, textures, ...props }) {
+export function TerrainMap({ module, terrains, ...props }) {
 	const { state, dispatch } = useModule(module);
 
 	return (
 		<div className="flex flex-col items-center justify-center p-2 m-2 border border-solid rounded border-neutral-200 bg-neutral-50" { ...props }>
 			{
-				Object.keys(textures).map((key) => {
+				Object.keys(terrains).map((key) => {
 					return (
 						<div
 							key={ key }
 							className={ `flex flex-row items-center justify-center rounded p-2` + (state.selected === +key ? ` bg-neutral-300` : ``) }
 							onClick={ () => {
 								dispatch({
-									type: EnumActions.SELECT_TEXTURE,
+									type: EnumActions.SELECT_TERRAIN,
 									data: +key
 								});
 							} }
@@ -23,7 +23,7 @@ export function TextureMap({ module, textures, ...props }) {
 							<div
 								className="w-16 h-16 m-1 border border-gray-800 border-solid rounded cursor-pointer"
 								style={ {
-									backgroundColor: textures[ key ],
+									backgroundColor: terrains[ key ],
 								} }
 							/>
 						</div>
@@ -34,4 +34,4 @@ export function TextureMap({ module, textures, ...props }) {
 	);
 };
 
-export default TextureMap;
+export default TerrainMap;

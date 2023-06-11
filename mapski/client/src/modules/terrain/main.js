@@ -1,19 +1,19 @@
 import { Module } from "../../lib/Module.js";
 
 export const EnumActions = {
-	SELECT_TEXTURE: "SELECT_TEXTURE",
+	SELECT_TERRAIN: "SELECT_TERRAIN",
 };
 
 export const Generate = ({ ...args } = {}) => {
 	const module = new Module({
 		state: {
 			selected: 2,
-			textures: new Map(),
+			terrains: new Map(),
 		},
 		reducers: [
 			(state, payload) => {
 				switch(payload && payload.type) {
-					case EnumActions.SELECT_TEXTURE:
+					case EnumActions.SELECT_TERRAIN:
 						const next = structuredClone(state);
 
 						return {
@@ -33,5 +33,7 @@ export const Generate = ({ ...args } = {}) => {
 
 export default {
 	Generate,
-	Enum: {},
+	Enum: {
+		Actions: EnumActions,
+	},
 };
