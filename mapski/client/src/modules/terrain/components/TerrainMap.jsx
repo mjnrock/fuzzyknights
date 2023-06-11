@@ -24,7 +24,7 @@ export function TerrainMap({ module, ...props }) {
 					return (
 						<div
 							key={ key }
-							className={ `flex flex-row items-center justify-center rounded p-2` + (state.selected === +key ? ` bg-neutral-300` : ``) }
+							className={ `flex flex-row items-center justify-center rounded p-2 border border-solid cursor-pointer hover:bg-sky-50 hover:border-sky-200 ` + (state.selected === key ? ` bg-sky-100 border-sky-300` : `border-transparent`) }
 							onClick={ () => {
 								dispatch({
 									type: EnumActions.SELECT_TERRAIN,
