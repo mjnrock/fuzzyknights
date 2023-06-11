@@ -3,7 +3,7 @@
 	"name": "mapski-server",
 	"version": "0.1.0",
 	"main": "index.js",
-	"license": "None",
+	"license": "UNLICENSED",
 	"scripts": {
 		"start": "node index.js"
 	},
