@@ -6,14 +6,14 @@ import { Canvas } from "../../../components/Canvas";
 export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 	const fileInputRef = useRef();
 
-	const handleColorClick = (e) => {
-		e.target.type = "color";
-		e.target.onchange = () => {
-			colorHandler(e.target.value);
-			e.target.type = "";
-		};
-		e.target.click();
-	};
+	// const handleColorClick = (e) => {
+	// 	e.target.type = "color";
+	// 	e.target.onchange = () => {
+	// 		colorHandler(e.target.value);
+	// 		e.target.type = "";
+	// 	};
+	// 	e.target.click();
+	// };
 
 	const handleCanvasClick = () => {
 		fileInputRef.current.click();
@@ -43,11 +43,11 @@ export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 				accept="image/*"
 				onChange={ handleFileChange }
 			/>
-			{ typeof terrain.render === "string" ? (
+			{ typeof terrain.texture === "string" ? (
 				<div
 					className="w-16 h-16 m-1 border border-gray-800 border-solid rounded cursor-pointer"
-					style={ { backgroundColor: terrain.render } }
-					onClick={ handleColorClick }
+					style={ { backgroundColor: terrain.texture } }
+					onClick={ handleCanvasClick }
 				/>
 			) : (
 				<Canvas

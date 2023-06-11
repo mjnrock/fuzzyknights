@@ -3,11 +3,12 @@ import { useModule } from "../../../lib/ReactModule.js";
 
 import { EnumActions as EnumBrushesActions } from "../../brushes/main.js";
 
-export function TerrainCanvas({ module, terrains, ...props }) {
+export function TerrainCanvas({ module, ...props }) {
 	useModule(module);
 	const canvas = useRef(document.createElement("canvas"));
 
 	const drawTerrain = () => {
+		const terrains = module.$query("terrain", "terrains");
 		const ctx = canvas.current.getContext("2d");
 
 		ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
@@ -18,15 +19,22 @@ export function TerrainCanvas({ module, terrains, ...props }) {
 				const y = row * module.state.th;
 
 				const data = module.state.getTile(column, row).data;
-				if(data === null) {
+				if(data == null) {
 					ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
 					ctx.fillRect(x, y, module.state.tw, module.state.th);
 					ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
 					ctx.fillRect(x, y, module.state.tw / 2, module.state.th / 2);
 					ctx.fillRect(x + module.state.tw / 2, y + module.state.th / 2, module.state.tw / 2, module.state.th / 2);
 				} else {
-					ctx.fillStyle = terrains[ data ];
-					ctx.fillRect(x, y, module.state.tw, module.state.th);
+					const texture = terrains[ data ].texture;
+					if(typeof texture === "string") {
+						// texture is a color
+						ctx.fillStyle = texture;
+						ctx.fillRect(x, y, module.state.tw, module.state.th);
+					} else {
+						// texture is a canvas
+						ctx.drawImage(texture, 0, 0, Math.min(texture.width, module.state.tw), Math.min(texture.height, module.state.th), x, y, module.state.tw, module.state.th);
+					}
 				}
 			}
 		}

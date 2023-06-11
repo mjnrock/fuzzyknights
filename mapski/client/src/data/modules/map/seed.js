@@ -5,6 +5,7 @@ import { TerrainMap } from "../../stub/TerrainMap.js";
 
 export function Seed({ rows = 10, columns = 10, tileData, tw, th, tiles, ...rest } = {}, excludeTiles = false) {
 	const nextTiles = [];
+	const terrainMapKeys = Object.keys(TerrainMap);
 
 	for(let y = 0; y < rows; y++) {
 		const row = [];
@@ -14,7 +15,13 @@ export function Seed({ rows = 10, columns = 10, tileData, tw, th, tiles, ...rest
 				continue;
 			}
 
-			const data = tileData !== void 0 ? tileData : ~~(Math.random() * Object.keys(TerrainMap).length) + 1;	// Remove "null", which is also key 0, so +1 for "key floor".
+			let data;
+			if(tileData) {
+				data = tileData;
+			} else {
+				let index = ~~(Math.random() * terrainMapKeys.length);
+				data = terrainMapKeys[ index ];
+			}
 
 			row.push(new Tile({ x, y, data }));
 		}
