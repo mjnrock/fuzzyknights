@@ -55,8 +55,8 @@ export function mergeObject(pojoToObject, extraProps = {}) {
 	const pojo = toObject(pojoToObject);
 	const extraPropsPojo = toObject(extraProps);
 
-	return pojo;
-}
+	return Object.assign(pojo, extraPropsPojo);
+};
 
 export default {
 	isObject,

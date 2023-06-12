@@ -1,5 +1,5 @@
 import { Module } from "../../lib/Module.js";
-import { toObject, mergeObject } from "./../../util/copy.js";
+import { toObject } from "./../../util/copy.js";
 
 import { Seed as MapRandomSeedData } from "./../../data/modules/map/seed.js";
 
