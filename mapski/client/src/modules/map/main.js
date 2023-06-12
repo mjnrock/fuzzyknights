@@ -1,4 +1,5 @@
 import { Module } from "../../lib/Module.js";
+import { toObject, mergeObject } from "./../../util/copy.js";
 
 import { Seed as MapRandomSeedData } from "./../../data/modules/map/seed.js";
 
@@ -37,10 +38,10 @@ export const Generate = ({ ...args } = {}) => {
 				} else if(payload.type === EnumActions.SOLID_FILL) {
 					return MapRandomSeedData({ ...state, tileData: payload.data }, true);
 				} else if(payload.type === EnumActions.SET_TILE_DATA) {
-					return state.setTiles(...payload.data);
+					return toObject(state.setTiles(...payload.data));
 				}
 
-				return MapRandomSeedData({ ...state }, false);
+				return toObject(state);
 			},
 		],
 		...args,

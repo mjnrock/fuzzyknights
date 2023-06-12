@@ -57,9 +57,11 @@ export const Generate = ({ ...args } = {}) => {
 							...state,
 							terrains,
 						};
-					} else {
-						return state;
 					}
+
+					return {
+						...state,
+					};
 				}
 			},
 		],
@@ -67,6 +69,7 @@ export const Generate = ({ ...args } = {}) => {
 			(state, payload, self) => {
 				if(payload && payload.type) {
 					if(payload.type === EnumActions.SET_TERRAIN_TEXTURE) {
+						// Force a map update
 						self.$dispatch("map", true);
 					}
 				}

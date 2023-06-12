@@ -6,7 +6,7 @@ import { TerrainCanvas } from "./TerrainCanvas.jsx";
 
 import { BsDice5, BsPaintBucket, BsEasel, BsBoundingBoxCircles } from "react-icons/bs";
 
-export function Map({ module, terrains, ...props }) {
+export function Map({ module, ...props }) {
 	const { dispatch } = useModule(module);
 
 	return (
@@ -84,7 +84,6 @@ export function Map({ module, terrains, ...props }) {
 					<TerrainCanvas
 						className="cursor-crosshair"
 						module={ module }
-						terrains={ terrains }
 					/>
 				</div>
 			</div>

@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import { toObject } from "../util/copy";
 
 export class Module {
 	static EventTypes = {
@@ -22,6 +23,7 @@ export class Module {
 		};
 
 		this.config = {
+			noTrivialUpdates: false,	// Dis/allow a dispatch to force a state change even if the state is the same
 			...config,
 		};
 
@@ -69,15 +71,18 @@ export class Module {
 			next = reducer(next, ...args, this);
 		}
 
-		this.emit(Module.EventTypes.STATE_CHANGE, next, previous, this);
-		// if(JSON.stringify(previous) !== JSON.stringify(next)) {
-		// 	this.emit(Module.EventTypes.STATE_CHANGE, next, previous, this);
-		// }
+		if(this.config.noTrivialUpdates) {
+			if(JSON.stringify(previous) !== JSON.stringify(next)) {
+				this.emit(Module.EventTypes.STATE_CHANGE, next, previous, this);
+			}
+		} else {
+			this.emit(Module.EventTypes.STATE_CHANGE, next, previous, this);
+		}
 
 		this.state = next;
 
 		// const effectState = typeof next === "object" && "clone" in next ? next.clone() : structuredClone(next);
-		const effectState = typeof next === "object" && "clone" in next ? next.clone() : { ...next };
+		const effectState = typeof next === "object" && "clone" in next ? next.clone() : toObject(next);
 
 		for(const effect of this.events.effects) {
 			effect(effectState, ...args, this);
