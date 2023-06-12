@@ -21,23 +21,20 @@ export const EnumActions = {
 export const Generate = ({ ...args } = {}) => {
 	const module = new Module({
 		state: {
-			selected: 2,
+			selected: null,
 			terrains: terrainMap,	// new Map(),
 		},
 		reducers: [
-			(state, payload) => {
+			(state, payload, self) => {
 				if(payload && payload.type) {
 					if(payload.type === EnumActions.SELECT_TERRAIN) {
-						const next = state;//structuredClone(state);
-
 						return {
-							...next,
+							...state,
 							selected: payload.data,
 						};
 					} else if(payload.type === EnumActions.SET_TERRAIN_TEXTURE) {
+						const next = state;
 						const { key, texture } = payload.data;
-
-						const next = state;//structuredClone(state);
 
 						const terrain = next.terrains[ key ];
 						next.terrains[ key ] = new Terrain({
@@ -45,27 +42,32 @@ export const Generate = ({ ...args } = {}) => {
 							texture,
 						});
 
-						console.log("SET_TERRAIN_TEXTURE", next.terrains[ key ])
-
 						return {
 							...next,
 						};
 					} else if(payload.type === EnumActions.SET_TERRAIN_MAP) {
-						const next = state;//structuredClone(state);
-
-						const map = new Map(next.terrains);
-						for(const [ key, terrainObj ] of payload.data) {
+						const terrains = {};
+						for(const [ key, terrainObj ] of Object.entries(payload.data)) {
 							const terrain = new Terrain(terrainObj);
 
-							map.set(key, terrain);
+							terrains[ key ] = terrain;
 						}
 
 						return {
-							...next,
-							terrains: map,
+							...state,
+							terrains,
 						};
 					} else {
 						return state;
+					}
+				}
+			},
+		],
+		effects: [
+			(state, payload, self) => {
+				if(payload && payload.type) {
+					if(payload.type === EnumActions.SET_TERRAIN_TEXTURE) {
+						self.$dispatch("map", true);
 					}
 				}
 			},

@@ -1,20 +1,20 @@
-export class Tags {
+export class Tags extends Map {
 	constructor (...tags) {
-		this.tags = new Map();
+		super();
 
 		this.add(...tags);
 	}
 
 	asList() {
-		return Array.from(this.tags.keys());
+		return Array.from(this.keys());
 	}
 	asEntries() {
-		return Array.from(this.tags.entries());
+		return Array.from(this.entries());
 	}
 	asValues(argObj = {}, raw = false) {
 		let results = [];
 
-		this.tags.forEach((value, key) => {
+		this.forEach((value, key) => {
 			if(typeof value === "function" && !raw) {
 				if(key in argObj) {
 					results.push(value(argObj[ key ]));
@@ -29,18 +29,9 @@ export class Tags {
 		return results;
 	}
 
-	get(key, ...args) {
-		let value = this.tags.get(key);
-
-		if(typeof value === "function") {
-			return value(...args);
-		} else {
-			return value;
-		}
-	}
 	getByIndex(index) {
 		let i = 0;
-		for(let value of this.tags.values()) {
+		for(let value of this.values()) {
 			if(i === index) {
 				return value;
 			}
@@ -49,18 +40,6 @@ export class Tags {
 		}
 
 		return;
-	}
-
-	set(key, value) {
-		this.tags.set(key, value);
-
-		return this;
-	}
-	remove(key) {
-		return this.tags.delete(key);
-	}
-	has(key) {
-		return this.tags.has(key);
 	}
 
 	add(...inputs) {
@@ -77,17 +56,17 @@ export class Tags {
 		return this;
 	}
 	addValue(...tags) {
-		tags.forEach(tag => this.tags.set(tag, tags));
+		tags.forEach(tag => this.set(tag, tags));
 
 		return this;
 	}
 	addEntry(key, value) {
-		this.tags.set(key, value);
+		this.set(key, value);
 
 		return this;
 	}
 	addObject(object) {
-		Object.entries(object).forEach(([ key, value ]) => this.tags.set(key, value));
+		Object.entries(object).forEach(([ key, value ]) => this.set(key, value));
 
 		return this;
 	}
@@ -95,7 +74,7 @@ export class Tags {
 	toObject(argsObj = {}, raw = false) {
 		let object = {};
 
-		this.tags.forEach((value, key) => {
+		this.forEach((value, key) => {
 			if(typeof value === "function" && !raw) {
 				if(key in argsObj) {
 					object[ key ] = value(argsObj[ key ]);

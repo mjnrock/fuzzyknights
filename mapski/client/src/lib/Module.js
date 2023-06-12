@@ -69,9 +69,10 @@ export class Module {
 			next = reducer(next, ...args, this);
 		}
 
-		if(JSON.stringify(previous) !== JSON.stringify(next)) {
-			this.emit(Module.EventTypes.STATE_CHANGE, next, previous, this);
-		}
+		this.emit(Module.EventTypes.STATE_CHANGE, next, previous, this);
+		// if(JSON.stringify(previous) !== JSON.stringify(next)) {
+		// 	this.emit(Module.EventTypes.STATE_CHANGE, next, previous, this);
+		// }
 
 		this.state = next;
 

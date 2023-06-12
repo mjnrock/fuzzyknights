@@ -3,14 +3,14 @@ import { Tags } from "./Tags";
 
 export class Identity {
 	constructor ({ id, tags = [] } = {}) {
-		this.id = id || uuid();
-		this.tags = new Tags(...tags);
+		this.$id = id || uuid();
+		this.$tags = new Tags(...tags);
 	}
 
 	toObject(...args) {
 		return {
-			id: this.id,
-			tags: this.tags.toTags(...args),
+			$id: this.$id,
+			$tags: this.$tags.toTags(...args),
 		};
 	}
 	toString(...args) {

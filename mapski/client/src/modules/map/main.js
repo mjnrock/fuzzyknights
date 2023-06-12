@@ -40,7 +40,7 @@ export const Generate = ({ ...args } = {}) => {
 					return state.setTiles(...payload.data);
 				}
 
-				return state;
+				return MapRandomSeedData({ ...state }, false);
 			},
 		],
 		...args,
