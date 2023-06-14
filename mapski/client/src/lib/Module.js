@@ -44,14 +44,14 @@ export class Module {
 		}
 	}
 
-	get $query() {
-		return this.network.query.bind(this.network);
+	$query(...args) {
+		return this.network.query.call(this.network, ...args);
 	}
-	get $execute() {
-		return this.network.execute.bind(this.network);
+	$execute(...args) {
+		return this.network.execute.call(this.network, ...args);
 	}
-	get $dispatch() {
-		return this.network.dispatch.bind(this.network);
+	$dispatch(...args) {
+		return this.network.dispatch.call(this.network, ...args);
 	}
 
 	init(...args) {
