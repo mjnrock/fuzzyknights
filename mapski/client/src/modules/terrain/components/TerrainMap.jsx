@@ -5,6 +5,8 @@ import { TerrainPreview } from "../components/TerrainPreview";
 
 import { BitMask } from "../../../components/BitMask";
 
+import { BsInfinity } from "react-icons/bs";
+
 // STUB: Import from data network
 export const EnumMask = {
 	IsNavigable: 1 << 0,
@@ -55,7 +57,7 @@ export function TerrainMap({ module, ...props }) {
 								</div>
 								<div className="flex">
 									<p className="font-bold">cost:</p>
-									<p className="ml-2 italic">{ terrain.cost }</p>
+									<p className="m-auto ml-2 italic">{ terrain.cost === Infinity ? <BsInfinity className="text-sm" /> : terrain.cost }</p>
 								</div>
 								<div className="flex">
 									<p className="font-bold">mask:</p>
