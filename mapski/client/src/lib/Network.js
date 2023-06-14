@@ -89,7 +89,7 @@ export class Network {
 		if(!this.modules.has(name)) {
 			throw new Error(`Module ${ name } does not exist`);
 		}
-
+		
 		const instance = this.modules.get(name);
 
 		instance.dispatch(...args);
