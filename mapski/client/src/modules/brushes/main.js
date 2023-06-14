@@ -26,7 +26,7 @@ export const EnumActions = {
 export const Generate = ({ ...args } = {}) => {
 	const module = new Module({
 		state: {
-			brush: EnumActions.RECTANGLE,
+			brush: EnumActions.PLUS,
 			x: null,
 			y: null,
 			special: 1,

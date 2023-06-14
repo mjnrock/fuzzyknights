@@ -28,6 +28,17 @@ export function ViewPalette({ module }) {
 
 	return (
 		<div className="flex flex-row items-center justify-center gap-2">
+			<div className="flex flex-row items-center justify-center gap-2 p-2 border border-solid rounded bg-blue-50 border-neutral-200">
+				<Button onClick={ dispatch(EnumActions.POINT) } active={ active === EnumActions.POINT }>
+					<BsPen className="text-2xl" />
+				</Button>
+				<Button onClick={ dispatch(EnumActions.PLUS) } active={ active === EnumActions.PLUS }>
+					<BsPlus className="text-2xl" />
+				</Button>
+				<Button onClick={ dispatch(EnumActions.RECTANGLE, { width: 6, height: 3 }) } active={ active === EnumActions.RECTANGLE }>
+					<BsSquare className="text-2xl" />
+				</Button>
+			</div>
 			<div className="flex flex-row items-center justify-center gap-2 p-2 border border-solid rounded bg-gray-50 border-neutral-200">
 				<div className="flex flex-row gap-2">
 					<div
@@ -43,18 +54,6 @@ export function ViewPalette({ module }) {
 						<BsPaintBucket className="mx-auto text-2xl" />
 					</div>
 				</div>
-			</div>
-
-			<div className="flex flex-row items-center justify-center gap-2 p-2 border border-solid rounded bg-blue-50 border-neutral-200">
-				<Button onClick={ dispatch(EnumActions.POINT) } active={ active === EnumActions.POINT }>
-					<BsPen className="text-2xl" />
-				</Button>
-				<Button onClick={ dispatch(EnumActions.PLUS) } active={ active === EnumActions.PLUS }>
-					<BsPlus className="text-2xl" />
-				</Button>
-				<Button onClick={ dispatch(EnumActions.RECTANGLE, { width: 6, height: 3 }) } active={ active === EnumActions.RECTANGLE }>
-					<BsSquare className="text-2xl" />
-				</Button>
 			</div>
 		</div>
 	);

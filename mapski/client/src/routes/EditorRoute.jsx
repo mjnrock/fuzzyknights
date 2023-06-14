@@ -22,11 +22,11 @@ export function EditorRoute() {
 		<div className="flex flex-col select-none">
 			<div className="flex flex-row">
 				<div className="flex flex-col items-center justify-center">
-					<ViewPalette module={ Registry1[ "brushes" ] } />
-					<ViewTileMap module={ Registry1[ "map" ] } />
+					<ViewTerrainPicker module={ Registry1[ "terrain" ] } />
 				</div>
 				<div className="flex flex-col items-center justify-center">
-					<ViewTerrainPicker module={ Registry1[ "terrain" ] } />
+					<ViewPalette module={ Registry1[ "brushes" ] } />
+					<ViewTileMap module={ Registry1[ "map" ] } />
 				</div>
 			</div>
 		</div>
