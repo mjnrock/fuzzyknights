@@ -1,9 +1,9 @@
 import { TerrainMap } from "../components/TerrainMap.jsx";
 
-export function ViewTerrainPicker({ module }) {
+export function ViewTerrainPicker({ node }) {
 	return (
 		<TerrainMap
-			module={ module }
+			node={ node }
 		/>
 	)
 };

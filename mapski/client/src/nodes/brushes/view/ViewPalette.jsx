@@ -13,16 +13,16 @@ export function Button({ text, active, children, ...props } = {}) {
 	)
 }
 
-export function ViewPalette({ module }) {
-	useModule(module);
-	const [ active, setActive ] = useState(module.state.brush);
+export function ViewPalette({ node }) {
+	useModule(node);
+	const [ active, setActive ] = useState(node.state.brush);
 
 	const dispatch = (type, data) => () => {
-		module.dispatch({ type, data });
+		node.dispatch({ type, data });
 		setActive(type);
 	};
 	const $dispatch = (name, type, data) => () => {
-		module.$dispatch(name, { type, data });
+		node.$dispatch(name, { type, data });
 		setActive(type);
 	};
 
@@ -49,7 +49,7 @@ export function ViewPalette({ module }) {
 					</div>
 					<div
 						className="flex-1 p-2 text-center text-gray-400 border border-gray-300 border-solid rounded shadow cursor-pointer bg-neutral-50 hover:bg-gray-400 hover:text-neutral-100 active:bg-gray-500"
-						onClick={ $dispatch("map", EnumMapActions.SOLID_FILL, module.$query("terrain", "selected")) }
+						onClick={ $dispatch("map", EnumMapActions.SOLID_FILL, node.$query("terrain", "selected")) }
 					>
 						<BsPaintBucket className="mx-auto text-2xl" />
 					</div>

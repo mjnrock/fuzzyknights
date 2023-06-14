@@ -1,7 +1,7 @@
-import { Module } from "../../lib/Module.js";
-import { toObject } from "./../../util/copy.js";
+import { Node } from "../../lib/Node.js";
+import { toObject } from "../../util/copy.js";
 
-import { Seed as MapRandomSeedData } from "./../../data/modules/map/seed.js";
+import { Seed as MapRandomSeedData } from "../../data/nodes/map/seed.js";
 
 export const EnumActions = {
 	RESIZE: "RESIZE",
@@ -13,7 +13,7 @@ export const EnumActions = {
 };
 
 export const Generate = ({ ...args } = {}) => {
-	const module = new Module({
+	const node = new Node({
 		state: MapRandomSeedData(),
 		reducers: [
 			(state, payload) => {
@@ -47,7 +47,7 @@ export const Generate = ({ ...args } = {}) => {
 		...args,
 	});
 
-	return module;
+	return node;
 };
 
 export default {

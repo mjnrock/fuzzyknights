@@ -1,4 +1,4 @@
-import { Module } from "../../lib/Module.js";
+import { Node } from "../../lib/Node.js";
 
 import { EnumActions as EnumMapActions } from "../map/main.js";
 
@@ -24,7 +24,7 @@ export const EnumActions = {
 };
 
 export const Generate = ({ ...args } = {}) => {
-	const module = new Module({
+	const node = new Node({
 		state: {
 			brush: EnumActions.PLUS,
 			x: null,
@@ -152,7 +152,7 @@ export const Generate = ({ ...args } = {}) => {
 		...args,
 	});
 
-	return module;
+	return node;
 };
 
 export default {

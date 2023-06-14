@@ -2,15 +2,15 @@ import { Network } from "../lib/Network.js";
 
 /**
  * Use dependency injection to provide a network context to all children,
- * alongside a registry of modules to be used by the network.  This is
- * meant to be a "render wrapper" for related modules and their respective
+ * alongside a registry of nodes to be used by the network.  This is
+ * meant to be a "render wrapper" for related nodes and their respective
  * components.
  * @param {ReactContext} network
- * @param {{ name: module, ... }} registry
+ * @param {{ name: node, ... }} registry
  * @returns 
  */
 export function ViewPort({ network, registry = {}, children, ...props }) {
-	const networkInstance = new Network({ modules: registry });
+	const networkInstance = new Network({ nodes: registry });
 
 	return (
 		<network.Provider value={ networkInstance }>

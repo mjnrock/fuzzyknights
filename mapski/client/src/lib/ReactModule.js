@@ -1,33 +1,33 @@
 import { useState, useEffect } from "react";
 
-export function useModule(module) {
-	const [ state, setState ] = useState(module.state);
+export function useModule(node) {
+	const [ state, setState ] = useState(node.state);
 
 	useEffect(() => {
 		const fn = (next) => {
 			setState(next);
 		};
 
-		module.addEffect(fn);
+		node.addEffect(fn);
 
 		return () => {
-			module.removeEffect(fn);
+			node.removeEffect(fn);
 		};
-	}, [ module ]);
+	}, [ node ]);
 
 	return {
 		state,
-		dispatch: module.dispatch.bind(module),
-		emit: module.emit.bind(module),
+		dispatch: node.dispatch.bind(node),
+		emit: node.emit.bind(node),
 	};
 };
 
-export function Subscription({ module, network, children }) {
-	const { state, dispatch, emit } = useModule(module);
+export function Subscription({ node, network, children }) {
+	const { state, dispatch, emit } = useModule(node);
 
 	const value = {
 		network,
-		module,
+		node,
 		state,
 		dispatch,
 		emit,

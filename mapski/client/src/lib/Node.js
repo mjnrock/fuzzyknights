@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { toObject } from "../util/copy";
 
-export class Module {
+export class Node {
 	static EventTypes = {
 		PRE_INIT: "preinit",
 		INIT: "init",
@@ -55,9 +55,9 @@ export class Module {
 	}
 
 	init(...args) {
-		this.emit(Module.EventTypes.PRE_INIT, ...args);
-		this.emit(Module.EventTypes.INIT, ...args);
-		this.emit(Module.EventTypes.POST_INIT, ...args);
+		this.emit(Node.EventTypes.PRE_INIT, ...args);
+		this.emit(Node.EventTypes.INIT, ...args);
+		this.emit(Node.EventTypes.POST_INIT, ...args);
 
 		return this;
 	}
@@ -73,10 +73,10 @@ export class Module {
 
 		if(this.config.noTrivialUpdates) {
 			if(JSON.stringify(previous) !== JSON.stringify(next)) {
-				this.emit(Module.EventTypes.STATE_CHANGE, next, previous, this);
+				this.emit(Node.EventTypes.STATE_CHANGE, next, previous, this);
 			}
 		} else {
-			this.emit(Module.EventTypes.STATE_CHANGE, next, previous, this);
+			this.emit(Node.EventTypes.STATE_CHANGE, next, previous, this);
 		}
 
 		this.state = next;
@@ -162,4 +162,4 @@ export class Module {
 	}
 };
 
-export default Module;
+export default Node;

@@ -1,4 +1,4 @@
-import { Module } from "../../lib/Module.js";
+import { Node } from "../../lib/Node.js";
 
 import { Terrain } from "./lib/Terrain.js";
 
@@ -19,7 +19,7 @@ export const EnumActions = {
 };
 
 export const Generate = ({ ...args } = {}) => {
-	const module = new Module({
+	const node = new Node({
 		state: {
 			selected: null,
 			terrains: terrainMap,	// new Map(),
@@ -78,7 +78,7 @@ export const Generate = ({ ...args } = {}) => {
 		...args,
 	});
 
-	return module;
+	return node;
 };
 
 export default {

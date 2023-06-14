@@ -3,37 +3,37 @@ import { useModule } from "../../../lib/ReactModule.js";
 
 import { EnumActions as EnumBrushesActions } from "../../brushes/main.js";
 
-export function TerrainCanvas({ module, ...props }) {
-	useModule(module);
+export function TerrainCanvas({ node, ...props }) {
+	useModule(node);
 	const canvas = useRef(document.createElement("canvas"));
 
 	const drawTerrain = () => {
-		const terrains = module.$query("terrain", "terrains");
+		const terrains = node.$query("terrain", "terrains");
 		const ctx = canvas.current.getContext("2d");
 
 		ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
 
-		for(let row = 0; row < module.state.rows; row++) {
-			for(let column = 0; column < module.state.columns; column++) {
-				const x = column * module.state.tw;
-				const y = row * module.state.th;
+		for(let row = 0; row < node.state.rows; row++) {
+			for(let column = 0; column < node.state.columns; column++) {
+				const x = column * node.state.tw;
+				const y = row * node.state.th;
 
-				const data = module.state.getTile(column, row).data;
+				const data = node.state.getTile(column, row).data;
 				if(data == null) {
 					ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-					ctx.fillRect(x, y, module.state.tw, module.state.th);
+					ctx.fillRect(x, y, node.state.tw, node.state.th);
 					ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-					ctx.fillRect(x, y, module.state.tw / 2, module.state.th / 2);
-					ctx.fillRect(x + module.state.tw / 2, y + module.state.th / 2, module.state.tw / 2, module.state.th / 2);
+					ctx.fillRect(x, y, node.state.tw / 2, node.state.th / 2);
+					ctx.fillRect(x + node.state.tw / 2, y + node.state.th / 2, node.state.tw / 2, node.state.th / 2);
 				} else {
 					const texture = terrains[ data ].texture;
 					if(typeof texture === "string") {
 						// texture is a color
 						ctx.fillStyle = texture;
-						ctx.fillRect(x, y, module.state.tw, module.state.th);
+						ctx.fillRect(x, y, node.state.tw, node.state.th);
 					} else {
 						// texture is a canvas
-						ctx.drawImage(texture, 0, 0, Math.min(texture.width, module.state.tw), Math.min(texture.height, module.state.th), x, y, module.state.tw, module.state.th);
+						ctx.drawImage(texture, 0, 0, Math.min(texture.width, node.state.tw), Math.min(texture.height, node.state.th), x, y, node.state.tw, node.state.th);
 					}
 				}
 			}
@@ -41,41 +41,41 @@ export function TerrainCanvas({ module, ...props }) {
 	};
 
 	const onMouseEvent = (e) => {
-		const x = Math.floor(e.offsetX / module.state.tw);
-		const y = Math.floor(e.offsetY / module.state.th);
-		const cx = module.$query("brushes", "x");
-		const cy = module.$query("brushes", "y");
+		const x = Math.floor(e.offsetX / node.state.tw);
+		const y = Math.floor(e.offsetY / node.state.th);
+		const cx = node.$query("brushes", "x");
+		const cy = node.$query("brushes", "y");
 
-		if(Array.isArray(module.$query("brushes", "special"))) {
-			const [ , sx, sy ] = module.$query("brushes", "special");
-			const tx = e.offsetX / module.state.tw;
-			const ty = e.offsetY / module.state.th;
+		if(Array.isArray(node.$query("brushes", "special"))) {
+			const [ , sx, sy ] = node.$query("brushes", "special");
+			const tx = e.offsetX / node.state.tw;
+			const ty = e.offsetY / node.state.th;
 
 			if(
 				(e.type === "mouseup" && e.target !== canvas.current)	// Break out of the selection if the mouse is released outside of the canvas
 				|| (e.type === "mouseup" && x === sx && y === sy)		// Ignore selection if the mouse hasn't moved tiles
 			) {
 				drawTerrain();
-				module.$dispatch("brushes", { type: EnumBrushesActions.DESELECT });
+				node.$dispatch("brushes", { type: EnumBrushesActions.DESELECT });
 				return;
 			}
 
 			let startX, startY, rectWidth, rectHeight;
 
 			if(sx > tx) { // Mouse moving left
-				startX = Math.floor(tx) * module.state.tw;
-				rectWidth = (Math.ceil(sx) - Math.floor(tx) + 1) * module.state.tw;
+				startX = Math.floor(tx) * node.state.tw;
+				rectWidth = (Math.ceil(sx) - Math.floor(tx) + 1) * node.state.tw;
 			} else { // Mouse moving right
-				startX = Math.floor(sx * module.state.tw);
-				rectWidth = (Math.ceil(tx) - sx) * module.state.tw;
+				startX = Math.floor(sx * node.state.tw);
+				rectWidth = (Math.ceil(tx) - sx) * node.state.tw;
 			}
 
 			if(sy > ty) { // Mouse moving up
-				startY = Math.floor(ty) * module.state.th;
-				rectHeight = (Math.ceil(sy) - Math.floor(ty) + 1) * module.state.th;
+				startY = Math.floor(ty) * node.state.th;
+				rectHeight = (Math.ceil(sy) - Math.floor(ty) + 1) * node.state.th;
 			} else { // Mouse moving down
-				startY = Math.floor(sy * module.state.th);
-				rectHeight = (Math.ceil(ty) - sy) * module.state.th;
+				startY = Math.floor(sy * node.state.th);
+				rectHeight = (Math.ceil(ty) - sy) * node.state.th;
 			}
 
 			const ctx = canvas.current.getContext("2d");
@@ -107,9 +107,9 @@ export function TerrainCanvas({ module, ...props }) {
 
 		if(type === EnumBrushesActions.MOVE && x === cx && y === cy) return;
 		if(type === EnumBrushesActions.UP && e.buttons) return;
-		if(x < 0 || x >= module.state.columns || y < 0 || y >= module.state.rows) return;
+		if(x < 0 || x >= node.state.columns || y < 0 || y >= node.state.rows) return;
 
-		module.$dispatch("brushes", { type, x, y });
+		node.$dispatch("brushes", { type, x, y });
 		drawTerrain();
 	};
 
@@ -134,11 +134,11 @@ export function TerrainCanvas({ module, ...props }) {
 	}, [ canvas.current ]);
 
 	useEffect(() => {
-		canvas.current.width = module.state.tw * module.state.columns;
-		canvas.current.height = module.state.th * module.state.rows;
+		canvas.current.width = node.state.tw * node.state.columns;
+		canvas.current.height = node.state.th * node.state.rows;
 
 		drawTerrain();
-	}, [ module.state ]);
+	}, [ node.state ]);
 
 	return (
 		<div className="p-2 m-2 border border-solid rounded bg-neutral-100 border-neutral-200">

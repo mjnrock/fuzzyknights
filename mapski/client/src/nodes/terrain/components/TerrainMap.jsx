@@ -14,8 +14,8 @@ export const EnumMask = {
 	IsHarvestable: 1 << 2,
 };
 
-export function TerrainMap({ module, ...props }) {
-	const { state, dispatch } = useModule(module);
+export function TerrainMap({ node, ...props }) {
+	const { state, dispatch } = useModule(node);
 
 	return (
 		<div className="flex flex-col items-center justify-center p-2 m-2 border border-solid rounded border-neutral-200 bg-neutral-50" { ...props }>

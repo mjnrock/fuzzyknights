@@ -3,12 +3,12 @@ import { v4 as uuid } from "uuid";
 export class Network {
 	static Registry = new Map();
 
-	constructor ({ modules = {}, id, $self = {} } = {}) {
+	constructor ({ nodes = {}, id, $self = {} } = {}) {
 		this.id = id || uuid();
-		this.modules = new Map();
+		this.nodes = new Map();
 
-		for(const [ name, module ] of Object.entries(modules)) {
-			this.register(name, module);
+		for(const [ name, node ] of Object.entries(nodes)) {
+			this.register(name, node);
 		}
 
 		for(const [ key, value ] of Object.entries($self)) {
@@ -26,30 +26,32 @@ export class Network {
 		Network.Registry.delete(this.id);
 	}
 
-	register(name, module) {
-		this.modules.set(name, module);
+	register(name, node) {
+		this.nodes.set(name, node);
 
-		module.network = this;
+		node.network = this;
 
 		return this;
 	}
 	unregister(name) {
-		this.modules.delete(name);
+		const node = this.nodes.get(name);
 
-		module.network = null;
+		this.nodes.delete(name);
+
+		node.network = null;
 
 		return this;
 	}
 
 	execute(name, trigger, ...args) {
-		if(!this.modules.has(name)) {
-			throw new Error(`Module ${ name } does not exist`);
+		if(!this.nodes.has(name)) {
+			throw new Error(`Node ${ name } does not exist`);
 		}
 
-		const instance = this.modules.get(name);
+		const instance = this.nodes.get(name);
 
 		if(!instance[ trigger ]) {
-			throw new Error(`Trigger ${ trigger } does not exist on module ${ name }`);
+			throw new Error(`Trigger ${ trigger } does not exist on node ${ name }`);
 		}
 
 		if(trigger === "state") {
@@ -67,11 +69,11 @@ export class Network {
 	}
 
 	query(name, ...args) {
-		if(!this.modules.has(name)) {
-			throw new Error(`Module ${ name } does not exist`);
+		if(!this.nodes.has(name)) {
+			throw new Error(`Node ${ name } does not exist`);
 		}
 
-		const instance = this.modules.get(name);
+		const instance = this.nodes.get(name);
 
 		if(!args.length) return instance.state;
 
@@ -86,11 +88,11 @@ export class Network {
 	}
 
 	dispatch(name, ...args) {
-		if(!this.modules.has(name)) {
-			throw new Error(`Module ${ name } does not exist`);
+		if(!this.nodes.has(name)) {
+			throw new Error(`Node ${ name } does not exist`);
 		}
-		
-		const instance = this.modules.get(name);
+
+		const instance = this.nodes.get(name);
 
 		instance.dispatch(...args);
 
@@ -99,14 +101,14 @@ export class Network {
 
 	/**
 	 * If the primary purpose of the Network's instantiation is functionally to allow
-	 * a "multi-module" context, then this method is a convenience for creating a
+	 * a "multi-node" context, then this method is a convenience for creating a
 	 * Network instance, given a registry of (instantiated) Modules.  It will return
 	 * an object with the original registry, as well as the Network instance, if needed.
 	 */
-	static CreateSimple(modules = {}) {
+	static CreateSimple(nodes = {}) {
 		return {
-			registry: modules,
-			network: new Network({ modules }),
+			registry: nodes,
+			network: new Network({ nodes }),
 		};
 	}
 };
