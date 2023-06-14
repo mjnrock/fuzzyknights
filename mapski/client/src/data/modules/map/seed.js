@@ -1,5 +1,5 @@
-import { Map } from "../../../nodes/map/models/Map.js";
-import { Tile } from "../../../nodes/map/models/Tile.js";
+import { Map } from "../../../modules/map/models/Map.js";
+import { Tile } from "../../../modules/map/models/Tile.js";
 
 import { TerrainMap } from "../../stub/TerrainMap.js";
 

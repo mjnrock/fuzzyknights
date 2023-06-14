@@ -1,7 +1,7 @@
 import { Node } from "../../lib/Node.js";
 import { toObject } from "../../util/copy.js";
 
-import { Seed as MapRandomSeedData } from "../../data/nodes/map/seed.js";
+import { Seed as MapRandomSeedData } from "../../data/modules/map/seed.js";
 
 export const EnumActions = {
 	RESIZE: "RESIZE",
