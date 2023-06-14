@@ -141,7 +141,7 @@ export function TerrainCanvas({ module, ...props }) {
 	}, [ module.state ]);
 
 	return (
-		<div className="p-2 m-2 border border-solid rounded bg-neutral-50 border-neutral-200">
+		<div className="p-2 m-2 border border-solid rounded bg-neutral-100 border-neutral-200">
 			<canvas
 				ref={ canvas }
 				{ ...props }
