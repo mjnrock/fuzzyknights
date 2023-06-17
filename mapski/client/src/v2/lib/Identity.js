@@ -1,10 +1,12 @@
 import { v4 as uuid } from "uuid";
 import { Tags } from "../util/Tags";
 
-// @Schema = {
-// 	[ `$...` ]: <any>,	// Meta data
-// 	[ `...` ]: <any>,	// Data
-// };
+/*
+* @Schema = {
+* 	[ `$...` ]: <any>,	// Meta data
+* 	[ `...` ]: <any>,	// Data
+* };
+*/
 
 export const Identity = (target = {}) => ({
 	Create({ id, tags = [], ...rest } = {}) {

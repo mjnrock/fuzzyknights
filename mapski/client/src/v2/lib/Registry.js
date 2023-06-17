@@ -1,20 +1,22 @@
 import { v4 as uuid, validate } from "uuid";
 
-// @Schema = {
-// 	[ <UUID> ]: <RegistryEntry>({
-// 		type: EnumEntryType.VALUE,
-// 		value: <any>
-// 	}),
-// 	[ Alias<string> ]: <RegistryEntry>({
-// 		type: EnumEntryType.ALIAS,
-// 		value: <UUID>
-// 	}),
-// 	[ Pool<string> ]: <RegistryEntry>({
-// 		type: EnumEntryType.POOL,
-// 		value: <UUID[]>
-// 	}),
-//	...
-// };
+/*
+ * @Schema = {
+* 	[ <UUID> ]: <RegistryEntry>({
+* 		type: EnumEntryType.VALUE,
+* 		value: <any>
+* 	}),
+* 	[ Alias<string> ]: <RegistryEntry>({
+* 		type: EnumEntryType.ALIAS,
+* 		value: <UUID>
+* 	}),
+* 	[ Pool<string> ]: <RegistryEntry>({
+* 		type: EnumEntryType.POOL,
+* 		value: <UUID[]>
+* 	}),
+*	...
+* };
+*/
 
 export const EnumEntryType = {
 	ENTRY: 0,
@@ -33,8 +35,22 @@ export const RegistryEntry = (self = {}) => ({
 });
 
 export const Registry = (self = {}) => ({
+	Create(entries = {}) {
+		if(Array.isArray(entries)) {
+			for(const entry of entries) {
+				Registry(self).register(entry);
+			}
+		} else if(typeof entries === "object") {
+			for(const [ key, value ] of Object.entries(entries)) {
+				let id = Registry(self).register(value);
+				Registry(self).addAlias(id, key);
+			}
+		}
+
+		return self;
+	},
 	register(entry, isIdentity = false) {
-		let id = isIdentity ? entry.$id : uuid();
+		let id = isIdentity || (typeof entry === "object" && entry.$id) ? entry.$id : uuid();
 
 		if(!id) {
 			return false;
@@ -72,6 +88,7 @@ export const Registry = (self = {}) => ({
 		if(!(id in self)) {
 			return false;
 		}
+
 
 		for(const alias of aliases) {
 			self[ alias ] = RegistryEntry().Create({
