@@ -1,6 +1,6 @@
 import { BsEasel, BsBoundingBoxCircles } from "react-icons/bs";
 
-export function TileMapSizing({ data, dispatch }) { 
+export function TileMapSizing({ data, update }) { 
 	return (
 		<div className="p-2 border border-solid rounded bg-neutral-50 border-neutral-200">
 			<div className="flex flex-row gap-2 mb-1">
@@ -10,7 +10,7 @@ export function TileMapSizing({ data, dispatch }) {
 						type="number"
 						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
 						value={ data.columns }
-						onChange={ (e) => dispatch({
+						onChange={ (e) => update({
 							type: "resize",
 							data: [ +e.target.value, data.rows ],
 						}) }
@@ -20,7 +20,7 @@ export function TileMapSizing({ data, dispatch }) {
 						type="number"
 						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
 						value={ data.rows }
-						onChange={ (e) => dispatch({
+						onChange={ (e) => update({
 							type: "resize",
 							data: [ data.columns, +e.target.value ],
 						}) }
@@ -35,7 +35,7 @@ export function TileMapSizing({ data, dispatch }) {
 						type="number"
 						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
 						value={ data.tw }
-						onChange={ (e) => dispatch({
+						onChange={ (e) => update({
 							type: "resizeTile",
 							data: [ +e.target.value, data.th ],
 						}) }
@@ -45,7 +45,7 @@ export function TileMapSizing({ data, dispatch }) {
 						type="number"
 						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
 						value={ data.th }
-						onChange={ (e) => dispatch({
+						onChange={ (e) => update({
 							type: "resizeTile",
 							data: [ data.tw, +e.target.value ],
 						}) }

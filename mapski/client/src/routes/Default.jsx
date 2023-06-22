@@ -21,7 +21,8 @@ export const FunctionRegistry = Registry.Generate(Identity.New(), {
 		// data.columns = columns;
 		// data.rows = rows;
 
-		return TileMapData.Generate(data, {
+		return TileMapData.New({
+			...data,
 			columns,
 			rows,
 		});
@@ -30,7 +31,8 @@ export const FunctionRegistry = Registry.Generate(Identity.New(), {
 		// data.tw = tw;
 		// data.th = th;
 
-		return TileMapData.Generate(data, {
+		return TileMapData.New({
+			...data,
 			tw,
 			th,
 		});
@@ -42,27 +44,29 @@ console.log(FunctionRegistry);
 // console.log(QueryRegistry.getByAlias(DataRegistry, "map"));
 
 export function Default() {
-	const [ snapshot, setSnapshot ] = useState(QueryRegistry.getByAlias(DataRegistry, "map"));
+	const map = () => QueryRegistry.getByAlias(DataRegistry, "map");
+	const [ snapshot, setSnapshot ] = useState(map());
 
-	const dispatch = (msg) => {
+	const dispatch = (type, ...args) => QueryRegistry.getByAlias(FunctionRegistry, type)(snapshot, ...args);
+	const update = (msg) => {
 		let next;
 		if(msg.type === "resize") {
-			next = QueryRegistry.getByAlias(FunctionRegistry, "mapResize")(snapshot, msg.data);
+			next = dispatch("mapResize", msg.data);
 		} else if(msg.type === "resizeTile") {
-			next = QueryRegistry.getByAlias(FunctionRegistry, "mapResizeTile")(snapshot, msg.data);
+			next = dispatch("mapResizeTile", msg.data);
 		}
 
 		WriteRegistry.setByAlias(DataRegistry, "map", next);
 
-		setSnapshot({ ...QueryRegistry.getByAlias(DataRegistry, "map") });
+		setSnapshot(map());
 	};
 
 	// console.log("UPDATE", snapshot)
 
 	return (
 		<>
-			<TileMapSizing data={ snapshot } dispatch={ dispatch } />
-			<TileMapJSX data={ snapshot } dispatch={ dispatch } />
+			<TileMapSizing data={ snapshot } update={ update } />
+			<TileMapJSX data={ snapshot } update={ update } />
 		</>
 	);
 };
