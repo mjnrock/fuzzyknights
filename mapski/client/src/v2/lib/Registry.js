@@ -24,74 +24,84 @@ export const EnumEntryType = {
 	POOL: 2,
 };
 
-export const RegistryEntry = (self = {}) => ({
-	Create({ type, value, ...rest } = {}) {
-		return Object.assign(self, {
+export const RegistryEntry ={
+	Generate(target, { type, value, ...rest } = {}) {
+		return Object.assign(target, {
 			type,
 			value,
 			...rest,
 		});
 	},
-});
+	New({ type, value, ...rest } = {}) {
+		return RegistryEntry.Generate({}, {
+			type,
+			value,
+			...rest,
+		});
+	},
+};
 
-export const Registry = (self = {}) => ({
-	Create(entries = {}) {
+export const Registry = {
+	Generate(target, entries = {}) {
 		if(Array.isArray(entries)) {
 			for(const entry of entries) {
-				Registry(self).register(entry);
+				Registry.register(target, entry);
 			}
 		} else if(typeof entries === "object") {
 			for(const [ key, value ] of Object.entries(entries)) {
-				let id = Registry(self).register(value);
-				Registry(self).addAlias(id, key);
+				let id = Registry.register(target, value);
+				Registry.addAlias(target, id, key);
 			}
 		}
 
-		return self;
+		return target;
 	},
-	register(entry, isIdentity = false) {
+	New(entries = {}) {
+		return Registry.New(entries);
+	},
+	register(target, entry, isIdentity = false) {
 		let id = isIdentity || (typeof entry === "object" && entry.$id) ? entry.$id : uuid();
 
 		if(!id) {
 			return false;
 		}
 
-		self[ id ] = RegistryEntry().Create({
+		target[ id ] = RegistryEntry.New({
 			type: EnumEntryType.ENTRY,
 			value: entry,
 		});
 
 		return id;
 	},
-	unregister(entryOrId) {
+	unregister(target, entryOrId) {
 		let id = validate(entryOrId) ? entryOrId : entryOrId.$id;
 
 		/* iterate over all keys: if id matches key, delete; if id matches value, delete; if value is an array and id is in array, removeFromPool (if pool is now empty, delete) */
-		for(const [ key, value ] of Object.entries(self)) {
+		for(const [ key, value ] of Object.entries(target)) {
 			if(key === id) {
-				delete self[ key ];
+				delete target[ key ];
 			} else if(value.value === id) {
-				delete self[ key ];
+				delete target[ key ];
 			} else if(Array.isArray(value.value) && value.value.includes(id)) {
-				Registry(self).removeFromPool(key, id);
+				Registry.removeFromPool(target, key, id);
 			}
 
 			if(Array.isArray(value.value) && value.value.length === 0) {
-				Registry(self).removePool(key);
+				Registry.removePool(target, key);
 			}
 		}
 
 		return true;
 	},
 
-	addAlias(id, ...aliases) {
-		if(!(id in self)) {
+	addAlias(target, id, ...aliases) {
+		if(!(id in target)) {
 			return false;
 		}
 
 
 		for(const alias of aliases) {
-			self[ alias ] = RegistryEntry().Create({
+			target[ alias ] = RegistryEntry.New({
 				type: EnumEntryType.ALIAS,
 				value: id,
 			});
@@ -99,77 +109,98 @@ export const Registry = (self = {}) => ({
 
 		return true;
 	},
-	removeAlias(id, ...aliases) {
-		if(!(id in self)) {
+	removeAlias(target, id, ...aliases) {
+		if(!(id in target)) {
 			return false;
 		}
 
 		for(const alias of aliases) {
-			delete self[ alias ];
+			delete target[ alias ];
 		}
 
 		return true;
 	},
 
-	addPool(name, ...ids) {
-		self[ name ] = RegistryEntry().Create({
+	addPool(target, name, ...ids) {
+		target[ name ] = RegistryEntry.New({
 			type: EnumEntryType.POOL,
 			value: ids,
 		});
 	},
-	removePool(name) {
-		delete self[ name ];
+	removePool(target, name) {
+		delete target[ name ];
 	},
-	clearPool(name) {
-		self[ name ].value = [];
+	clearPool(target, name) {
+		target[ name ].value = [];
 	},
 
-	addToPool(name, ...ids) {
-		if(!(name in self)) {
+	addToPool(target, name, ...ids) {
+		if(!(name in target)) {
 			return false;
 		}
 
-		self[ name ].value.push(...ids);
+		target[ name ].value.push(...ids);
 
 		return true;
 	},
-	removeFromPool(name, ...ids) {
-		if(!(name in self)) {
+	removeFromPool(target, name, ...ids) {
+		if(!(name in target)) {
 			return false;
 		}
 
-		self[ name ].value = self[ name ].value.filter(id => !ids.includes(id));
+		target[ name ].value = target[ name ].value.filter(id => !ids.includes(id));
 
 		return true;
 	},
-});
+};
 
-export const Query = (self = {}) => ({
-	getById(id) {
-		if(!(id in self)) {
+export const Query = {
+	getById(target, id) {
+		if(!(id in target)) {
 			return;
 		}
 
-		return self[ id ].value;
+		return target[ id ].value;
 	},
-	getByAlias(alias) {
-		if(!(alias in self)) {
+	getByAlias(target, alias) {
+		if(!(alias in target)) {
 			return;
 		}
 
-		return self[ self[ alias ].value ].value;
+		return target[ target[ alias ].value ].value;
 	},
-	getByPool(name, resolve = true) {
-		if(!(name in self)) {
+	getByPool(target, name, resolve = true) {
+		if(!(name in target)) {
 			return;
 		}
 		
 		if(resolve) {
-			return self[ name ].value.map(id => self[ id ].value);
+			return target[ name ].value.map(id => target[ id ].value);
 		} else {
-			return self[ name ].value;
+			return target[ name ].value;
 		}
 	},
-});
+};
+
+export const Write = {
+	setById(target, id, value) {
+		if(!(id in target)) {
+			return false;
+		}
+
+		target[ id ].value = value;
+
+		return true;
+	},
+	setByAlias(target, alias, value) {
+		if(!(alias in target)) {
+			return false;
+		}
+
+		target[ target[ alias ].value ].value = value;
+
+		return true;
+	},
+};
 
 export default Registry;

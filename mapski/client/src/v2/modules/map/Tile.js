@@ -7,35 +7,38 @@
  * }
  */
 
-export const Tile = (self = {}) => ({
-	Create({ x, y, data } = {}) {
-		self.x = x;
-		self.y = y;
-		self.data = data;
+export const Tile = {
+	Generate(target, { x, y, data } = {}) {
+		target.x = x;
+		target.y = y;
+		target.data = data;
 
-		return self;
+		return target;
+	},
+	New({ x, y, data } = {}) {
+		return Tile.Generate({}, { x, y, data });
 	},
 
-	toArray() {
-		return [ self.x, self.y, self.data ];
+	toArray(target) {
+		return [ target.x, target.y, target.data ];
 	},
-	toObject() {
+	toObject(target) {
 		return {
-			x: self.x,
-			y: self.y,
-			data: self.data,
+			x: target.x,
+			y: target.y,
+			data: target.data,
 		};
 	},
-	toJson(...args) {
-		return JSON.stringify(Tile(self).toObject(), ...args);
+	toJson(target, ...args) {
+		return JSON.stringify(Tile.toObject(target), ...args);
 	},
 
 	FromArray([ x, y, data ]) {
-		return Tile.Create({ x, y, data });
+		return Tile.New({ x, y, data });
 	},
 	FromObject({ x, y, data }) {
-		return Tile.Create({ x, y, data });
+		return Tile.New({ x, y, data });
 	},
-});
+};
 
 export default Tile;

@@ -8,8 +8,8 @@ import { Tags } from "../util/Tags";
 * };
 */
 
-export const Identity = (target = {}) => ({
-	Create({ id, tags = [], ...rest } = {}) {
+export const Identity = {
+	Generate(target, { id, tags = [], ...rest } = {}) {
 		target.$id = id || uuid();
 		target.$tags = Tags.ToObject(Tags.From(...tags));
 
@@ -17,12 +17,15 @@ export const Identity = (target = {}) => ({
 
 		return target;
 	},
+	New({ id, tags = [], ...rest } = {}) {
+		return Identity.Generate({}, { id, tags, ...rest });
+	},
 
 	/**
 	 * Collapses the object into a single object, with the meta data
 	 * stored in a $meta object.
 	 */
-	toObject() {
+	toObject(target) {
 		const obj = {
 			$meta: {},
 		};
@@ -37,14 +40,14 @@ export const Identity = (target = {}) => ({
 
 		return obj;
 	},
-	toString(...args) {
+	toString(target, ...args) {
 		return JSON.stringify(target, ...args);
 	},
 
 	/**
 	 * Creates an isoldated object with *only* the meta data.
 	 */
-	toMetaObject() {
+	toMetaObject(target) {
 		const meta = {};
 
 		for(const [ key, value ] of Object.entries(target)) {
@@ -55,9 +58,9 @@ export const Identity = (target = {}) => ({
 
 		return meta;
 	},
-	toMetaString(...args) {
+	toMetaString(target, ...args) {
 		return JSON.stringify(target.toMetaObject(), ...args);
 	},
-});
+};
 
 export default Identity;

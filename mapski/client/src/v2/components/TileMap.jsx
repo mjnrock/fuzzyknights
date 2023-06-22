@@ -25,8 +25,8 @@ export function drawTerrain(canvas, data) {
 
 export function TileMap({ data }) {
 	const canvas = useRef(document.createElement("canvas"));
-	const [ , setRender ] = useState(0);
-
+	const [ render, setRender ] = useState(0);
+	
 	useEffect(() => {
 		if(!canvas.current) return;
 
@@ -35,7 +35,7 @@ export function TileMap({ data }) {
 
 		drawTerrain(canvas.current, data);
 
-		setRender(render => render + 1);
+		setRender(render + 1);
 	}, [ canvas.current, data ]);
 
 	return (
