@@ -9,16 +9,14 @@ import { Tags } from "../util/Tags";
 */
 
 export const Identity = {
-	Generate(target, { id, tags = [], ...rest } = {}) {
+	Next({ id, tags = [], ...target } = {}) {
 		target.$id = id || uuid();
 		target.$tags = Tags.ToObject(Tags.From(...tags));
-
-		Object.assign(target, rest);
 
 		return target;
 	},
 	New({ id, tags = [], ...rest } = {}) {
-		return Identity.Generate({}, { id, tags, ...rest });
+		return Identity.Next({ id, tags, ...rest });
 	},
 
 	/**

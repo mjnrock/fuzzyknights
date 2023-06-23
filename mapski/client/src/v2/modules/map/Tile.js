@@ -8,7 +8,7 @@
  */
 
 export const Tile = {
-	Generate(target, { x, y, data } = {}) {
+	Next({ x, y, data, ...target } = {}) {
 		target.x = x;
 		target.y = y;
 		target.data = data;
@@ -16,7 +16,7 @@ export const Tile = {
 		return target;
 	},
 	New({ x, y, data } = {}) {
-		return Tile.Generate({}, { x, y, data });
+		return Tile.Next({ x, y, data });
 	},
 
 	toArray(target) {

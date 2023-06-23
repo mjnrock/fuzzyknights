@@ -1,20 +1,20 @@
 import React from "react";
 
-import { Generate as GenerateMap } from "../modules/map/main.js";
+import { Next as NextMap } from "../modules/map/main.js";
 import { ViewTileMap } from "../modules/map/view/ViewTileMap.jsx";
 
-import { Generate as GenerateTerrain } from "../modules/terrain/main.js";
+import { Next as NextTerrain } from "../modules/terrain/main.js";
 import { ViewTerrainPicker } from "../modules/terrain/view/ViewTerrainPicker.jsx";
 
-import { Generate as GenerateBrushes } from "../modules/brushes/main.js";
+import { Next as NextBrushes } from "../modules/brushes/main.js";
 
 import { Network } from "../lib/Network.js";
 import ViewPalette from "../modules/brushes/view/ViewPalette.jsx";
 
 export const { registry: Registry1 } = Network.CreateSimple({
-	brushes: GenerateBrushes(),
-	map: GenerateMap(),
-	terrain: GenerateTerrain(),
+	brushes: NextBrushes(),
+	map: NextMap(),
+	terrain: NextTerrain(),
 });
 
 export function EditorRoute() {

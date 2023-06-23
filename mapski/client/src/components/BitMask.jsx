@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export const BitMask = ({ mask, dict }) => {
-	// Generate an array of bits from the mask
+	// Next an array of bits from the mask
 	const bits = Array.from({ length: 8 }, (_, i) => (mask & (1 << i)) !== 0);
 
 	// State for tooltip

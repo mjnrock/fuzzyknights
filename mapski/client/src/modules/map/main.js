@@ -12,7 +12,7 @@ export const EnumActions = {
 	SET_TILE_DATA: "SET_TILE_DATA",
 };
 
-export const Generate = ({ ...args } = {}) => {
+export const Next = ({ ...args } = {}) => {
 	const node = new Node({
 		state: MapRandomSeedData(),
 		reducers: [
@@ -51,7 +51,7 @@ export const Generate = ({ ...args } = {}) => {
 };
 
 export default {
-	Generate,
+	Next,
 	Enum: {
 		Actions: EnumActions,
 	},

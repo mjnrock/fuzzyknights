@@ -23,7 +23,7 @@ export const EnumActions = {
 	POLYGON: "POLYGON",
 };
 
-export const Generate = ({ ...args } = {}) => {
+export const Next = ({ ...args } = {}) => {
 	const node = new Node({
 		state: {
 			brush: EnumActions.PLUS,
@@ -156,7 +156,7 @@ export const Generate = ({ ...args } = {}) => {
 };
 
 export default {
-	Generate,
+	Next,
 	Enum: {
 		Actions: EnumActions,
 	},

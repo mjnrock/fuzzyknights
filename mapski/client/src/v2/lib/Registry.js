@@ -1,4 +1,5 @@
 import { v4 as uuid, validate } from "uuid";
+import Identity from "./Identity";
 
 /*
  * @Schema = {
@@ -25,15 +26,15 @@ export const EnumEntryType = {
 };
 
 export const RegistryEntry ={
-	Generate(target, { type, value, ...rest } = {}) {
-		return Object.assign(target, {
+	Next({ type, value, ...target } = {}) {
+		return {
+			...target,
 			type,
 			value,
-			...rest,
-		});
+		};
 	},
 	New({ type, value, ...rest } = {}) {
-		return RegistryEntry.Generate({}, {
+		return RegistryEntry.Next({
 			type,
 			value,
 			...rest,
@@ -42,7 +43,7 @@ export const RegistryEntry ={
 };
 
 export const Registry = {
-	Generate(target, entries = {}) {
+	Next(target, entries = {}) {
 		if(Array.isArray(entries)) {
 			for(const entry of entries) {
 				Registry.register(target, entry);
@@ -57,7 +58,7 @@ export const Registry = {
 		return target;
 	},
 	New(entries = {}) {
-		return Registry.New(entries);
+		return Registry.Next(Identity.New(), entries);
 	},
 	register(target, entry, isIdentity = false) {
 		let id = isIdentity || (typeof entry === "object" && entry.$id) ? entry.$id : uuid();

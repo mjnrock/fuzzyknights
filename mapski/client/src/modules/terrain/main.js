@@ -18,7 +18,7 @@ export const EnumActions = {
 	SET_TERRAIN_MAP: "SET_TERRAIN_MAP",
 };
 
-export const Generate = ({ ...args } = {}) => {
+export const Next = ({ ...args } = {}) => {
 	const node = new Node({
 		state: {
 			selected: null,
@@ -82,7 +82,7 @@ export const Generate = ({ ...args } = {}) => {
 };
 
 export default {
-	Generate,
+	Next,
 	Enum: {
 		Actions: EnumActions,
 	},

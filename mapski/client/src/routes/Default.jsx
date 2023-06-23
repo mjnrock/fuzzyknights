@@ -7,36 +7,26 @@ import TileMapData from "../v2/modules/map/TileMap";
 import TileMapJSX from "../v2/components/TileMap";
 import TileMapSizing from "../v2/components/TileMapSizing";
 
-export const DataRegistry = Registry.Generate(Identity.New(), {
-	map: TileMapData.New({
+export const DataRegistry = Registry.New({
+	map: TileMapData.Next({
 		columns: 10,
 		rows: 10,
 		tw: 64,
 		th: 64,
-		tileData: (x, y) => Math.floor(Math.random() * 5),
+		tileData: (x, y) => Math.floor(Math.random() * 4),
 	}),
 });
-export const FunctionRegistry = Registry.Generate(Identity.New(), {
-	mapResize: (data, [ columns, rows ]) => {
-		// data.columns = columns;
-		// data.rows = rows;
-
-		return TileMapData.New({
-			...data,
-			columns,
-			rows,
-		});
-	},
-	mapResizeTile: (data, [ tw, th ]) => {
-		// data.tw = tw;
-		// data.th = th;
-
-		return TileMapData.New({
-			...data,
-			tw,
-			th,
-		});
-	},
+export const FunctionRegistry = Registry.New({
+	mapResize: (data, [ columns, rows ]) => TileMapData.Next({
+		...data,
+		columns: Math.max(columns, 1),
+		rows: Math.max(rows, 1),
+	}),
+	mapResizeTile: (data, [ tw, th ]) => TileMapData.Next({
+		...data,
+		tw: Math.max(tw, 1),
+		th: Math.max(th, 1),
+	}),
 });
 
 console.log(FunctionRegistry);
