@@ -1,11 +1,15 @@
 /**
  * The general idea of a "Tag" is a unique term, with optional properties.  As
- * such, a "tag" can is just a string, or it can be a string with property values.
+ * such, a "tag" can be just a string, or it can be a string with property values.
  * 
  * The apparent redundancy of this class is to allow for a more intuitive API,
- * by mapping the methods to the data structure that the represent.  Because this
+ * by mapping the methods to the data structure that they represent.  Because this
  * is a Map, "entries" represent exactly that, and "values" represent the properties
- * of the tags (or the tag itself if it is non-descriptive).
+ * of the tags (or the tag itself if it is "non-descriptive").
+ * 
+ * Importantly, this class allows for dynamic properties, which are properties that
+ * are a "retriever" function.  This allows for the properties to be populated
+ * from external sources (e.g. API, database, etc.).
  */
 export class Tags extends Map {
 	constructor (...tags) {
@@ -14,26 +18,42 @@ export class Tags extends Map {
 		this.add(...tags);
 	}
 
+	/**
+	 * Use this when you want a unique list of tags (names).
+	 */
 	asList() {
 		return Array.from(this.keys());
 	}
+	/**
+	 * Use this when you want a descriptive list of tags (names and values).
+	 * NOTE: If you have dynamic properties, this will *return the functions*.
+	 * Use the "asValues" method if you want the results of the functions.
+	 */
 	asEntries() {
 		return Array.from(this.entries());
 	}
-	asValues(argObj = {}, raw = false) {
+	/**
+	 * This is basically "asEntries", but as if the dynamic properties were
+	 * to be resolved.  If you have no dynamic properties, this will be the
+	 * same as "asEntries", but returning a Promise, instead.
+	 */
+	async asValues(argObj = {}, raw = false) {
 		let results = [];
 
-		this.forEach((value, key) => {
+		for(let [ key, value ] of this.entries()) {
 			if(typeof value === "function" && !raw) {
 				if(key in argObj) {
-					results.push(value(argObj[ key ]));
+					/* If the value is a function and custom arguments have been passed, use them. */
+					results.push(await value(argObj[ key ]));
 				} else {
-					results.push(value());
+					/* If the value is just a function, execute it. */
+					results.push(await value());
 				}
 			} else {
+				/* If raw option is set, or the value is not a function, use it. */
 				results.push(value);
 			}
-		});
+		}
 
 		return results;
 	}
