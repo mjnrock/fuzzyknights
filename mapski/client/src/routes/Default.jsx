@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-
-import Identity from "../v2/lib/Identity";
+import { useNode } from "../v2/lib/react/useNode";
 import Registry, { Query, Query as QueryRegistry, Write as WriteRegistry } from "../v2/lib/Registry";
 
 import TileMapData from "../v2/modules/map/TileMap";
@@ -47,34 +45,6 @@ const node = new Node({
 });
 
 console.log(node)
-
-function useNode(node, map) {
-	const [ state, setState ] = useState(node.state);
-	const dispatch = (msg) => {
-		if(msg.type in map) {
-			const next = map[ msg.type ](state, msg.data);
-
-			if(next !== state) {
-				node.dispatch(next);
-			}
-		}
-	};
-
-	useEffect(() => {
-		const fn = next => setState(next);
-
-		node.addEventListeners(Node.EventTypes.UPDATE, fn);
-
-		return () => {
-			node.removeEventListeners(Node.EventTypes.UPDATE, fn);
-		};
-	}, []);
-
-	return {
-		state,
-		dispatch,
-	};
-}
 
 export function Default() {
 	const { state, dispatch } = useNode(node, Reducers.map);

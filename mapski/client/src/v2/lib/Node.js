@@ -30,20 +30,20 @@ export class Node extends IdentityClass {
 
 	dispatch(...args) {
 		let previous = { ...this.state },
-			next = this.state;
+			current = this.state;
 
 		for(const reducer of this.events.reducers) {
-			next = reducer.call(this, next, ...args);
+			current = reducer.call(this, current, ...args);
 		}
 
-		this.state = { ...next };
-		this.emit(Node.EventTypes.UPDATE, next, previous, this);
+		this.state = { ...current };
+		this.emit(Node.EventTypes.UPDATE, current, previous, this);
 
 		for(const effect of this.events.effects) {
-			effect(next, ...args, this);
+			effect(current, ...args, this);
 		}
 
-		return next;
+		return current;
 	}
 	async dispatchAsync(...args) {
 		let previous = { ...this.state },
