@@ -19,13 +19,13 @@ export const MasterRegistry = Registry.New({
 
 export const Reducers = {
 	map: {
-		resize: (data, [ columns, rows ]) => TileMapData.Next({
-			...data,
+		// Need this in order to seed the added col/rows.
+		resize: (state, [ columns, rows ]) => TileMapData.Next({
+			...state,
 			columns: Math.max(columns, 1),
 			rows: Math.max(rows, 1),
 		}),
-		resizeTile: (data, [ tw, th ]) => TileMapData.Next({
-			...data,
+		resizeTile: (state, [ tw, th ]) => ({
 			tw: Math.max(tw, 1),
 			th: Math.max(th, 1),
 		}),
@@ -35,12 +35,15 @@ export const Reducers = {
 const node = new Node({
 	state: Query.getByAlias(MasterRegistry, "map"),
 	reducers: [
+		// A "merge" reducer -- note that "next" is paradigm dependent (i.e. it's ...args[0] -- if you change the messaging paradigm, you'll need to change this)
 		(state, next) => {
 			return {
 				...state,
 				...next,
 			};
 		},
+		// An "update" reducer
+		// (state, next) => next,
 	]
 });
 
