@@ -156,16 +156,20 @@ export const Registry = {
 };
 
 export const Query = {
-	getById(target, id) {
+	getByKey(target, id) {
 		if(!(id in target)) {
 			return;
 		}
 
 		return target[ id ].value;
 	},
-	getByAlias(target, alias) {
+	getByAlias(target, alias, resolve = true) {
 		if(!(alias in target)) {
 			return;
+		}
+
+		if(!resolve) {
+			return target[ alias ].value;
 		}
 
 		return target[ target[ alias ].value ].value;

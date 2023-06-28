@@ -8,6 +8,35 @@ import { Tags } from "../util/Tags";
 * };
 */
 
+export class IdentityClass {
+	constructor({ id, tags = [], ...rest } = {}) {
+		this.$id = id || uuid();
+		this.$tags = Tags.ToObject(Tags.From(...tags));
+
+		Object.assign(this, rest);
+
+		return this;
+	}
+
+	copy() {
+		return new this.constructor(this);
+	}
+
+	toObject() {
+		return Identity.toObject(this);
+	}
+	toString(...args) {
+		return Identity.toString(this, ...args);
+	}
+
+	toMetaObject() {
+		return Identity.toMetaObject(this);
+	}
+	toMetaString(...args) {
+		return Identity.toMetaString(this, ...args);
+	}
+};
+
 export const Identity = {
 	Next({ id, tags = [], ...target } = {}) {
 		target.$id = id || uuid();
