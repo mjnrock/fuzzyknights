@@ -1,6 +1,14 @@
 import { IdentityClass } from "./Identity";
 
 export class Node extends IdentityClass {
+	static MergeReducer = (state, next) => {
+		return {
+			...state,
+			...next,
+		};
+	};
+	static UpdateReducer = (state, next) => next;
+
 	static EventTypes = {
 		PRE: "pre",
 		INIT: "init",
