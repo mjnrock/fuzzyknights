@@ -1,5 +1,8 @@
 import { Tile } from "./Tile";
 
+// STUB: This is using example data
+import { TerrainDict } from "../../data/example/TerrainMap";
+
 export const TileMap = {
 	Next({ rows, columns, tw, th, tiles, tileData, ...target } = {}) {
 		target.rows = rows;
@@ -12,7 +15,11 @@ export const TileMap = {
 				return tiles[ y ][ x ].data;
 			}
 
-			return Math.floor(Math.random() * 5);
+			// STUB: This is using example data
+			const index = Math.floor(Math.random() * Object.keys(TerrainDict).length);
+			const data = Object.values(TerrainDict)[ index ].type;
+
+			return data;
 		};
 
 		target.tiles = Array(rows).fill().map((_, y) => Array(columns).fill().map((_, x) => Tile.New({

@@ -1,13 +1,15 @@
 import { IdentityClass } from "./Identity";
 
 export class Node extends IdentityClass {
-	static MergeReducer = (state, next) => {
+	/* Some generic helpers for reducers and effects */
+	static MergeReducer = (current, next) => {
 		return {
-			...state,
+			...current,
 			...next,
 		};
 	};
-	static UpdateReducer = (state, next) => next;
+	static UpdateReducer = (current, next) => next;
+	static LogEffect = (self, state) => console.warn(`[@${ self.$id }]:`, state);
 
 	static EventTypes = {
 		PRE: "pre",
@@ -48,27 +50,27 @@ export class Node extends IdentityClass {
 		this.emit(Node.EventTypes.UPDATE, current, previous, this);
 
 		for(const effect of this.events.effects) {
-			effect(current, ...args, this);
+			effect(this, current, ...args);
 		}
 
 		return current;
 	}
 	async dispatchAsync(...args) {
 		let previous = { ...this.state },
-			next = this.state;
+			current = this.state;
 
 		for(const reducer of this.events.reducers) {
-			next = await reducer.call(this, next, previous, ...args);
+			current = await reducer.call(this, current, ...args);
 		}
 
-		this.state = { ...next };
-		this.emit(Node.EventTypes.UPDATE, next, previous, this);
+		this.state = { ...current };
+		this.emit(Node.EventTypes.UPDATE, current, previous, this);
 
 		for(const effect of this.events.effects) {
-			effect(next, ...args, this);
+			effect(this, current, ...args);
 		}
 
-		return next;
+		return current;
 	}
 
 	addReducer(...reducers) {

@@ -2,10 +2,16 @@ import { useNode } from "../v2/lib/react/useNode";
 import Registry, { Query } from "../v2/lib/Registry";
 
 import TileMapData from "../v2/modules/map/TileMap";
-import TileMapJSX from "../v2/components/TileMap";
-import TileMapSizing from "../v2/components/TileMapSizing";
+import Terrain from "../v2/modules/terrain/Terrain";
+
+import TileMapJSX from "../v2/modules/map/components/TileMap";
+import TileMapSizing from "../v2/modules/map/components/TileMapSizing";
+import TerrainMap from "../v2/modules/terrain/components/TerrainMap";
 
 import { Node } from "../v2/lib/Node";
+
+// STUB: This is using example data
+import { TerrainDict, TerrainMapData as TerrainMap_ExampleData } from "../v2/data/example/TerrainMap";
 
 /**
  * The Registry is a global store of all the data in the app.
@@ -25,10 +31,32 @@ export const MasterRegistry = Registry.New({
 			rows: 10,
 			tw: 64,
 			th: 64,
-			tileData: (x, y) => Math.floor(Math.random() * 4),
+			// STUB: This is using example data
+			tileData: (x, y) => {
+				const index = Math.floor(Math.random() * Object.keys(TerrainDict).length);
+				const data = Object.values(TerrainDict)[ index ].type;
+
+				return data;
+			},
 		}),
 		reducers: [
 			Node.MergeReducer,
+		],
+		effects: [
+			Node.LogEffect,
+		],
+	}),
+	terrain: new Node({
+		state: {
+			selected: null,
+			// STUB: This is using example data
+			terrains: TerrainMap_ExampleData,
+		},
+		reducers: [
+			Node.MergeReducer,
+		],
+		effects: [
+			Node.LogEffect,
 		],
 	}),
 });
@@ -57,6 +85,41 @@ export const Reducers = {
 			th: Math.max(th, 1),
 		}),
 	},
+	terrain: {
+		selectTerrain: (state, data) => {
+			return {
+				...state,
+				selected: data,
+			};
+		},
+		setTerrainTexture: (state, data) => {
+			const next = state;
+			const { key, texture } = data;
+
+			const terrain = next.terrains[ key ];
+			next.terrains[ key ] = Terrain.New({
+				...terrain,
+				texture,
+			});
+
+			return {
+				...next,
+			};
+		},
+		setTerrainMap: (state, data) => {
+			const terrains = {};
+			for(const [ key, terrainObj ] of Object.entries(data)) {
+				const terrain = Terrain.New(terrainObj);
+
+				terrains[ key ] = terrain;
+			}
+
+			return {
+				...state,
+				terrains,
+			};
+		},
+	},
 };
 
 export function Default() {
@@ -67,12 +130,19 @@ export function Default() {
 	 * the same reducer, if desired (e.g. multiple maps, multiple players, etc.)
 	 */
 	const { state: map, dispatch: mapDispatch } = useNode(Query.getByAlias(MasterRegistry, "map"), Reducers.map);
+	const { state: terrain, dispatch: terrainDispatch } = useNode(Query.getByAlias(MasterRegistry, "terrain"), Reducers.terrain);
 
 	return (
-		<>
-			<TileMapSizing data={ map } update={ mapDispatch } />
-			<TileMapJSX data={ map } update={ mapDispatch } />
-		</>
+		<div className="flex flex-row">
+			<div className="flex flex-col">
+				<TerrainMap data={ terrain } update={ terrainDispatch } />
+			</div>
+
+			<div className="flex flex-col">
+				<TileMapSizing data={ map } update={ mapDispatch } />
+				<TileMapJSX data={ { map, terrain } } update={ mapDispatch } />
+			</div>
+		</div>
 	);
 };
 
