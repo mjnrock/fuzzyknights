@@ -2,7 +2,7 @@ import { BsEasel, BsBoundingBoxCircles } from "react-icons/bs";
 
 export function TileMapSizing({ data, update }) { 
 	return (
-		<div className="p-2 border border-solid rounded bg-neutral-50 border-neutral-200">
+		<div className="p-2 border border-solid rounded select-none bg-neutral-50 border-neutral-200">
 			<div className="flex flex-row gap-2 mb-1">
 				<BsEasel className="m-auto text-2xl text-gray-400" />
 				<div className="flex flex-row flex-1 text-center">

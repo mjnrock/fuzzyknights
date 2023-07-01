@@ -144,6 +144,45 @@ export class Node extends IdentityClass {
 
 		return this;
 	}
+
+	static Create({ state = {}, events = {}, reducers = [], effects = [], registry, id, tags = [], ...rest } = {}) {
+		return new Node({
+			state,
+			events,
+			reducers,
+			effects,
+			registry,
+			id,
+			tags,
+			...rest,
+		});
+	}
+	static CreateMany(stateObject = {}) {
+		const obj = {};
+		for(const [ key, state ] of Object.entries(stateObject)) {
+			obj[ key ] = Node.Create(state);
+		}
+
+		return obj;
+	}
+
+	static CreateSimple(state = {}) {
+		return new Node({
+			state,
+			reducers: [ Node.MergeReducer ],
+
+			// STUB: Remove this
+			// effects: [ Node.LogEffect ],
+		});
+	}
+	static CreateManySimple(stateObject = {}) {
+		const obj = {};
+		for(const [ key, state ] of Object.entries(stateObject)) {
+			obj[ key ] = Node.CreateSimple(state);
+		}
+
+		return obj;
+	}
 };
 
 export default Node;

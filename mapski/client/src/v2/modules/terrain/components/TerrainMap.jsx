@@ -11,7 +11,7 @@ export const EnumMask = {
 
 export function TerrainMap({ data, update, ...props }) {
 	return (
-		<div className="flex flex-col items-center justify-center p-2 m-2 border border-solid rounded border-neutral-200 bg-neutral-50" { ...props }>
+		<div className="flex flex-col items-center justify-center p-2 m-2 border border-solid rounded select-none border-neutral-200 bg-neutral-50" { ...props }>
 			{
 				Object.keys(data.terrains).map((key, i) => {
 					const terrain = data.terrains[ key ];
