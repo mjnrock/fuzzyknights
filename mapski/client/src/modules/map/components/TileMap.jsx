@@ -191,7 +191,10 @@ export function TileMap({ data, update }) {
 
 
 	return (
-		<div className="p-1 border border-solid rounded shadow border-neutral-200 bg-neutral-50">
+		<div
+		className="p-1 border border-solid rounded shadow border-neutral-200 bg-neutral-50"
+		title="Ctrl+Zoom: Double/Half scale"
+		>
 			<canvas ref={ canvas } />
 		</div>
 	);
