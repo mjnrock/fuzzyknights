@@ -82,7 +82,7 @@ export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 					style={ { backgroundColor: terrain.texture } }
 					onContextMenu={ e => e.preventDefault() }
 					onMouseDown={ handleMouseDown }
-					title="Right-Click preview box to change texture"
+					title="Ctrl+Left: Change texture | Ctrl+Right: Change color"
 				/>
 			) : (
 				<Canvas
@@ -92,7 +92,7 @@ export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 					height={ 64 }
 					onContextMenu={ e => e.preventDefault() }
 					onMouseDown={ handleMouseDown }
-					title="Right-Click preview box to change texture"
+					title="Ctrl+Left: Change texture | Ctrl+Right: Change color"
 				/>
 			) }
 		</>

@@ -321,7 +321,7 @@ export const IMM = (module, message, ...args) => {
 	}
 };
 
-export function Default() {
+export function Editor() {
 	const { state: map, dispatch: mapDispatch } = useNode(NodeRegistry.map, Reducers.map);
 	const { state: terrain, dispatch: terrainDispatch } = useNode(NodeRegistry.terrain, Reducers.terrain);
 	const { state: brushes, dispatch: brushesDispatch } = useNode(NodeRegistry.brushes, Reducers.brushes);
@@ -347,4 +347,4 @@ export function Default() {
 	);
 };
 
-export default Default;
+export default Editor;

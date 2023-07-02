@@ -1,103 +1,83 @@
-import { v4 as uuid } from "uuid";
-import { toObject } from "../util/copy";
+import { IdentityClass } from "./Identity";
 
-export class Node {
+export class Node extends IdentityClass {
+	static MergeReducer = (current, next) => {
+		return {
+			...current,
+			...next,
+		};
+	};
+	static UpdateReducer = (current, next) => next;
+	static LogEffect = (self, state) => console.warn(`[@${ self.$id }]:`, state);
+
 	static EventTypes = {
-		PRE_INIT: "preinit",
+		PRE: "pre",
 		INIT: "init",
-		POST_INIT: "postinit",
-		STATE_CHANGE: "statechange",
+		POST: "post",
+		UPDATE: "update",
 	};
 
-	constructor ({ state = {}, events = {}, config = {}, reducers = [], effects = [], listeners = [], network = null, id, $init, $self = {} } = {}) {
-		this.id = id || uuid();
-		this.network = network;
+	constructor ({ state = {}, events = {}, reducers = {}, effects = [], registry, id, tags = [], ...rest } = {}) {
+		super({ id, tags, ...rest });
 
 		this.state = state;
 		this.events = {
-			reducers: [],
-			effects: [],
-			listeners: [],
-
+			reducers,
+			effects,
 			...events,
 		};
-
-		this.config = {
-			noTrivialUpdates: false,	// Dis/allow a dispatch to force a state change even if the state is the same
-			...config,
-		};
-
-		this.addEventListener(listeners);
-		this.addReducer(...reducers);
-		this.addEffect(...effects);
-
-		if(Array.isArray($init)) {
-			this.init(...$init);
-		}
-
-		for(const [ key, value ] of Object.entries($self)) {
-			this[ key ] = value;
-
-			if(typeof value === "function") {
-				this[ key ] = this[ key ].bind(this);
-			}
-		}
-	}
-
-	$query(...args) {
-		return this.network.query.call(this.network, ...args);
-	}
-	$execute(...args) {
-		return this.network.execute.call(this.network, ...args);
-	}
-	$dispatch(...args) {
-		return this.network.dispatch.call(this.network, ...args);
 	}
 
 	init(...args) {
-		this.emit(Node.EventTypes.PRE_INIT, ...args);
+		this.emit(Node.EventTypes.PRE, ...args);
 		this.emit(Node.EventTypes.INIT, ...args);
-		this.emit(Node.EventTypes.POST_INIT, ...args);
+		this.emit(Node.EventTypes.POST, ...args);
 
 		return this;
 	}
 
-	dispatch(...args) {
-		// let previous = structuredClone(this.state),
-		let previous = { ...this.state },
-			next = this.state;
+	dispatch(action, ...args) {
+		let previous = { ...this.state };
+		let state = this.state;
 
-		for(const reducer of this.events.reducers) {
-			next = reducer(next, ...args, this);
+		if(this.events.reducers[ action ]) {
+			state = this.events.reducers[ action ].call(this, state, ...args);
 		}
-
-		if(this.config.noTrivialUpdates) {
-			if(JSON.stringify(previous) !== JSON.stringify(next)) {
-				this.emit(Node.EventTypes.STATE_CHANGE, next, previous, this);
-			}
-		} else {
-			this.emit(Node.EventTypes.STATE_CHANGE, next, previous, this);
-		}
-
-		this.state = next;
-
-		// const effectState = typeof next === "object" && "clone" in next ? next.clone() : structuredClone(next);
-		const effectState = typeof next === "object" && "clone" in next ? next.clone() : toObject(next);
+		
+		this.state = { ...state };
+		this.emit(Node.EventTypes.UPDATE, state, previous, this);
 
 		for(const effect of this.events.effects) {
-			effect(effectState, ...args, this);
+			effect.call(this, action, state, ...args);
 		}
 
-		return this;
+		return state;
+	}
+	async dispatchAsync(action, ...args) {
+		let previous = { ...this.state };
+		let state = this.state;
+
+		if(this.events.reducers[ action ]) {
+			state = await this.events.reducers[ action ].call(this, state, ...args);
+		}
+
+		this.state = { ...state };
+		this.emit(Node.EventTypes.UPDATE, state, previous, this);
+
+		for(const effect of this.events.effects) {
+			effect.call(this, action, state, ...args);
+		}
+
+		return state;
 	}
 
-	addReducer(...reducers) {
-		this.events.reducers.push(...reducers);
+	addReducer(action, reducer) {
+		this.events.reducers[ action ] = reducer;
 
 		return this;
 	}
-	removeReducer(...reducers) {
-		this.events.reducers = this.events.reducers.filter(reducer => !reducers.includes(reducer));
+	removeReducer(action) {
+		delete this.events.reducers[ action ];
 
 		return this;
 	}
@@ -114,51 +94,92 @@ export class Node {
 	}
 
 	emit(event, ...args) {
-		if(!this.events.listeners[ event ]) {
+		if(!this.events[ event ]) {
 			return;
 		}
 
-		this.events.listeners[ event ].forEach(listener => listener(...args));
+		this.events[ event ].forEach(listener => listener(...args));
 	}
-	addEventListener(event, ...listeners) {
-		if(typeof event === "object") {
-			// Allow for object syntax (e.g. { event: [ listener1, listener2 ], event2: listener3, ... })
-			Object.entries(event).forEach(([ event, listeners ]) => {
-				this.addEventListener(event, ...(Array.isArray(listeners) ? listeners : [ listeners ]));
-			});
-
-			return this;
-		}
-
-		if(!this.events.listeners[ event ]) {
-			this.events.listeners[ event ] = [];
-		}
-
-		this.events.listeners[ event ].push(...listeners);
-
-		return this;
-	}
-	removeEventListener(event, ...listeners) {
-		if(typeof event === "object") {
-			// Allow for object syntax (e.g. { event: [ listener1, listener2 ], event2: listener3, ... })
-			Object.entries(event).forEach(([ event, listeners ]) => {
-				this.removeEventListener(event, ...(Array.isArray(listeners) ? listeners : [ listeners ]));
-			});
-
-			return this;
-		}
-
-		if(!this.events.listeners[ event ]) {
+	async emitAsync(event, ...args) {
+		if(!this.events[ event ]) {
 			return;
 		}
 
-		this.events.listeners[ event ] = this.events.listeners[ event ].filter(listener => !listeners.includes(listener));
+		return Promise.all(this.events[ event ].map(listener => listener(...args)));
+	}
 
-		if(this.events.listeners[ event ].length === 0) {
-			delete this.events.listeners[ event ];
+	addEventListeners(event, ...listeners) {
+		if(!this.events[ event ]) {
+			this.events[ event ] = [];
+		}
+
+		if(typeof event === "object") {
+			for(const [ e, l ] of Object.entries(event)) {
+				this.addEventListeners(e, ...l);
+			}
+		} else {
+			this.events[ event ].push(...listeners);
 		}
 
 		return this;
+	}
+	removeEventListeners(event, ...listeners) {
+		if(!this.events[ event ]) {
+			return;
+		}
+
+		if(typeof event === "object") {
+			for(const [ e, l ] of Object.entries(event)) {
+				this.removeEventListeners(e, ...l);
+			}
+		} else {
+			this.events[ event ] = this.events[ event ].filter(listener => !listeners.includes(listener));
+		}
+
+		if(this.events[ event ].length === 0) {
+			delete this.events[ event ];
+		}
+
+		return this;
+	}
+
+	static Create({ state = {}, events = {}, reducers = {}, effects = [], registry, id, tags = [], ...rest } = {}) {
+		return new Node({
+			state,
+			events,
+			reducers,
+			effects,
+			registry,
+			id,
+			tags,
+			...rest,
+		});
+	}
+	static CreateMany(stateObject = {}) {
+		const obj = {};
+		for(const [ key, state ] of Object.entries(stateObject)) {
+			obj[ key ] = Node.Create(state);
+		}
+
+		return obj;
+	}
+
+	static CreateSimple(state = {}) {
+		return new Node({
+			state,
+			reducers: { 'default': Node.MergeReducer },
+
+			// STUB: Remove this
+			// effects: [ Node.LogEffect ],
+		});
+	}
+	static CreateManySimple(stateObject = {}) {
+		const obj = {};
+		for(const [ key, state ] of Object.entries(stateObject)) {
+			obj[ key ] = Node.CreateSimple(state);
+		}
+
+		return obj;
 	}
 };
 
