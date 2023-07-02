@@ -162,18 +162,20 @@ export function TileMap({ data, update }) {
 		const handleScroll = (e) => {
 			e.preventDefault();
 
-			if(e.deltaY < 0) {
-				// Zoom in
-				mapDispatch({
-					type: "resizeScale",
-					data: [ mapData.sw * 2, mapData.sh * 2 ],
-				});
-			} else {
-				// Zoom out
-				mapDispatch({
-					type: "resizeScale",
-					data: [ mapData.sw / 2, mapData.sh / 2 ],
-				});
+			if(e.ctrlKey) {
+				if(e.deltaY < 0) {
+					// Zoom in
+					mapDispatch({
+						type: "resizeScale",
+						data: [ mapData.sw * 2, mapData.sh * 2 ],
+					});
+				} else {
+					// Zoom out
+					mapDispatch({
+						type: "resizeScale",
+						data: [ mapData.sw / 2, mapData.sh / 2 ],
+					});
+				}
 			}
 		};
 
