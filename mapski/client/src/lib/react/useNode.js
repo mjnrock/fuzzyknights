@@ -8,8 +8,8 @@ export function useNode(node, reducerMap) {
 	};
 
 	useEffect(() => {
-		const updateListener = (event) => {
-			setState(event);
+		const updateListener = (next) => {
+			setState(next);
 		};
 
 		node.addEventListeners(Node.EventTypes.UPDATE, updateListener);

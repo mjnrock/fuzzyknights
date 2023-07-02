@@ -48,7 +48,7 @@ export function TileMap({ data, update }) {
 	}, [ canvas.current, mapData ]);
 
 	useEffect(() => {
-		if(!e) return;
+		if(!e || e.button !== 0) return;
 		const x = Math.floor(e.offsetX / mapData.tw);
 		const y = Math.floor(e.offsetY / mapData.th);
 		const cx = brushesData.x;

@@ -17,15 +17,19 @@ export class Node extends IdentityClass {
 		UPDATE: "update",
 	};
 
-	constructor ({ state = {}, events = {}, reducers = {}, effects = [], registry, id, tags = [], ...rest } = {}) {
+	constructor ({ state = {}, events = {}, reducers = {}, effects = {}, registry, id, tags = [], ...rest } = {}) {
 		super({ id, tags, ...rest });
 
 		this.state = state;
 		this.events = {
 			reducers,
-			effects,
+			effects: {},
 			...events,
 		};
+
+		for(const [ a, e ] of Object.entries(effects)) {
+			this.addEffect(a, ...(Array.isArray(e) ? e : [ e ]));
+		}
 	}
 
 	init(...args) {
@@ -36,6 +40,8 @@ export class Node extends IdentityClass {
 		return this;
 	}
 
+
+
 	dispatch(action, ...args) {
 		let previous = { ...this.state };
 		let state = this.state;
@@ -43,16 +49,19 @@ export class Node extends IdentityClass {
 		if(this.events.reducers[ action ]) {
 			state = this.events.reducers[ action ].call(this, state, ...args);
 		}
-		
+
 		this.state = { ...state };
 		this.emit(Node.EventTypes.UPDATE, state, previous, this);
 
-		for(const effect of this.events.effects) {
-			effect.call(this, action, state, ...args);
+		if(this.events.effects[ action ]) {
+			for(const effect of this.events.effects[ action ]) {
+				effect.call(this, state, ...args);
+			}
 		}
 
 		return state;
 	}
+
 	async dispatchAsync(action, ...args) {
 		let previous = { ...this.state };
 		let state = this.state;
@@ -64,8 +73,10 @@ export class Node extends IdentityClass {
 		this.state = { ...state };
 		this.emit(Node.EventTypes.UPDATE, state, previous, this);
 
-		for(const effect of this.events.effects) {
-			effect.call(this, action, state, ...args);
+		if(this.events.effects[ action ]) {
+			for(const effect of this.events.effects[ action ]) {
+				effect.call(this, state, ...args);
+			}
 		}
 
 		return state;
@@ -76,19 +87,20 @@ export class Node extends IdentityClass {
 
 		return this;
 	}
-	removeReducer(action) {
-		delete this.events.reducers[ action ];
+
+	addEffect(action, ...effects) {
+		if(!this.events.effects[ action ]) {
+			this.events.effects[ action ] = [];
+		}
+		this.events.effects[ action ].push(...effects);
 
 		return this;
 	}
-
-	addEffect(...effects) {
-		this.events.effects.push(...effects);
-
-		return this;
-	}
-	removeEffect(...effects) {
-		this.events.effects = this.events.effects.filter(effect => !effects.includes(effect));
+	removeEffect(action, ...effects) {
+		if(!this.events.effects[ action ]) {
+			return;
+		}
+		this.events.effects[ action ] = this.events.effects[ action ].filter(effect => !effects.includes(effect));
 
 		return this;
 	}
