@@ -10,20 +10,20 @@ export function drawTerrain(canvas, data) {
 		for(let x = 0; x < mapData.columns; x++) {
 			const tile = mapData.tiles[ y ][ x ];
 			const texture = terrainData.terrains[ tile.data ]?.texture;
-			const tx = x * mapData.tw;
-			const ty = y * mapData.th;
+			const tx = x * mapData.tw * mapData.sw;  // apply horizontal scaling
+			const ty = y * mapData.th * mapData.sh;  // apply vertical scaling
 
 			if(texture == null) {
 				ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-				ctx.fillRect(tx, ty, mapData.tw, mapData.th);
+				ctx.fillRect(tx, ty, mapData.tw * mapData.sw, mapData.th * mapData.sh);
 				ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-				ctx.fillRect(tx, ty, mapData.tw / 2, mapData.th / 2);
-				ctx.fillRect(tx + mapData.tw / 2, ty + mapData.th / 2, mapData.tw / 2, mapData.th / 2);
+				ctx.fillRect(tx, ty, mapData.tw * mapData.sw / 2, mapData.th * mapData.sh / 2);
+				ctx.fillRect(tx + mapData.tw * mapData.sw / 2, ty + mapData.th * mapData.sh / 2, mapData.tw * mapData.sw / 2, mapData.th * mapData.sh / 2);
 			} else if(typeof texture === "string") {
-				ctx.fillStyle = texture;	// Color
-				ctx.fillRect(x * mapData.tw, y * mapData.th, mapData.tw, mapData.th);
+				ctx.fillStyle = texture;    // Color
+				ctx.fillRect(x * mapData.tw * mapData.sw, y * mapData.th * mapData.sh, mapData.tw * mapData.sw, mapData.th * mapData.sh);
 			} else if(texture instanceof HTMLCanvasElement || texture instanceof HTMLImageElement) {
-				ctx.drawImage(texture, 0, 0, mapData.tw, mapData.th, tx, ty, mapData.tw, mapData.th);
+				ctx.drawImage(texture, 0, 0, mapData.tw * mapData.sw, mapData.th * mapData.sh, tx, ty, mapData.tw * mapData.sw, mapData.th * mapData.sh);
 			}
 		}
 	}
@@ -31,7 +31,7 @@ export function drawTerrain(canvas, data) {
 
 export function TileMap({ data, update }) {
 	const { map: mapData, terrain: terrainData, brushes: brushesData } = data;
-	const { brushesDispatch } = update;
+	const { mapDispatch, brushesDispatch } = update;
 	const canvas = useRef(document.createElement("canvas"));
 	const [ render, setRender ] = useState(0);
 	const [ e, setLastEvent ] = useState(null);
@@ -39,13 +39,22 @@ export function TileMap({ data, update }) {
 	useEffect(() => {
 		if(!canvas.current) return;
 
-		canvas.current.width = mapData.tw * mapData.columns;
-		canvas.current.height = mapData.th * mapData.rows;
+		if(mapData.autoSize) {
+			// Autosize canvas based on the tile dimensions, count and scaling
+			canvas.current.width = mapData.tw * mapData.columns;
+			canvas.current.height = mapData.th * mapData.rows;
+		} else {
+			// Fixed canvas size
+			canvas.current.width = mapData.width;
+			canvas.current.height = mapData.height;
+		}
 
 		drawTerrain(canvas.current, data);
 
 		setRender(render + 1);
 	}, [ canvas.current, mapData ]);
+
+
 
 	useEffect(() => {
 		if(!e || e.button !== 0) return;
@@ -61,7 +70,7 @@ export function TileMap({ data, update }) {
 
 			if(
 				(e.type === "mouseup" && e.target !== canvas.current)	// Break out of the selection if the mouse is released outside of the canvas
-				|| (e.type === "mouseup" && x === sx && y === sy)		// Ignore selection if the mouse hasn't moved tiles
+				|| (e.type === "mouseup" && x === sx && y === sy)		// Ignore selection if the mouse hasn"t moved tiles
 				|| e.type === "mouseout"
 				|| e.type === "mouseenter"
 			) {
@@ -150,16 +159,39 @@ export function TileMap({ data, update }) {
 	}, [ canvas.current, setLastEvent ]);
 
 	useEffect(() => {
-		canvas.current.width = mapData.tw * mapData.columns;
-		canvas.current.height = mapData.th * mapData.rows;
+		const handleScroll = (e) => {
+			e.preventDefault();
 
-		drawTerrain(canvas.current, data);
-	}, [ mapData ]);
+			if(e.deltaY < 0) {
+				// Zoom in
+				mapDispatch({
+					type: "resizeScale",
+					data: [ mapData.sw * 2, mapData.sh * 2 ],
+				});
+			} else {
+				// Zoom out
+				mapDispatch({
+					type: "resizeScale",
+					data: [ mapData.sw / 2, mapData.sh / 2 ],
+				});
+			}
+		};
+
+		if(!canvas.current) return;
+
+		canvas.current.addEventListener("wheel", handleScroll);
+
+		return () => {
+			if(!canvas.current) return;
+			canvas.current.removeEventListener("wheel", handleScroll);
+		};
+	}, [ canvas.current, mapDispatch, mapData.sw, mapData.sh ]);
+
 
 	return (
-		<>
+		<div className="p-1 border border-solid rounded shadow border-neutral-200 bg-neutral-50">
 			<canvas ref={ canvas } />
-		</>
+		</div>
 	);
 };
 
