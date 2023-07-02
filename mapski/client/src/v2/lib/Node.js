@@ -1,7 +1,6 @@
 import { IdentityClass } from "./Identity";
 
 export class Node extends IdentityClass {
-	/* Some generic helpers for reducers and effects */
 	static MergeReducer = (current, next) => {
 		return {
 			...current,
@@ -18,14 +17,13 @@ export class Node extends IdentityClass {
 		UPDATE: "update",
 	};
 
-	constructor ({ state = {}, events = {}, reducers = [], effects = [], registry, id, tags = [], ...rest } = {}) {
+	constructor ({ state = {}, events = {}, reducers = {}, effects = [], registry, id, tags = [], ...rest } = {}) {
 		super({ id, tags, ...rest });
 
 		this.state = state;
 		this.events = {
 			reducers,
 			effects,
-
 			...events,
 		};
 	}
@@ -38,48 +36,48 @@ export class Node extends IdentityClass {
 		return this;
 	}
 
-	dispatch(...args) {
-		let previous = { ...this.state },
-			current = this.state;
+	dispatch(action, ...args) {
+		let previous = { ...this.state };
+		let state = this.state;
 
-		for(const reducer of this.events.reducers) {
-			current = reducer.call(this, current, ...args);
+		if(this.events.reducers[ action ]) {
+			state = this.events.reducers[ action ].call(this, state, ...args);
 		}
-
-		this.state = { ...current };
-		this.emit(Node.EventTypes.UPDATE, current, previous, this);
+		
+		this.state = { ...state };
+		this.emit(Node.EventTypes.UPDATE, state, previous, this);
 
 		for(const effect of this.events.effects) {
-			effect(this, current, ...args);
+			effect.call(this, action, state, ...args);
 		}
 
-		return current;
+		return state;
 	}
-	async dispatchAsync(...args) {
-		let previous = { ...this.state },
-			current = this.state;
+	async dispatchAsync(action, ...args) {
+		let previous = { ...this.state };
+		let state = this.state;
 
-		for(const reducer of this.events.reducers) {
-			current = await reducer.call(this, current, ...args);
+		if(this.events.reducers[ action ]) {
+			state = await this.events.reducers[ action ].call(this, state, ...args);
 		}
 
-		this.state = { ...current };
-		this.emit(Node.EventTypes.UPDATE, current, previous, this);
+		this.state = { ...state };
+		this.emit(Node.EventTypes.UPDATE, state, previous, this);
 
 		for(const effect of this.events.effects) {
-			effect(this, current, ...args);
+			effect.call(this, action, state, ...args);
 		}
 
-		return current;
+		return state;
 	}
 
-	addReducer(...reducers) {
-		this.events.reducers.push(...reducers);
+	addReducer(action, reducer) {
+		this.events.reducers[ action ] = reducer;
 
 		return this;
 	}
-	removeReducer(...reducers) {
-		this.events.reducers = this.events.reducers.filter(reducer => !reducers.includes(reducer));
+	removeReducer(action) {
+		delete this.events.reducers[ action ];
 
 		return this;
 	}
@@ -145,7 +143,7 @@ export class Node extends IdentityClass {
 		return this;
 	}
 
-	static Create({ state = {}, events = {}, reducers = [], effects = [], registry, id, tags = [], ...rest } = {}) {
+	static Create({ state = {}, events = {}, reducers = {}, effects = [], registry, id, tags = [], ...rest } = {}) {
 		return new Node({
 			state,
 			events,
@@ -169,7 +167,7 @@ export class Node extends IdentityClass {
 	static CreateSimple(state = {}) {
 		return new Node({
 			state,
-			reducers: [ Node.MergeReducer ],
+			reducers: { 'default': Node.MergeReducer },
 
 			// STUB: Remove this
 			// effects: [ Node.LogEffect ],

@@ -17,7 +17,6 @@ export function ViewPalette({ data, update }) {
 					active={ data.brush === "point" }
 					onClick={ e => brushesDispatch({
 						type: "point",
-						data: true,
 					}) }
 				>
 					<BsPen className="text-2xl" />
@@ -26,7 +25,6 @@ export function ViewPalette({ data, update }) {
 					active={ data.brush === "plus" }
 					onClick={ e => brushesDispatch({
 						type: "plus",
-						data: true,
 					}) }
 				>
 					<BsPlus className="text-2xl" />
@@ -47,7 +45,6 @@ export function ViewPalette({ data, update }) {
 						className="flex-1 p-2 text-center text-gray-400 border border-gray-300 border-solid rounded shadow cursor-pointer bg-neutral-50 hover:bg-gray-400 hover:text-neutral-100 active:bg-gray-500"
 						onClick={ e => mapDispatch({
 							type: "randomize",
-							data: true,
 						}) }
 					>
 						<BsDice5 className="mx-auto text-2xl" />
@@ -56,7 +53,6 @@ export function ViewPalette({ data, update }) {
 						className="flex-1 p-2 text-center text-gray-400 border border-gray-300 border-solid rounded shadow cursor-pointer bg-neutral-50 hover:bg-gray-400 hover:text-neutral-100 active:bg-gray-500"
 						onClick={ e => mapDispatch({
 							type: "solidFill",
-							data: true,
 						}) }
 					>
 						<BsPaintBucket className="mx-auto text-2xl" />

@@ -67,7 +67,6 @@ export function TileMap({ data, update }) {
 			) {
 				brushesDispatch({
 					type: "deselect",
-					data: true,
 				});
 				drawTerrain(canvas.current, data);
 

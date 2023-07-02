@@ -14,86 +14,6 @@ import { Node } from "../v2/lib/Node";
 // STUB: This is using example data
 import { TerrainDict, TerrainMapData as TerrainMap_ExampleData } from "../v2/data/example/TerrainMap";
 
-/**
- * The Registry is a global store of all the data in the app.
- * A Node within this context can be thought of as a "slice"
- * of the global state.  Each node is assigned a UUID (typically
- * its own .id property) and can be accessed by that UUID.
- * Optionally, aliases can be assigned to nodes, which can be
- * used to access the node by that alias, instead.  This allows
- * for a more "semantic" approach to accessing data, but can
- * also be expanded to allow for "namespaced" data, as well,
- * or multiple instances of the same data (e.g. map1, map2, etc.)
- */
-// export const MasterRegistry = Registry.New(Node.CreateManySimple({
-// 	map: TileMapData.Next({
-// 		columns: 10,
-// 		rows: 10,
-// 		tw: 64,
-// 		th: 64,
-// 		// STUB: This is using example data
-// 		tileData: (x, y) => {
-// 			const index = Math.floor(Math.random() * Object.keys(TerrainDict).length);
-// 			const data = Object.values(TerrainDict)[ index ].type;
-
-// 			return data;
-// 		},
-// 	}),
-// 	terrain: {
-// 		selected: null,
-// 		// STUB: This is using example data
-// 		terrains: TerrainMap_ExampleData,
-// 	},
-// }));
-export const State = {
-	...Node.CreateManySimple({
-		map: TileMapData.Next({
-			columns: 10,
-			rows: 10,
-			tw: 64,
-			th: 64,
-			// STUB: This is using example data
-			tileData: (x, y) => {
-				const index = Math.floor(Math.random() * Object.keys(TerrainDict).length);
-				const data = Object.values(TerrainDict)[ index ].type;
-
-				return data;
-			},
-		}),
-		terrain: {
-			selected: null,
-			// STUB: This is using example data
-			terrains: TerrainMap_ExampleData,
-		},
-	}),
-	...Node.CreateMany({
-		brushes: {
-			state: {
-				brush: "plus",
-				x: null,
-				y: null,
-				special: 1,
-				theta: 0,
-				selection: null,
-				isActive: false,
-			},
-			effects: [
-				(node, state, next) => {
-					console.log("brushes", state, next);
-
-					//FIXME: Do not allow for stacked reducers, refactor to named reducers only (i.e. no arrays, only objects)
-
-					if(next.type === "move" && state.isActive === true) {
-						dispatch("brushes", {
-							type: "down",
-							data: true,
-						});
-					}
-				},
-			],
-		},
-	}),
-};
 
 /**
  * A reduction namespace is a way to group reducers together
@@ -239,7 +159,7 @@ export const Reducers = {
 			const currentTerrain = State.terrain?.state?.selected || null;	// This assumes that 0 is the null terrain key (i.e. { 0: null }.
 
 			if(state.brush === "eraser") {
-				dispatch("map", {
+				IMM("map", {
 					type: "setTileData",
 					data: {
 						x: state.x,
@@ -248,7 +168,7 @@ export const Reducers = {
 					},
 				});
 			} else if(state.brush === "point") {
-				dispatch("map", {
+				IMM("map", {
 					type: "setTileData",
 					data: {
 						x: state.x,
@@ -266,7 +186,7 @@ export const Reducers = {
 					{ x: x, y: y + 1, data: currentTerrain },
 				];
 
-				dispatch("map", {
+				IMM("map", {
 					type: "setTileData",
 					data: plus,
 				});
@@ -300,7 +220,7 @@ export const Reducers = {
 					}
 				}
 
-				dispatch("map", {
+				IMM("map", {
 					type: "setTileData",
 					data: rectangle,
 				});
@@ -335,34 +255,72 @@ export const Reducers = {
 		}),
 	},
 };
-const Effects = {
-
-};
-const dispatch = (key, msg) => {
-	let next = State[ key ].state;
-	if(Array.isArray(Reducers[ key ])) {
-		/* If an array, iteratively reduce the state */
-		next = Reducers[ key ].reduce((state, reducer) => reducer(state, msg), next);
-	} else if(msg.type in Reducers[ key ]) {
-		/* If an object, use the type as a key to the reducer */
-		next = Reducers[ key ][ msg.type ](next, msg.data);
-	}
-
-	if(next !== State[ key ].state) {
-		State[ key ].dispatch(next);
-	}
-
-	if(Array.isArray(Effects[ key ])) {
-		Effects[ key ].forEach(effect => effect({ ...next }, msg));
-	}
-};
-
 /**
- * The general idea here is that the "update" prop fn receives a { type, data } object,
- * and `dispatch` uses that .type to find a reducer of the same name in the passed map.
- * This is separated into `node` and `reducer maps` so that multiple nodes can share
- * the same reducer, if desired (e.g. multiple maps, multiple players, etc.)
+ * The Registry is a global store of all the data in the app.
+ * A Node within this context can be thought of as a "slice"
+ * of the global state.  Each node is assigned a UUID (typically
+ * its own .id property) and can be accessed by that UUID.
+ * Optionally, aliases can be assigned to nodes, which can be
+ * used to access the node by that alias, instead.  This allows
+ * for a more "semantic" approach to accessing data, but can
+ * also be expanded to allow for "namespaced" data, as well,
+ * or multiple instances of the same data (e.g. map1, map2, etc.)
  */
+export const State = Node.CreateMany({
+	map: {
+		state: TileMapData.Next({
+			columns: 10,
+			rows: 10,
+			tw: 64,
+			th: 64,
+			// STUB: This is using example data
+			tileData: (x, y) => {
+				const index = Math.floor(Math.random() * Object.keys(TerrainDict).length);
+				const data = Object.values(TerrainDict)[ index ].type;
+
+				return data;
+			},
+		}),
+		reducers: Reducers.map,
+	},
+	terrain: {
+		state: {
+			selected: null,
+			// STUB: This is using example data
+			terrains: TerrainMap_ExampleData,
+		},
+		reducers: Reducers.terrain,
+	},
+	brushes: {
+		state: {
+			brush: "plus",
+			x: null,
+			y: null,
+			special: 1,
+			theta: 0,
+			selection: null,
+			isActive: false,
+		},
+		reducers: Reducers.brushes,
+		effects: [
+			function(action, state, ...args) {
+				if(action === "move" && state.isActive === true) {
+					IMM("brushes", {
+						type: "down",
+					});
+				}
+			},
+		],
+	},
+});
+
+export const IMM = (module, message, ...args) => {
+	const node = State[ module ];
+	if(node) {
+		return node.dispatch(message.type, message.data, ...args);
+	}
+};
+
 export function Default() {
 	const { state: map, dispatch: mapDispatch } = useNode(State.map, Reducers.map);
 	const { state: terrain, dispatch: terrainDispatch } = useNode(State.terrain, Reducers.terrain);
