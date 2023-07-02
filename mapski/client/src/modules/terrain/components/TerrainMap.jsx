@@ -1,4 +1,4 @@
-import { BsInfinity } from "react-icons/bs";
+import { BsEraser, BsInfinity } from "react-icons/bs";
 import { TerrainPreview } from "./TerrainPreview";
 import { BitMask } from "../../../components/BitMask";
 
@@ -12,6 +12,19 @@ export const EnumMask = {
 export function TerrainMap({ data, update, ...props }) {
 	return (
 		<div className="flex flex-col items-center justify-center p-2 m-2 border border-solid rounded select-none border-neutral-200 bg-neutral-50" { ...props }>
+			<div
+				className={ `text-neutral-500 w-full flex flex-row items-center justify-center rounded p-2 border border-solid cursor-pointer hover:bg-sky-50 hover:border-sky-200 ` + (data.selected === null ? ` bg-sky-100 border-sky-300` : `border-transparent`) }
+				onClick={ () => {
+					update({
+						type: "selectTerrain",
+						data: null
+					});
+				} }
+			>
+				<BsEraser className="text-2xl" />
+				<div className="ml-2">Eraser</div>
+			</div>
+
 			{
 				Object.keys(data.terrains).map((key, i) => {
 					const terrain = data.terrains[ key ];

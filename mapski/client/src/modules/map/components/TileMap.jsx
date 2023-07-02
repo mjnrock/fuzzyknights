@@ -91,6 +91,8 @@ export function TileMap({ data, update }) {
 				rectHeight = (Math.ceil(ty) - sy) * mapData.th;
 			}
 
+			drawTerrain(canvas.current, data);
+
 			const ctx = canvas.current.getContext("2d");
 			ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
 			ctx.fillRect(startX, startY, rectWidth, rectHeight);
