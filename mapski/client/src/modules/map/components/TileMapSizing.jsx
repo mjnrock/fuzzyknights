@@ -1,4 +1,73 @@
+import { useState } from "react";
 import { BsEasel, BsBoundingBoxCircles, BsAspectRatio, BsArrowsAngleExpand } from "react-icons/bs";
+
+export function ResetToDefault({ update }) {
+	const [ confirmDialogOpen, setConfirmDialogOpen ] = useState(false);
+
+	const handleResetClick = () => {
+		setConfirmDialogOpen(true);
+	};
+
+	const handleConfirmReset = () => {
+		update({
+			type: "merge",
+			data: {
+				columns: 10,
+				rows: 10,
+				tw: 64,
+				th: 64,
+				sw: 1,
+				sh: 1,
+				width: 640,
+				height: 640,
+				autoSize: true,
+			},
+		});
+
+		setConfirmDialogOpen(false);
+	};
+
+	const handleCancelReset = () => {
+		setConfirmDialogOpen(false);
+	};
+
+	return (
+		<>
+			<button
+				type="button"
+				className={ `w-full p-1 ml-2 text-xs border-solid rounded border bg-white text-gray-400 border-gray-300 hover:bg-sky-100 hover:text-sky-500 hover:border-sky-300` }
+				onClick={ handleResetClick }
+			>
+				Reset to Default
+			</button>
+
+			{/* Confirmation Dialog */ }
+			{ confirmDialogOpen && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center">
+					<div className="p-4 bg-white rounded-lg shadow-lg">
+						<p>Are you sure you want to reset to default?</p>
+						<div className="flex justify-end mt-4">
+							<button
+								type="button"
+								className="px-3 py-1 mr-2 text-xs bg-gray-300 rounded hover:bg-gray-400 focus:outline-none"
+								onClick={ handleCancelReset }
+							>
+								Cancel
+							</button>
+							<button
+								type="button"
+								className="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none"
+								onClick={ handleConfirmReset }
+							>
+								Confirm
+							</button>
+						</div>
+					</div>
+				</div>
+			) }
+		</>
+	);
+};
 
 export function TileMapSizing({ data, update }) {
 	return (
@@ -132,8 +201,11 @@ export function TileMapSizing({ data, update }) {
 					>
 						Auto Size
 					</button>
-
 				</div>
+			</div>
+
+			<div className="flex flex-row gap-2 mt-2">
+				<ResetToDefault update={ update } />
 			</div>
 		</div>
 	);

@@ -7,6 +7,12 @@ import { TerrainDict, TerrainMapData } from "./data/TerrainMap";
 
 export const Reducers = {
 	map: {
+		merge: (state, data) => {
+			return TileMapData.Next({
+				...state,
+				...data,
+			});
+		},
 		resize: (state, [ columns, rows ]) => {
 			let { width, height, tw, th, autoSize } = state;
 			if(autoSize) {
