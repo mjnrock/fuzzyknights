@@ -7,15 +7,71 @@ import { TerrainDict, TerrainMapData } from "./data/TerrainMap";
 
 export const Reducers = {
 	map: {
-		resize: (state, [ columns, rows ]) => TileMapData.Next({
-			...state,
-			columns: Math.max(columns, 1),
-			rows: Math.max(rows, 1),
-		}),
-		resizeTile: (state, [ tw, th ]) => ({
-			tw: Math.max(tw, 1),
-			th: Math.max(th, 1),
-		}),
+		merge: (state, data) => {
+			return TileMapData.Next({
+				...state,
+				...data,
+			});
+		},
+		resize: (state, [ columns, rows ]) => {
+			let { width, height, tw, th, autoSize } = state;
+			if(autoSize) {
+				// when autoSize is checked, resize canvas too
+				width = tw * columns;
+				height = th * rows;
+			}
+
+			return TileMapData.Next({
+				...state,
+				columns: Math.max(columns, 1),
+				rows: Math.max(rows, 1),
+				width,
+				height,
+			});
+		},
+		resizeTile: (state, [ tw, th ]) => {
+			let { width, height, columns, rows, autoSize } = state;
+			if(autoSize) {
+				// when autoSize is checked, resize canvas too
+				width = tw * columns;
+				height = th * rows;
+			}
+			return {
+				...state,
+				tw: Math.max(tw, 1),
+				th: Math.max(th, 1),
+				width,
+				height,
+			};
+		},
+		resizeScale: (state, [ sw, sh ]) => {
+			return {
+				...state,
+				sw: Math.min(Math.max(sw, 0.1), 10),
+				sh: Math.min(Math.max(sh, 0.1), 10),
+			};
+		},
+		resizeCanvas: (state, [ width, height ]) => {
+			return {
+				...state,
+				width: Math.max(width, 1),
+				height: Math.max(height, 1),
+			};
+		},
+		toggleAutoSize: (state, autoSize) => {
+			let { width, height, tw, th, columns, rows } = state;
+			if(autoSize) {
+				// when autoSize is checked, resize canvas too
+				width = tw * columns;
+				height = th * rows;
+			}
+			return {
+				...state,
+				width,
+				height,
+				autoSize,
+			};
+		},
 		setTileData: (state, data) => {
 			if(Array.isArray(data)) {
 				const next = { ...state };
@@ -242,6 +298,11 @@ export const State = Node.CreateMany({
 			rows: 10,
 			tw: 64,
 			th: 64,
+			sw: 1.0,
+			sh: 1.0,
+			width: 640,
+			height: 640,
+			autoSize: true,
 			// STUB: This is using example data
 			tileData: (x, y) => {
 				const index = Math.floor(Math.random() * Object.keys(TerrainDict).length);

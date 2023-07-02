@@ -24,9 +24,13 @@ export function Editor() {
 				</div>
 
 				<div className="flex flex-col">
-					<TileMapSizing data={ map } update={ mapDispatch } />
-					<div className="cursor-crosshair">
-						<TileMapJSX data={ { map, terrain, brushes } } update={ { mapDispatch, brushesDispatch } } />
+					<div className="flex flex-row">
+						<TileMapSizing data={ map } update={ mapDispatch } />
+					</div>
+					<div className="flex flex-row">
+						<div className="cursor-crosshair">
+							<TileMapJSX data={ { map, terrain, brushes } } update={ { mapDispatch, brushesDispatch } } />
+						</div>
 					</div>
 				</div>
 			</div>

@@ -1,6 +1,75 @@
-import { BsEasel, BsBoundingBoxCircles } from "react-icons/bs";
+import { useState } from "react";
+import { BsEasel, BsBoundingBoxCircles, BsAspectRatio, BsArrowsAngleExpand } from "react-icons/bs";
 
-export function TileMapSizing({ data, update }) { 
+export function ResetToDefault({ update }) {
+	const [ confirmDialogOpen, setConfirmDialogOpen ] = useState(false);
+
+	const handleResetClick = () => {
+		setConfirmDialogOpen(true);
+	};
+
+	const handleConfirmReset = () => {
+		update({
+			type: "merge",
+			data: {
+				columns: 10,
+				rows: 10,
+				tw: 64,
+				th: 64,
+				sw: 1,
+				sh: 1,
+				width: 640,
+				height: 640,
+				autoSize: true,
+			},
+		});
+
+		setConfirmDialogOpen(false);
+	};
+
+	const handleCancelReset = () => {
+		setConfirmDialogOpen(false);
+	};
+
+	return (
+		<>
+			<button
+				type="button"
+				className={ `w-full p-1 ml-2 text-xs border-solid rounded border bg-white text-gray-400 border-gray-300 hover:bg-sky-100 hover:text-sky-500 hover:border-sky-300` }
+				onClick={ handleResetClick }
+			>
+				Reset to Default
+			</button>
+
+			{/* Confirmation Dialog */ }
+			{ confirmDialogOpen && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center">
+					<div className="p-4 bg-white rounded-lg shadow-lg">
+						<p>Are you sure you want to reset to default?</p>
+						<div className="flex justify-end mt-4">
+							<button
+								type="button"
+								className="px-3 py-1 mr-2 text-xs bg-gray-300 rounded hover:bg-gray-400 focus:outline-none"
+								onClick={ handleCancelReset }
+							>
+								Cancel
+							</button>
+							<button
+								type="button"
+								className="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none"
+								onClick={ handleConfirmReset }
+							>
+								Confirm
+							</button>
+						</div>
+					</div>
+				</div>
+			) }
+		</>
+	);
+};
+
+export function TileMapSizing({ data, update }) {
 	return (
 		<div className="p-2 border border-solid rounded select-none bg-neutral-50 border-neutral-200">
 			<div className="flex flex-row gap-2 mb-1">
@@ -51,6 +120,92 @@ export function TileMapSizing({ data, update }) {
 						}) }
 					/>
 				</div>
+			</div>
+
+			<div className="flex flex-row gap-2 mb-1">
+				<BsAspectRatio className="m-auto text-2xl text-gray-400" />
+				<div className="flex flex-row flex-1 w-5/6 text-center">
+					<input
+						type="number"
+						min={ 0.1 }
+						max={ 10 }
+						step={ 0.1 }
+						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
+						value={ data.sw }
+						onChange={ (e) => update({
+							type: "resizeScale",
+							data: [ +e.target.value, data.sh ],
+						}) }
+					/>
+					<div className="m-auto font-mono text-xs text-gray-400">&nbsp;x&nbsp;</div>
+					<input
+						type="number"
+						min={ 0.1 }
+						max={ 10 }
+						step={ 0.1 }
+						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
+						value={ data.sh }
+						onChange={ (e) => update({
+							type: "resizeScale",
+							data: [ data.sw, +e.target.value ],
+						}) }
+					/>
+				</div>
+				<div className="flex flex-row items-center w-1/6">
+					<button
+						type="button"
+						className="w-full p-1 ml-2 text-xs text-gray-700 bg-white border border-gray-300 border-solid rounded hover:bg-sky-100 hover:text-sky-500 hover:border-sky-300"
+						onClick={ (e) => update({
+							type: "resizeScale",
+							data: [ 1, 1 ]
+						}) }
+					>
+						Reset
+					</button>
+				</div>
+			</div>
+
+			<div className="flex flex-row gap-2 mb-1">
+				<BsArrowsAngleExpand className="m-auto text-2xl text-gray-400" />
+				<div className="flex flex-row flex-1 w-5/6 text-center">
+					<input
+						type="number"
+						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
+						value={ data.width }
+						onChange={ (e) => update({
+							type: "resizeCanvas",
+							data: [ +e.target.value, data.height ],
+						}) }
+						disabled={ data.autoSize }
+					/>
+					<div className="m-auto font-mono text-xs text-gray-400">&nbsp;x&nbsp;</div>
+					<input
+						type="number"
+						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
+						value={ data.height }
+						onChange={ (e) => update({
+							type: "resizeCanvas",
+							data: [ data.width, +e.target.value ],
+						}) }
+						disabled={ data.autoSize }
+					/>
+				</div>
+				<div className="flex flex-row items-center w-1/6">
+					<button
+						type="button"
+						className={ `w-full p-1 ml-2 text-xs border-solid rounded border ${ data.autoSize ? "border-sky-300 text-sky-400 bg-sky-50 hover:bg-neutral-50 hover:text-neutral-500 hover:border-neutral-300" : "bg-white text-gray-400 border-gray-300 hover:bg-sky-100 hover:text-sky-500 hover:border-sky-300" }` }
+						onClick={ (e) => update({
+							type: "toggleAutoSize",
+							data: !data.autoSize
+						}) }
+					>
+						Auto Size
+					</button>
+				</div>
+			</div>
+
+			<div className="flex flex-row gap-2 mt-2">
+				<ResetToDefault update={ update } />
 			</div>
 		</div>
 	);
