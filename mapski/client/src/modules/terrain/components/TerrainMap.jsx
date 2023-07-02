@@ -25,6 +25,8 @@ export function TerrainMap({ data, update, ...props }) {
 				<div className="ml-2">Eraser</div>
 			</div>
 
+			<hr className="w-full my-2 border-neutral-200" />
+
 			{
 				Object.keys(data.terrains).map((key, i) => {
 					const terrain = data.terrains[ key ];
