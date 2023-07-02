@@ -1,11 +1,12 @@
 import { Routes, Route } from "react-router-dom";
 
-import { EditorRoute } from "./routes/EditorRoute.jsx";
+import { Default as DefaultRoute } from "./routes/Default.jsx";
+import { Editor as EditorRoute } from "./routes/Editor.jsx";
 
 export function App() {
 	return (
 		<Routes>
-			{/* <Route index element={ <Router.Default /> } /> */ }
+			<Route index element={ <DefaultRoute /> } />
 			<Route path="editor" element={ <EditorRoute /> } />
 		</Routes>
 	);

@@ -1,11 +1,6 @@
-import { useModule } from "../../../lib/ReactModule";
-import { EnumActions } from "../main";
-
-import { TerrainPreview } from "../components/TerrainPreview";
-
-import { BitMask } from "../../../components/BitMask";
-
 import { BsInfinity } from "react-icons/bs";
+import { TerrainPreview } from "./TerrainPreview";
+import { BitMask } from "../../../components/BitMask";
 
 // STUB: Import from data network
 export const EnumMask = {
@@ -14,22 +9,20 @@ export const EnumMask = {
 	IsHarvestable: 1 << 2,
 };
 
-export function TerrainMap({ module, ...props }) {
-	const { state, dispatch } = useModule(module);
-
+export function TerrainMap({ data, update, ...props }) {
 	return (
-		<div className="flex flex-col items-center justify-center p-2 m-2 border border-solid rounded border-neutral-200 bg-neutral-50" { ...props }>
+		<div className="flex flex-col items-center justify-center p-2 m-2 border border-solid rounded select-none border-neutral-200 bg-neutral-50" { ...props }>
 			{
-				Object.keys(state.terrains).map((key, i) => {
-					const terrain = state.terrains[ key ];
+				Object.keys(data.terrains).map((key, i) => {
+					const terrain = data.terrains[ key ];
 
 					return (
 						<div
 							key={ key }
-							className={ `flex flex-row items-center justify-center rounded p-2 border border-solid cursor-pointer hover:bg-sky-50 hover:border-sky-200 ` + (state.selected === key ? ` bg-sky-100 border-sky-300` : `border-transparent`) }
+							className={ `flex flex-row items-center justify-center rounded p-2 border border-solid cursor-pointer hover:bg-sky-50 hover:border-sky-200 ` + (data.selected === key ? ` bg-sky-100 border-sky-300` : `border-transparent`) }
 							onClick={ () => {
-								dispatch({
-									type: EnumActions.SELECT_TERRAIN,
+								update({
+									type: "selectTerrain",
 									data: key
 								});
 							} }
@@ -37,14 +30,14 @@ export function TerrainMap({ module, ...props }) {
 							<TerrainPreview
 								terrain={ terrain }
 								colorHandler={ (color) => {
-									dispatch({
-										type: EnumActions.SET_TERRAIN_TEXTURE,
+									update({
+										type: "setTerrainTexture",
 										data: { key, texture: color }
 									});
 								} }
 								imageHandler={ (image) => {
-									dispatch({
-										type: EnumActions.SET_TERRAIN_TEXTURE,
+									update({
+										type: "setTerrainTexture",
 										data: { key, texture: image }
 									});
 								} }
