@@ -178,7 +178,7 @@ export const Reducers = {
 	brushes: {
 		deselect: (state, data) => ({
 			...state,
-			special: 1,
+			special: null,
 			isActive: false,
 		}),
 
@@ -212,58 +212,44 @@ export const Reducers = {
 				});
 			} else if(state.brush === "plus") {
 				const { x, y } = state;
-				const plus = [
-					{ x: x, y: y, data: currentTerrain },
-					{ x: x - 1, y: y, data: currentTerrain },
-					{ x: x + 1, y: y, data: currentTerrain },
-					{ x: x, y: y - 1, data: currentTerrain },
-					{ x: x, y: y + 1, data: currentTerrain },
-				];
 
 				IMM("map", {
 					type: "setTileData",
-					data: plus,
+					data: state.brushData.map(([ rx, ry ]) => ({
+						x: x + rx,
+						y: y + ry,
+						data: currentTerrain,
+					})),
 				});
-			} else if(state.brush === "rectangle") {
-				return {
-					...state,
-					special: [ "rectangle", state.x, state.y ]
-				};
 			}
 
-			return {
+			const next = {
 				...state,
 				isActive: true,
 			};
+
+			if(!Array.isArray(state.special)) {
+				next.special = [ state.x, state.y ];
+			}
+
+			return next;
 		},
 
 		up: (state, data) => {
-			if(Array.isArray(state.special)) {
-				const currentTerrain = State.terrain?.state?.selected || null;	// This assumes that 0 is the null terrain key (i.e. { 0: null }.
-				const [ , x, y ] = state.special;
-				const { x: x2, y: y2 } = state;
+			if(state.brush === "rectangle" && state.isActive) {
+				const { x, y, special: [ startX, startY ] } = state;
+				const { brushData } = state;
 
-				const rectangle = [];
-				for(let i = Math.min(x, x2); i <= Math.max(x, x2); i++) {
-					for(let j = Math.min(y, y2); j <= Math.max(y, y2); j++) {
-						rectangle.push({
-							x: i,
-							y: j,
-							data: currentTerrain,
-						});
-					}
-				}
+				const tileData = brushData(x, y, startX, startY).map(([ rx, ry ]) => ({
+					x: rx,
+					y: ry,
+					data: State.terrain?.state?.selected || null,
+				}));
 
 				IMM("map", {
 					type: "setTileData",
-					data: rectangle,
+					data: tileData,
 				});
-
-				return {
-					...state,
-					special: 1,
-					isActive: false,
-				};
 			}
 
 			return {
@@ -275,16 +261,35 @@ export const Reducers = {
 		point: (state, data) => ({
 			...state,
 			brush: "point",
+			brushData: [
+				[ 0, 0 ],
+			],
 		}),
 
 		plus: (state, data) => ({
 			...state,
 			brush: "plus",
+			brushData: [
+				[ 0, 0 ],
+				[ -1, 0 ],
+				[ 1, 0 ],
+				[ 0, -1 ],
+				[ 0, 1 ],
+			]
 		}),
 
 		rectangle: (state, data) => ({
 			...state,
-			special: data.data,
+			brushData: (sx, sy, dx, dy) => {
+				const rectangle = [];
+				for(let i = Math.min(sx, dx); i <= Math.max(sx, dx); i++) {
+					for(let j = Math.min(sy, dy); j <= Math.max(sy, dy); j++) {
+						rectangle.push([ i, j ]);
+					}
+				}
+
+				return rectangle;
+			},
 			brush: "rectangle",
 		}),
 	},
@@ -324,9 +329,15 @@ export const State = Node.CreateMany({
 	brushes: {
 		state: {
 			brush: "plus",
+			brushData: [
+				[ 0, 0 ],
+				[ -1, 0 ],
+				[ 1, 0 ],
+				[ 0, -1 ],
+				[ 0, 1 ],
+			],
 			x: null,
 			y: null,
-			special: 1,
 			theta: 0,
 			selection: null,
 			isActive: false,

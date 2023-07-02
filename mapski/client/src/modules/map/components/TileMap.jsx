@@ -60,51 +60,78 @@ export function TileMap({ data, update }) {
 		if(!e || e.button !== 0) return;
 		const x = Math.floor(e.offsetX / mapData.tw);
 		const y = Math.floor(e.offsetY / mapData.th);
-		const cx = brushesData.x;
-		const cy = brushesData.y;
+		const bx = brushesData.x;
+		const by = brushesData.y;
+		let points = Array.isArray(brushesData.brushData) ? brushesData.brushData.map(([ rx, ry ]) => [ rx + bx, ry + by ]) : [ [ bx, by ] ];
 
-		if(Array.isArray(brushesData.special)) {
-			const [ , sx, sy ] = brushesData.special;
-			const tx = e.offsetX / mapData.tw;
-			const ty = e.offsetY / mapData.th;
-
-			if(
-				(e.type === "mouseup" && e.target !== canvas.current)	// Break out of the selection if the mouse is released outside of the canvas
-				|| (e.type === "mouseup" && x === sx && y === sy)		// Ignore selection if the mouse hasn"t moved tiles
-				|| e.type === "mouseout"
-				|| e.type === "mouseenter"
-			) {
-				brushesDispatch({
-					type: "deselect",
-				});
-				drawTerrain(canvas.current, data);
-
-				return;
-			}
-
-			let startX, startY, rectWidth, rectHeight;
-
-			if(sx > tx) { // Mouse moving left
-				startX = Math.floor(tx) * mapData.tw;
-				rectWidth = (Math.ceil(sx) - Math.floor(tx) + 1) * mapData.tw;
-			} else { // Mouse moving right
-				startX = Math.floor(sx * mapData.tw);
-				rectWidth = (Math.ceil(tx) - sx) * mapData.tw;
-			}
-
-			if(sy > ty) { // Mouse moving up
-				startY = Math.floor(ty) * mapData.th;
-				rectHeight = (Math.ceil(sy) - Math.floor(ty) + 1) * mapData.th;
-			} else { // Mouse moving down
-				startY = Math.floor(sy * mapData.th);
-				rectHeight = (Math.ceil(ty) - sy) * mapData.th;
-			}
-
+		// Break out of the selection if the mouse is released outside of the canvas
+		if(e.type === "mouseup" && e.target !== canvas.current) {
+			brushesDispatch({
+				type: "deselect",
+			});
 			drawTerrain(canvas.current, data);
 
+			return;
+		}
+
+		drawTerrain(canvas.current, data);
+
+		if(typeof brushesData.brushData === "function") {
+			if(brushesData.isActive) {
+				const [ startX, startY ] = brushesData.special;
+				points = brushesData.brushData(startX, startY, x, y);
+			} else {
+				points = brushesData.brushData(x, y, x, y);
+			}
+		} else if(!Array.isArray(points)) {
+			points = [];
+		}
+
+		// create a semi-transparent red square over each point in points
+		for(let [ tx, ty ] of points) {
 			const ctx = canvas.current.getContext("2d");
 			ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-			ctx.fillRect(startX, startY, rectWidth, rectHeight);
+			ctx.fillRect(tx * mapData.tw, ty * mapData.th, mapData.tw, mapData.th);
+		}
+
+		// Create a white line around all edges that don't connect to another point in points
+		for(let [ tx, ty ] of points) {
+			const ctx = canvas.current.getContext("2d");
+			ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+
+			const lineWidth = 2; // Desired line width
+			if(!points.find(([ px, py ]) => px === tx && py === ty - 1)) {
+				ctx.fillRect(
+					tx * mapData.tw,
+					ty * mapData.th - lineWidth / 2,
+					mapData.tw,
+					lineWidth
+				);
+			}
+			if(!points.find(([ px, py ]) => px === tx && py === ty + 1)) {
+				ctx.fillRect(
+					tx * mapData.tw,
+					ty * mapData.th + mapData.th - lineWidth / 2,
+					mapData.tw,
+					lineWidth
+				);
+			}
+			if(!points.find(([ px, py ]) => px === tx - 1 && py === ty)) {
+				ctx.fillRect(
+					tx * mapData.tw - lineWidth / 2,
+					ty * mapData.th,
+					lineWidth,
+					mapData.th
+				);
+			}
+			if(!points.find(([ px, py ]) => px === tx + 1 && py === ty)) {
+				ctx.fillRect(
+					tx * mapData.tw + mapData.tw - lineWidth / 2,
+					ty * mapData.th,
+					lineWidth,
+					mapData.th
+				);
+			}
 		}
 
 		let type;
@@ -128,7 +155,7 @@ export function TileMap({ data, update }) {
 				return;
 		}
 
-		if(type === "move" && x === cx && y === cy) return;
+		if(type === "move" && x === bx && y === by) return;
 		if(type === "up" && e.buttons) return;
 		if(x < 0 || x >= mapData.columns || y < 0 || y >= mapData.rows) return;
 
@@ -142,7 +169,7 @@ export function TileMap({ data, update }) {
 		if(!canvas.current) return;
 		canvas.current.addEventListener("mousemove", setLastEvent);
 		canvas.current.addEventListener("mousedown", setLastEvent);
-		canvas.current.addEventListener("mousedown", setLastEvent);
+		canvas.current.addEventListener("mouseup", setLastEvent);
 		window.addEventListener("mouseup", setLastEvent);
 		canvas.current.addEventListener("mouseout", setLastEvent);
 		canvas.current.addEventListener("mouseenter", setLastEvent);
@@ -151,7 +178,7 @@ export function TileMap({ data, update }) {
 			if(!canvas.current) return;
 			canvas.current.removeEventListener("mousemove", setLastEvent);
 			canvas.current.removeEventListener("mousedown", setLastEvent);
-			canvas.current.removeEventListener("mousedown", setLastEvent);
+			canvas.current.removeEventListener("mouseup", setLastEvent);
 			window.removeEventListener("mouseup", setLastEvent);
 			canvas.current.removeEventListener("mouseout", setLastEvent);
 			canvas.current.removeEventListener("mouseenter", setLastEvent);
@@ -162,18 +189,20 @@ export function TileMap({ data, update }) {
 		const handleScroll = (e) => {
 			e.preventDefault();
 
-			if(e.deltaY < 0) {
-				// Zoom in
-				mapDispatch({
-					type: "resizeScale",
-					data: [ mapData.sw * 2, mapData.sh * 2 ],
-				});
-			} else {
-				// Zoom out
-				mapDispatch({
-					type: "resizeScale",
-					data: [ mapData.sw / 2, mapData.sh / 2 ],
-				});
+			if(e.ctrlKey) {
+				if(e.deltaY < 0) {
+					// Zoom in
+					mapDispatch({
+						type: "resizeScale",
+						data: [ mapData.sw * 2, mapData.sh * 2 ],
+					});
+				} else {
+					// Zoom out
+					mapDispatch({
+						type: "resizeScale",
+						data: [ mapData.sw / 2, mapData.sh / 2 ],
+					});
+				}
 			}
 		};
 
@@ -189,7 +218,10 @@ export function TileMap({ data, update }) {
 
 
 	return (
-		<div className="p-1 border border-solid rounded shadow border-neutral-200 bg-neutral-50">
+		<div
+			className="p-1 border border-solid rounded shadow border-neutral-200 bg-neutral-50"
+			title="Ctrl+Zoom: Double/Half scale"
+		>
 			<canvas ref={ canvas } />
 		</div>
 	);
