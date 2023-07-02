@@ -10,7 +10,6 @@ export const TerrainDict = {
 	SNOW: { type: "SNOW", cost: 2, mask: 1, texture: `#fffafa` },
 };
 
-// STUB
 export const TerrainMapData = {};
 for(const [ key, terrainObj ] of Object.entries(TerrainDict)) {
 	const terrain = Terrain.New(terrainObj);
