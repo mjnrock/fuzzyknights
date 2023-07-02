@@ -5,10 +5,8 @@ import { Node } from "../../lib/Node";
 
 import { TerrainDict, TerrainMapData } from "./data/TerrainMap";
 
-
 export const Reducers = {
 	map: {
-		// Need this in order to seed the added col/rows.
 		resize: (state, [ columns, rows ]) => TileMapData.Next({
 			...state,
 			columns: Math.max(columns, 1),
