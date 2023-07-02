@@ -5,7 +5,10 @@ import { Node } from "../../lib/Node";
 
 import { TerrainDict, TerrainMapData } from "./data/TerrainMap";
 
+import { BsFolder2Open, BsSave } from 'react-icons/bs';
+
 export const Reducers = {
+	menubar: {},
 	map: {
 		merge: (state, data) => {
 			return TileMapData.Next({
@@ -295,8 +298,32 @@ export const Reducers = {
 	},
 };
 
-
 export const State = Node.CreateMany({
+	menubar: {
+		state: {
+			menu: [
+				{
+					name: "File",
+					command: "File",
+					submenu: [
+						{
+							name: "Save",
+							command: "file/save",
+							icon: BsSave,
+							// shortcut: "Ctrl+S",
+						},
+						{
+							name: "Load",
+							command: "file/load",
+							icon: BsFolder2Open,
+							// shortcut: "Ctrl+O",
+						},
+					],
+				},
+			],
+		},
+		reducers: Reducers.menubar,
+	},
 	map: {
 		state: TileMapData.Next({
 			columns: 10,
