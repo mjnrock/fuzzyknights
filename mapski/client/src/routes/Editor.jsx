@@ -14,7 +14,7 @@ export function Editor() {
 	const { state: brushes, dispatch: brushesDispatch } = useNode(State.brushes, Reducers.brushes);
 
 	return (
-		<div className="flex flex-col items-center justify-center w-full h-full gap-2">
+		<div className="flex flex-col gap-2">
 			<div className="flex flex-row items-center justify-center w-full gap-2">
 				<ViewPalette data={ brushes } update={ { mapDispatch, brushesDispatch } } />
 			</div>

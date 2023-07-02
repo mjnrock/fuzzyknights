@@ -56,7 +56,7 @@ export function ResetToDefault({ update }) {
 							</button>
 							<button
 								type="button"
-								className="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none"
+								className="px-3 py-1 text-xs text-white rounded bg-sky-500 hover:bg-sky-600 focus:outline-none"
 								onClick={ handleConfirmReset }
 							>
 								Confirm
