@@ -33,7 +33,6 @@ export function ViewPalette({ data, update }) {
 					active={ data.brush === "rectangle" }
 					onClick={ e => brushesDispatch({
 						type: "rectangle",
-						data: [ "rectangle", data.x, data.y ],
 					}) }
 				>
 					<BsSquare className="text-2xl" />
