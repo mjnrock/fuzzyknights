@@ -10,6 +10,9 @@ import { BsFolder2Open, BsSave } from 'react-icons/bs';
 export const Reducers = {
 	menubar: {},
 	map: {
+		set: (state, data) => {
+			return TileMapData.Next(data);
+		},
 		merge: (state, data) => {
 			return TileMapData.Next({
 				...state,
@@ -151,6 +154,17 @@ export const Reducers = {
 		},
 	},
 	terrain: {
+		set: (state, data) => {
+			return {
+				...data
+			};
+		},
+		merge: (state, data) => {
+			return {
+				...state,
+				...data,
+			};
+		},
 		selectTerrain: (state, data) => {
 			return {
 				...state,

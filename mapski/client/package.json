@@ -34,6 +34,7 @@
 			"react-hooks/exhaustive-deps": "off",
 			"import/no-anonymous-default-export": "off",
 			"no-unused-vars": "off",
+			"no-eval": "off",
 			"array-callback-return": "off"
 		}
 	},
