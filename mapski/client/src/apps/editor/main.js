@@ -142,6 +142,13 @@ export const Reducers = {
 				tiles,
 			};
 		},
+		pan: (state, [ deltaX, deltaY ]) => {
+			return {
+				...state,
+				offsetX: state.offsetX + deltaX,
+				offsetY: state.offsetY + deltaY,
+			};
+		},
 	},
 	terrain: {
 		selectTerrain: (state, data) => {
@@ -335,6 +342,8 @@ export const State = Node.CreateMany({
 			width: 640,
 			height: 640,
 			autoSize: true,
+			offsetX: 0,
+			offsetY: 0,
 			// STUB: This is using example data
 			tileData: (x, y) => {
 				const index = Math.floor(Math.random() * Object.keys(TerrainDict).length);

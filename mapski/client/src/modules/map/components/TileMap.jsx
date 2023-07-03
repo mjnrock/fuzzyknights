@@ -6,28 +6,34 @@ export function drawTerrain(canvas, data) {
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+	const tileWidthScaled = mapData.tw * mapData.sw;   // apply horizontal scaling
+	const tileHeightScaled = mapData.th * mapData.sh;  // apply vertical scaling
+	const tileCenterWidthScaled = tileWidthScaled / 2;
+	const tileCenterHeightScaled = tileHeightScaled / 2;
+
 	for(let y = 0; y < mapData.rows; y++) {
 		for(let x = 0; x < mapData.columns; x++) {
 			const tile = mapData.tiles[ y ][ x ];
 			const texture = terrainData.terrains[ tile.data ]?.texture;
-			const tx = x * mapData.tw * mapData.sw;  // apply horizontal scaling
-			const ty = y * mapData.th * mapData.sh;  // apply vertical scaling
+			const tx = x * tileWidthScaled;
+			const ty = y * tileHeightScaled;
 
 			if(texture == null) {
 				ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-				ctx.fillRect(tx, ty, mapData.tw * mapData.sw, mapData.th * mapData.sh);
+				ctx.fillRect(tx, ty, tileWidthScaled, tileHeightScaled);
 				ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-				ctx.fillRect(tx, ty, mapData.tw * mapData.sw / 2, mapData.th * mapData.sh / 2);
-				ctx.fillRect(tx + mapData.tw * mapData.sw / 2, ty + mapData.th * mapData.sh / 2, mapData.tw * mapData.sw / 2, mapData.th * mapData.sh / 2);
+				ctx.fillRect(tx, ty, tileCenterWidthScaled, tileCenterHeightScaled);
+				ctx.fillRect(tx + tileCenterWidthScaled, ty + tileCenterHeightScaled, tileCenterWidthScaled, tileCenterHeightScaled);
 			} else if(typeof texture === "string") {
 				ctx.fillStyle = texture;    // Color
-				ctx.fillRect(x * mapData.tw * mapData.sw, y * mapData.th * mapData.sh, mapData.tw * mapData.sw, mapData.th * mapData.sh);
+				ctx.fillRect(tx, ty, tileWidthScaled, tileHeightScaled);
 			} else if(texture instanceof HTMLCanvasElement || texture instanceof HTMLImageElement) {
-				ctx.drawImage(texture, 0, 0, mapData.tw * mapData.sw, mapData.th * mapData.sh, tx, ty, mapData.tw * mapData.sw, mapData.th * mapData.sh);
+				ctx.drawImage(texture, 0, 0, tileWidthScaled, tileHeightScaled, tx, ty, tileWidthScaled, tileHeightScaled);
 			}
 		}
 	}
 };
+
 
 export function TileMap({ data, update }) {
 	const { map: mapData, terrain: terrainData, brushes: brushesData } = data;
@@ -58,7 +64,7 @@ export function TileMap({ data, update }) {
 
 	useEffect(() => {
 		if(!e || e.button !== 0) return;
-		const { sw, sh } = mapData;
+		const { sw, sh, columns, rows } = mapData;  // get map dimensions
 		const x = Math.floor(e.offsetX / mapData.tw / sw);
 		const y = Math.floor(e.offsetY / mapData.th / sh);
 		const bx = brushesData.x;
@@ -87,6 +93,9 @@ export function TileMap({ data, update }) {
 		} else if(!Array.isArray(points)) {
 			points = [];
 		}
+
+		// Filter points to make sure they are within map boundaries
+		points = points.filter(([ tx, ty ]) => tx >= 0 && ty >= 0 && tx < columns && ty < rows);
 
 		// create a semi-transparent red square over each point in points
 		for(let [ tx, ty ] of points) {
@@ -223,7 +232,9 @@ export function TileMap({ data, update }) {
 			className="p-1 border border-solid rounded shadow border-neutral-200 bg-neutral-50"
 			title="Ctrl+Zoom: Double/Half scale"
 		>
-			<canvas ref={ canvas } />
+			<canvas
+				ref={ canvas }
+			/>
 		</div>
 	);
 };
