@@ -6,7 +6,7 @@ import { Editor as EditorRoute } from "./routes/Editor.jsx";
 export function App() {
 	return (
 		<Routes>
-			<Route index element={ <DefaultRoute /> } />
+			<Route index element={ <EditorRoute /> } />
 			<Route path="editor" element={ <EditorRoute /> } />
 		</Routes>
 	);
