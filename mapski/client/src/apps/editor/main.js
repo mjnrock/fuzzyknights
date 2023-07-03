@@ -5,8 +5,14 @@ import { Node } from "../../lib/Node";
 
 import { TerrainDict, TerrainMapData } from "./data/TerrainMap";
 
+import { BsFolder2Open, BsSave } from 'react-icons/bs';
+
 export const Reducers = {
+	menubar: {},
 	map: {
+		set: (state, data) => {
+			return TileMapData.Next(data);
+		},
 		merge: (state, data) => {
 			return TileMapData.Next({
 				...state,
@@ -139,8 +145,26 @@ export const Reducers = {
 				tiles,
 			};
 		},
+		pan: (state, [ deltaX, deltaY ]) => {
+			return {
+				...state,
+				offsetX: state.offsetX + deltaX,
+				offsetY: state.offsetY + deltaY,
+			};
+		},
 	},
 	terrain: {
+		set: (state, data) => {
+			return {
+				...data
+			};
+		},
+		merge: (state, data) => {
+			return {
+				...state,
+				...data,
+			};
+		},
 		selectTerrain: (state, data) => {
 			return {
 				...state,
@@ -295,8 +319,32 @@ export const Reducers = {
 	},
 };
 
-
 export const State = Node.CreateMany({
+	menubar: {
+		state: {
+			menu: [
+				{
+					name: "File",
+					command: "File",
+					submenu: [
+						{
+							name: "Save",
+							command: "file/save",
+							icon: BsSave,
+							// shortcut: "Ctrl+S",
+						},
+						{
+							name: "Load",
+							command: "file/load",
+							icon: BsFolder2Open,
+							// shortcut: "Ctrl+O",
+						},
+					],
+				},
+			],
+		},
+		reducers: Reducers.menubar,
+	},
 	map: {
 		state: TileMapData.Next({
 			columns: 10,
@@ -308,6 +356,8 @@ export const State = Node.CreateMany({
 			width: 640,
 			height: 640,
 			autoSize: true,
+			offsetX: 0,
+			offsetY: 0,
 			// STUB: This is using example data
 			tileData: (x, y) => {
 				const index = Math.floor(Math.random() * Object.keys(TerrainDict).length);
