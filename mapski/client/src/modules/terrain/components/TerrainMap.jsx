@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { BsEraser, BsInfinity, BsSearch, BsXCircle } from "react-icons/bs";
+import { BsEraser, BsInfinity, BsSearch, BsXCircle, BsPlusCircleDotted } from "react-icons/bs";
 import { TerrainPreview } from "./TerrainPreview";
 import { BitMask } from "../../../components/BitMask";
+import { TerrainModal } from "./TerrainModal";
 
 // STUB: Import from data network
 export const EnumMask = {
@@ -26,25 +27,52 @@ const SearchBox = ({ search, setSearch, ...props }) => (
 
 export function TerrainMap({ data, update, ...props }) {
 	const [ search, setSearch ] = useState("");
+	const [ isModalOpen, setIsModalOpen ] = useState(false);
 	const terrains = Object.keys(data.terrains).filter(key => {
 		const terrain = data.terrains[ key ];
-		//TODO: Add any additional search criteria here
+		//NOTE: Add any additional search criteria here
 		return terrain.type.toLowerCase().includes(search.toLowerCase());
 	});
 
 	return (
 		<div className="flex flex-col items-center justify-center max-h-screen p-2 border border-solid rounded select-none border-neutral-200 bg-neutral-50" { ...props }>
-			<div
-				className={ `text-neutral-500 w-full flex flex-row items-center justify-center rounded p-2 border border-solid cursor-pointer hover:bg-sky-50 hover:border-sky-200 ` + (data.selected === null ? ` bg-sky-100 border-sky-300` : `border-transparent`) }
-				onClick={ () => {
-					update({
-						type: "selectTerrain",
-						data: null
-					});
-				} }
-			>
-				<BsEraser className="text-2xl" />
-				<div className="ml-2">Eraser</div>
+			<div className="flex flex-row items-center justify-center w-full gap-2">
+				<>
+					<div
+						className="flex flex-row items-center justify-center w-1/6 p-2 border border-transparent border-solid rounded cursor-pointer text-neutral-500 hover:bg-sky-50 hover:text-sky-500 hover:border-sky-200"
+						onClick={ () => setIsModalOpen(true) }
+					>
+						<BsPlusCircleDotted className="text-2xl" />
+					</div>
+					<TerrainModal
+						isOpen={ isModalOpen }
+						setIsOpen={ setIsModalOpen }
+						onSubmit={ (terrain) => {
+							update({
+								type: "addTerrain",
+								data: terrain
+							});
+						} }
+						terrain={ {
+							type: "NEW_TERRAIN",
+							cost: 1,
+							mask: 0,
+							texture: "#000000",
+						} }
+					/>
+				</>
+				<div
+					className={ `w-5/6 text-neutral-500 flex flex-row items-center justify-center rounded p-2 border border-solid cursor-pointer hover:bg-sky-50 hover:border-sky-200 ` + (data.selected === null ? ` bg-sky-100 border-sky-300 text-sky-500` : `border-transparent`) }
+					onClick={ () => {
+						update({
+							type: "selectTerrain",
+							data: null
+						});
+					} }
+				>
+					<BsEraser className="text-2xl" />
+					<div className="ml-2">Eraser</div>
+				</div>
 			</div>
 
 			<hr className="w-full my-2 border-neutral-200" />

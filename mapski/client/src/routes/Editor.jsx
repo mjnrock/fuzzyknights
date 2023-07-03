@@ -12,16 +12,14 @@ import { Reducers, State } from "../apps/editor/main";
 import FileMenu from "../modules/menubar/components/FileMenu";
 import { FileIO } from "../util/FileIO";
 
-
 export function Editor() {
 	const { state: menubar, dispatch: menubarDispatch } = useNode(State.menubar, Reducers.menubar);
 	const { state: map, dispatch: mapDispatch } = useNode(State.map, Reducers.map);
 	const { state: terrain, dispatch: terrainDispatch } = useNode(State.terrain, Reducers.terrain);
 	const { state: brushes, dispatch: brushesDispatch } = useNode(State.brushes, Reducers.brushes);
 
-	//TODO: FileMenu should use events, as these are not state related.  Build out/refine Node event paradigm.
-	//TODO: Create a communication between client and server, and use that to save/load maps.
-
+	//TODO: FileMenu should use events when command patterns are desired.  Build out/refine Node event paradigm.
+	// Once established, move these into events and create an appropriate "emitter" or similar for `useNode`.
 	const saveMap = () => {
 		console.log("Saving map...");
 		const data = {

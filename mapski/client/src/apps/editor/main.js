@@ -165,6 +165,15 @@ export const Reducers = {
 				...data,
 			};
 		},
+		addTerrain: (state, data) => {
+			return {
+				...state,
+				terrains: {
+					...state.terrains,
+					[ data.type ]: Terrain.New(data),
+				},
+			};
+		},
 		selectTerrain: (state, data) => {
 			return {
 				...state,
