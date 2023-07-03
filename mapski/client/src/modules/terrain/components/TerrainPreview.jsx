@@ -78,7 +78,7 @@ export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 			) }
 			{ typeof terrain.texture === "string" ? (
 				<div
-					className="w-16 h-16 m-2 border border-gray-800 border-solid rounded cursor-pointer"
+					className="w-16 h-16 m-2 border border-gray-800 border-solid rounded shadow-md cursor-pointer"
 					style={ { backgroundColor: terrain.texture } }
 					onContextMenu={ e => e.preventDefault() }
 					onMouseDown={ handleMouseDown }
@@ -86,7 +86,7 @@ export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 				/>
 			) : (
 				<Canvas
-					className="m-2 border border-solid rounded cursor-pointer border-neutral-200 hover:border-neutral-300"
+					className="m-2 border border-solid rounded shadow-md cursor-pointer border-neutral-200 hover:border-neutral-300"
 					source={ terrain.texture }
 					width={ 64 }
 					height={ 64 }
