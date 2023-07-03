@@ -58,8 +58,9 @@ export function TileMap({ data, update }) {
 
 	useEffect(() => {
 		if(!e || e.button !== 0) return;
-		const x = Math.floor(e.offsetX / mapData.tw);
-		const y = Math.floor(e.offsetY / mapData.th);
+		const { sw, sh } = mapData;
+		const x = Math.floor(e.offsetX / mapData.tw / sw);
+		const y = Math.floor(e.offsetY / mapData.th / sh);
 		const bx = brushesData.x;
 		const by = brushesData.y;
 		let points = Array.isArray(brushesData.brushData) ? brushesData.brushData.map(([ rx, ry ]) => [ rx + bx, ry + by ]) : [ [ bx, by ] ];
@@ -91,7 +92,7 @@ export function TileMap({ data, update }) {
 		for(let [ tx, ty ] of points) {
 			const ctx = canvas.current.getContext("2d");
 			ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-			ctx.fillRect(tx * mapData.tw, ty * mapData.th, mapData.tw, mapData.th);
+			ctx.fillRect(sw * tx * mapData.tw, sh * ty * mapData.th, sw * mapData.tw, sh * mapData.th);
 		}
 
 		// Create a white line around all edges that don't connect to another point in points
@@ -102,34 +103,34 @@ export function TileMap({ data, update }) {
 			const lineWidth = 2; // Desired line width
 			if(!points.find(([ px, py ]) => px === tx && py === ty - 1)) {
 				ctx.fillRect(
-					tx * mapData.tw,
-					ty * mapData.th - lineWidth / 2,
-					mapData.tw,
-					lineWidth
+					sw * tx * mapData.tw,
+					sh * (ty * mapData.th - lineWidth / 2),
+					sw * mapData.tw,
+					sh * lineWidth
 				);
 			}
 			if(!points.find(([ px, py ]) => px === tx && py === ty + 1)) {
 				ctx.fillRect(
-					tx * mapData.tw,
-					ty * mapData.th + mapData.th - lineWidth / 2,
-					mapData.tw,
-					lineWidth
+					sw * tx * mapData.tw,
+					sh * (ty * mapData.th + mapData.th - lineWidth / 2),
+					sw * mapData.tw,
+					sh * lineWidth
 				);
 			}
 			if(!points.find(([ px, py ]) => px === tx - 1 && py === ty)) {
 				ctx.fillRect(
-					tx * mapData.tw - lineWidth / 2,
-					ty * mapData.th,
-					lineWidth,
-					mapData.th
+					sw * (tx * mapData.tw - lineWidth / 2),
+					sh * ty * mapData.th,
+					sw * lineWidth,
+					sh * mapData.th
 				);
 			}
 			if(!points.find(([ px, py ]) => px === tx + 1 && py === ty)) {
 				ctx.fillRect(
-					tx * mapData.tw + mapData.tw - lineWidth / 2,
-					ty * mapData.th,
-					lineWidth,
-					mapData.th
+					sw * (tx * mapData.tw + mapData.tw - lineWidth / 2),
+					sh * ty * mapData.th,
+					sw * lineWidth,
+					sh * mapData.th
 				);
 			}
 		}
