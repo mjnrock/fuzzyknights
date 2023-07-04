@@ -15,8 +15,9 @@ export function drawTerrain(canvas, data) {
 		for(let x = 0; x < mapData.columns; x++) {
 			const tile = mapData.tiles[ y ][ x ];
 			const texture = terrainData.terrains[ tile.data ]?.texture;
-			const tx = x * tileWidthScaled;
-			const ty = y * tileHeightScaled;
+			const tx = x * tileWidthScaled - mapData.offsetX;   // Apply panning offset
+			const ty = y * tileHeightScaled - mapData.offsetY;  // Apply panning offset
+
 
 			if(texture == null) {
 				ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
@@ -64,9 +65,10 @@ export function TileMap({ data, update }) {
 
 	useEffect(() => {
 		if(!e || e.button !== 0) return;
-		const { sw, sh, columns, rows } = mapData;  // get map dimensions
-		const x = Math.floor(e.offsetX / mapData.tw / sw);
-		const y = Math.floor(e.offsetY / mapData.th / sh);
+		const { sw, sh, columns, rows, offsetX, offsetY, startX, startY } = mapData;  // get map dimensions
+		//NOTE: There's a render speed bugfix here that the "isActive" check resolves
+		const x = ~~(e.offsetX / mapData.tw / sw) + ((brushesData.isActive && brushesData.brush === "pan") ? 0 : ~~(offsetX / mapData.tw / sw));
+		const y = ~~(e.offsetY / mapData.th / sh) + ((brushesData.isActive && brushesData.brush === "pan") ? 0 : ~~(offsetY / mapData.th / sh));
 		const bx = brushesData.x;
 		const by = brushesData.y;
 		let points = Array.isArray(brushesData.brushData) ? brushesData.brushData.map(([ rx, ry ]) => [ rx + bx, ry + by ]) : [ [ bx, by ] ];
@@ -97,52 +99,42 @@ export function TileMap({ data, update }) {
 		// Filter points to make sure they are within map boundaries
 		points = points.filter(([ tx, ty ]) => tx >= 0 && ty >= 0 && tx < columns && ty < rows);
 
-		// create a semi-transparent red square over each point in points
-		for(let [ tx, ty ] of points) {
-			const ctx = canvas.current.getContext("2d");
-			ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-			ctx.fillRect(sw * tx * mapData.tw, sh * ty * mapData.th, sw * mapData.tw, sh * mapData.th);
-		}
+		// Create context only once
+		const ctx = canvas.current.getContext("2d");
 
-		// Create a white line around all edges that don't connect to another point in points
+		// Calculate common values only once
+		const commonWidth = sw * mapData.tw;
+		const commonHeight = sh * mapData.th;
+		const lineWidth = 2; // Desired line width
+		const halfLineWidthSh = sh * lineWidth / 2;
+		const lineWidthSw = sw * lineWidth;
+
 		for(let [ tx, ty ] of points) {
-			const ctx = canvas.current.getContext("2d");
+			// Calculate the scaled width and height at the beginning
+			const scaledWidth = (sw * tx * mapData.tw) - (commonWidth * ~~(offsetX / commonWidth));
+			const scaledHeight = (sh * ty * mapData.th) - (commonHeight * ~~(offsetY / commonHeight));
+
+			// Draw a semi-transparent red square over each point
+			ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+			ctx.fillRect(scaledWidth, scaledHeight, commonWidth, commonHeight);
+
+			// Draw a white line around all edges that don't connect to another point
 			ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
 
-			const lineWidth = 2; // Desired line width
 			if(!points.find(([ px, py ]) => px === tx && py === ty - 1)) {
-				ctx.fillRect(
-					sw * tx * mapData.tw,
-					sh * (ty * mapData.th - lineWidth / 2),
-					sw * mapData.tw,
-					sh * lineWidth
-				);
+				ctx.fillRect(scaledWidth, scaledHeight - halfLineWidthSh, commonWidth, halfLineWidthSh);
 			}
 			if(!points.find(([ px, py ]) => px === tx && py === ty + 1)) {
-				ctx.fillRect(
-					sw * tx * mapData.tw,
-					sh * (ty * mapData.th + mapData.th - lineWidth / 2),
-					sw * mapData.tw,
-					sh * lineWidth
-				);
+				ctx.fillRect(scaledWidth, scaledHeight + commonHeight - halfLineWidthSh, commonWidth, halfLineWidthSh);
 			}
 			if(!points.find(([ px, py ]) => px === tx - 1 && py === ty)) {
-				ctx.fillRect(
-					sw * (tx * mapData.tw - lineWidth / 2),
-					sh * ty * mapData.th,
-					sw * lineWidth,
-					sh * mapData.th
-				);
+				ctx.fillRect(scaledWidth - lineWidthSw / 2, scaledHeight, lineWidthSw, commonHeight);
 			}
 			if(!points.find(([ px, py ]) => px === tx + 1 && py === ty)) {
-				ctx.fillRect(
-					sw * (tx * mapData.tw + mapData.tw - lineWidth / 2),
-					sh * ty * mapData.th,
-					sw * lineWidth,
-					sh * mapData.th
-				);
+				ctx.fillRect(scaledWidth + commonWidth - lineWidthSw / 2, scaledHeight, lineWidthSw, commonHeight);
 			}
 		}
+
 
 		let type;
 		switch(e.type) {
@@ -167,11 +159,27 @@ export function TileMap({ data, update }) {
 
 		if(type === "move" && x === bx && y === by) return;
 		if(type === "up" && e.buttons) return;
-		if(x < 0 || x >= mapData.columns || y < 0 || y >= mapData.rows) return;
+
+		if(x < 0 || x >= mapData.columns || y < 0 || y >= mapData.rows) {
+			if(brushesData.brush === "pan") {
+				// Pan outside of map boundaries
+				// NOOP
+			} else {
+				return;
+			}
+		}
+
+		const ox = ~~(e.offsetX / mapData.tw / sw);
+		const oy = ~~(e.offsetY / mapData.th / sh);
 
 		brushesDispatch({
 			type,
-			data: { x, y },
+			data: {
+				x: brushesData.brush === "pan" ? ox : x,
+				y: brushesData.brush === "pan" ? oy : y,
+				deltaX: x - bx,
+				deltaY: y - by,
+			},
 		});
 	}, [ e ]);
 
@@ -229,7 +237,7 @@ export function TileMap({ data, update }) {
 
 	return (
 		<div
-			className="p-1 border border-solid rounded shadow border-neutral-200 bg-neutral-50"
+			className={ `p-1 border border-solid rounded shadow border-neutral-200 bg-neutral-50 ` + (brushesData.brush === "pan" ? (brushesData.isActive ? "cursor-grabbing" : "cursor-grab") : "cursor-crosshair") }
 			title="Ctrl+Zoom: Double/Half scale"
 		>
 			<canvas
