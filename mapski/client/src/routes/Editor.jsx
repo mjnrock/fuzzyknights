@@ -1,4 +1,4 @@
-import { v4 as uuid } from "uuid";
+import { useEffect } from "react";
 import { useNode } from "../lib/react/useNode";
 
 import TileMapJSX from "../modules/map/components/TileMap";
@@ -17,6 +17,46 @@ export function Editor() {
 	const { state: map, dispatch: mapDispatch } = useNode(State.map, Reducers.map);
 	const { state: terrain, dispatch: terrainDispatch } = useNode(State.terrain, Reducers.terrain);
 	const { state: brushes, dispatch: brushesDispatch } = useNode(State.brushes, Reducers.brushes);
+
+	//TODO: This is effectively an app-level keybind.  Move to a more appropriate location.
+	useEffect(() => {
+		const onKeyDown = e => {
+			if(e.code === "F5" || (e.ctrlKey && e.code === "F5") || e.code === "F12") {
+				return;
+			} else {
+				e.preventDefault();
+			}
+
+			if(e.code === "Space") {
+				brushesDispatch({
+					type: "pan",
+				});
+			} else if(e.code === "KeyP") {
+				brushesDispatch({
+					type: "point",
+				});
+			} else if(e.code === "KeyL") {
+				brushesDispatch({
+					type: "plus",
+				});
+			} else if(e.code === "KeyR") {
+				brushesDispatch({
+					type: "rectangle",
+				});
+			}
+		};
+		const onKeyUp = e => {
+			e.preventDefault();
+		};
+
+		window.addEventListener("keydown", onKeyDown);
+		window.addEventListener("keyup", onKeyUp);
+
+		return () => {
+			window.removeEventListener("keydown", onKeyDown);
+			window.removeEventListener("keyup", onKeyUp);
+		};
+	}, []);
 
 	//TODO: FileMenu should use events when command patterns are desired.  Build out/refine Node event paradigm.
 	// Once established, move these into events and create an appropriate "emitter" or similar for `useNode`.

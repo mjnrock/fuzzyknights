@@ -65,9 +65,10 @@ export function TileMap({ data, update }) {
 
 	useEffect(() => {
 		if(!e || e.button !== 0) return;
-		const { sw, sh, columns, rows, offsetX, offsetY } = mapData;  // get map dimensions
-		const x = ~~(e.offsetX / mapData.tw / sw) + ~~(offsetX / mapData.tw / sw);
-		const y = ~~(e.offsetY / mapData.th / sh) + ~~(offsetY / mapData.th / sh);
+		const { sw, sh, columns, rows, offsetX, offsetY, startX, startY } = mapData;  // get map dimensions
+		//NOTE: There's a render speed bugfix here that the "isActive" check resolves
+		const x = ~~(e.offsetX / mapData.tw / sw) + ((brushesData.isActive && brushesData.brush === "pan") ? 0 : ~~(offsetX / mapData.tw / sw));
+		const y = ~~(e.offsetY / mapData.th / sh) + ((brushesData.isActive && brushesData.brush === "pan") ? 0 : ~~(offsetY / mapData.th / sh));
 		const bx = brushesData.x;
 		const by = brushesData.y;
 		let points = Array.isArray(brushesData.brushData) ? brushesData.brushData.map(([ rx, ry ]) => [ rx + bx, ry + by ]) : [ [ bx, by ] ];
@@ -158,13 +159,24 @@ export function TileMap({ data, update }) {
 
 		if(type === "move" && x === bx && y === by) return;
 		if(type === "up" && e.buttons) return;
-		if(x < 0 || x >= mapData.columns || y < 0 || y >= mapData.rows) return;
+
+		if(x < 0 || x >= mapData.columns || y < 0 || y >= mapData.rows) {
+			if(brushesData.brush === "pan") {
+				// Pan outside of map boundaries
+				// NOOP
+			} else {
+				return;
+			}
+		}
+
+		const ox = ~~(e.offsetX / mapData.tw / sw);
+		const oy = ~~(e.offsetY / mapData.th / sh);
 
 		brushesDispatch({
 			type,
 			data: {
-				x,
-				y,
+				x: brushesData.brush === "pan" ? ox : x,
+				y: brushesData.brush === "pan" ? oy : y,
 				deltaX: x - bx,
 				deltaY: y - by,
 			},

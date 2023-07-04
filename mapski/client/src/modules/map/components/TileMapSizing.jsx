@@ -18,6 +18,8 @@ export function ResetToDefault({ update }) {
 				th: 64,
 				sw: 1,
 				sh: 1,
+				offsetX: 0,
+				offsetY: 0,
 				width: 640,
 				height: 640,
 				autoSize: true,
@@ -200,6 +202,43 @@ export function TileMapSizing({ data, update }) {
 						}) }
 					>
 						Auto Size
+					</button>
+				</div>
+			</div>
+
+			<div className="flex flex-row gap-2 mb-1">
+				<BsArrowsAngleExpand className="m-auto text-2xl text-gray-400" />
+				<div className="flex flex-row flex-1 w-5/6 text-center">
+					<input
+						type="number"
+						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
+						value={ data.offsetX }
+						onChange={ (e) => update({
+							type: "offset",
+							data: [ +e.target.value, data.offsetX ],
+						}) }
+					/>
+					<div className="m-auto font-mono text-xs text-gray-400">&nbsp;x&nbsp;</div>
+					<input
+						type="number"
+						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
+						value={ data.offsetY }
+						onChange={ (e) => update({
+							type: "offset",
+							data: [ data.offsetY, +e.target.value ],
+						}) }
+					/>
+				</div>
+				<div className="flex flex-row items-center w-1/6">
+					<button
+						type="button"
+						className="w-full p-1 ml-2 text-xs text-gray-700 bg-white border border-gray-300 border-solid rounded hover:bg-sky-100 hover:text-sky-500 hover:border-sky-300"
+						onClick={ (e) => update({
+							type: "offset",
+							data: [ 0, 0 ]
+						}) }
+					>
+						Reset
 					</button>
 				</div>
 			</div>

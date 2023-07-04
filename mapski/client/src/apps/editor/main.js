@@ -148,8 +148,15 @@ export const Reducers = {
 		pan: (state, [ deltaX, deltaY ]) => {
 			return {
 				...state,
-				offsetX: (state.offsetX || 0) + (deltaX * state.tw * state.sw * -1),
-				offsetY: (state.offsetY || 0) + (deltaY * state.th * state.sh * -1),
+				offsetX: ~~((state.offsetX || 0) + (deltaX * state.tw * state.sw * -1)),
+				offsetY: ~~((state.offsetY || 0) + (deltaY * state.th * state.sh * -1)),
+			};
+		},
+		offset: (state, [ offsetX, offsetY ]) => {
+			return {
+				...state,
+				offsetX: ~~offsetX || 0,
+				offsetY: ~~offsetY || 0,
 			};
 		},
 	},
@@ -304,8 +311,7 @@ export const Reducers = {
 
 		pan: (state, data) => ({
 			...state,
-			brush: "pan",
-			brushData: [],
+			brush: "pan", 
 		}),
 		point: (state, data) => ({
 			...state,
