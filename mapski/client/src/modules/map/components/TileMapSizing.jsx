@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BsEasel, BsBoundingBoxCircles, BsAspectRatio, BsArrowsAngleExpand } from "react-icons/bs";
+import { BsEasel, BsBoundingBox, BsAspectRatio, BsGrid3X3, BsArrowsMove } from "react-icons/bs";
 
 export function ResetToDefault({ update }) {
 	const [ confirmDialogOpen, setConfirmDialogOpen ] = useState(false);
@@ -74,8 +74,11 @@ export function ResetToDefault({ update }) {
 export function TileMapSizing({ data, update }) {
 	return (
 		<div className="p-2 border border-solid rounded select-none bg-neutral-50 border-neutral-200">
-			<div className="flex flex-row gap-2 mb-1">
-				<BsEasel className="m-auto text-2xl text-gray-400" />
+			<div
+				className="flex flex-row gap-2 mb-1"
+				title="Columns x Rows"
+			>
+				<BsGrid3X3 className="m-auto text-2xl text-gray-400" />
 				<div className="flex flex-row flex-1 text-center">
 					<input
 						type="number"
@@ -99,8 +102,11 @@ export function TileMapSizing({ data, update }) {
 				</div>
 			</div>
 
-			<div className="flex flex-row gap-2 mb-1">
-				<BsBoundingBoxCircles className="m-auto text-2xl text-gray-400" />
+			<div
+				className="flex flex-row gap-2 mb-1"
+				title="Tile Width x Tile Height"
+			>
+				<BsBoundingBox className="m-auto text-2xl text-gray-400" />
 				<div className="flex flex-row flex-1 text-center">
 					<input
 						type="number"
@@ -124,7 +130,52 @@ export function TileMapSizing({ data, update }) {
 				</div>
 			</div>
 
-			<div className="flex flex-row gap-2 mb-1">
+			<div
+				className="flex flex-row gap-2 mb-1"
+				title="Canvas Width x Canvas Height"
+			>
+				<BsEasel className="m-auto text-2xl text-gray-400" />
+				<div className="flex flex-row flex-1 w-5/6 text-center">
+					<input
+						type="number"
+						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
+						value={ data.width }
+						onChange={ (e) => update({
+							type: "resizeCanvas",
+							data: [ +e.target.value, data.height ],
+						}) }
+						disabled={ data.autoSize }
+					/>
+					<div className="m-auto font-mono text-xs text-gray-400">&nbsp;x&nbsp;</div>
+					<input
+						type="number"
+						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
+						value={ data.height }
+						onChange={ (e) => update({
+							type: "resizeCanvas",
+							data: [ data.width, +e.target.value ],
+						}) }
+						disabled={ data.autoSize }
+					/>
+				</div>
+				<div className="flex flex-row items-center w-1/6">
+					<button
+						type="button"
+						className={ `w-full p-1 ml-2 text-xs border-solid rounded border ${ data.autoSize ? "border-sky-300 text-sky-400 bg-sky-50 hover:bg-neutral-50 hover:text-neutral-500 hover:border-neutral-300" : "bg-white text-gray-400 border-gray-300 hover:bg-sky-100 hover:text-sky-500 hover:border-sky-300" }` }
+						onClick={ (e) => update({
+							type: "toggleAutoSize",
+							data: !data.autoSize
+						}) }
+					>
+						Auto Size
+					</button>
+				</div>
+			</div>
+
+			<div
+				className="flex flex-row gap-2 mb-1"
+				title="Scale Width x Scale Height"
+			>
 				<BsAspectRatio className="m-auto text-2xl text-gray-400" />
 				<div className="flex flex-row flex-1 w-5/6 text-center">
 					<input
@@ -167,47 +218,11 @@ export function TileMapSizing({ data, update }) {
 				</div>
 			</div>
 
-			<div className="flex flex-row gap-2 mb-1">
-				<BsArrowsAngleExpand className="m-auto text-2xl text-gray-400" />
-				<div className="flex flex-row flex-1 w-5/6 text-center">
-					<input
-						type="number"
-						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
-						value={ data.width }
-						onChange={ (e) => update({
-							type: "resizeCanvas",
-							data: [ +e.target.value, data.height ],
-						}) }
-						disabled={ data.autoSize }
-					/>
-					<div className="m-auto font-mono text-xs text-gray-400">&nbsp;x&nbsp;</div>
-					<input
-						type="number"
-						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
-						value={ data.height }
-						onChange={ (e) => update({
-							type: "resizeCanvas",
-							data: [ data.width, +e.target.value ],
-						}) }
-						disabled={ data.autoSize }
-					/>
-				</div>
-				<div className="flex flex-row items-center w-1/6">
-					<button
-						type="button"
-						className={ `w-full p-1 ml-2 text-xs border-solid rounded border ${ data.autoSize ? "border-sky-300 text-sky-400 bg-sky-50 hover:bg-neutral-50 hover:text-neutral-500 hover:border-neutral-300" : "bg-white text-gray-400 border-gray-300 hover:bg-sky-100 hover:text-sky-500 hover:border-sky-300" }` }
-						onClick={ (e) => update({
-							type: "toggleAutoSize",
-							data: !data.autoSize
-						}) }
-					>
-						Auto Size
-					</button>
-				</div>
-			</div>
-
-			<div className="flex flex-row gap-2 mb-1">
-				<BsArrowsAngleExpand className="m-auto text-2xl text-gray-400" />
+			<div
+				className="flex flex-row gap-2 mb-1"
+				title="Offset X x Offset Y"
+			>
+				<BsArrowsMove className="m-auto text-2xl text-gray-400" />
 				<div className="flex flex-row flex-1 w-5/6 text-center">
 					<input
 						type="number"
