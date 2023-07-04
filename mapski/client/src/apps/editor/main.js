@@ -148,8 +148,8 @@ export const Reducers = {
 		pan: (state, [ deltaX, deltaY ]) => {
 			return {
 				...state,
-				offsetX: state.offsetX + deltaX,
-				offsetY: state.offsetY + deltaY,
+				offsetX: (state.offsetX || 0) + (deltaX * state.tw * state.sw * -1),
+				offsetY: (state.offsetY || 0) + (deltaY * state.th * state.sh * -1),
 			};
 		},
 	},
@@ -216,10 +216,21 @@ export const Reducers = {
 		}),
 
 		move: (state, data) => {
-			return {
+			const next = {
 				...state,
 				...data,
 			};
+
+			if(state.isActive === true) {
+				if(state.brush === "pan") {
+					IMM("map", {
+						type: "pan",
+						data: [ data.deltaX, data.deltaY ],
+					});
+				}
+			}
+
+			return next;
 		},
 
 		down: (state) => {
@@ -291,6 +302,11 @@ export const Reducers = {
 			};
 		},
 
+		pan: (state, data) => ({
+			...state,
+			brush: "pan",
+			brushData: [],
+		}),
 		point: (state, data) => ({
 			...state,
 			brush: "point",

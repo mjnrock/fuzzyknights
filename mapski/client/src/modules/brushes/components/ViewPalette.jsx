@@ -1,4 +1,4 @@
-import { BsPen, BsPlus, BsSquare, BsDice5, BsPaintBucket } from "react-icons/bs";
+import { BsPen, BsPlus, BsSquare, BsDice5, BsPaintBucket, BsArrowsMove, BsBrush, BsCpu } from "react-icons/bs";
 
 export function Button({ text, active, children, ...props } = {}) {
 	return (
@@ -13,6 +13,15 @@ export function ViewPalette({ data, update }) {
 	return (
 		<div className="flex flex-row items-center justify-center gap-2">
 			<div className="flex flex-row items-center justify-center gap-2 p-2 border border-solid rounded bg-blue-50 border-neutral-200">
+				<BsBrush className="text-2xl text-blue-200" />
+				<Button
+					active={ data.brush === "pan" }
+					onClick={ e => brushesDispatch({
+						type: "pan",
+					}) }
+				>
+					<BsArrowsMove className="text-2xl" />
+				</Button>
 				<Button
 					active={ data.brush === "point" }
 					onClick={ e => brushesDispatch({
@@ -39,6 +48,7 @@ export function ViewPalette({ data, update }) {
 				</Button>
 			</div>
 			<div className="flex flex-row items-center justify-center gap-2 p-2 border border-solid rounded bg-gray-50 border-neutral-200">
+				<BsCpu className="text-2xl text-gray-300" />
 				<div className="flex flex-row gap-2">
 					<div
 						className="flex-1 p-2 text-center text-gray-400 border border-gray-300 border-solid rounded shadow cursor-pointer bg-neutral-50 hover:bg-gray-400 hover:text-neutral-100 active:bg-gray-500"
