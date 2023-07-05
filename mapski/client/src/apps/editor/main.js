@@ -7,6 +7,7 @@ import { TerrainDict, TerrainMapData } from "./data/TerrainMap";
 
 import { BsFolder2Open, BsSave } from "react-icons/bs";
 
+import { CellularAutomata } from "../../util/algorithms/CellularAutomata";
 import { createNoise2D } from "simplex-noise";
 import alea from "alea";
 
@@ -502,6 +503,28 @@ export const State = Node.CreateMany({
 
 					return {
 						data: terrain.type,
+					};
+				},
+				cellularAutomata: (x, y, key, tileMap, state, data, algorithmState) => {
+					if(!algorithmState.map) {
+						const generator = new CellularAutomata(State.map?.state?.columns, State.map?.state?.rows, ...(data?.args || []));
+						const map = generator.generate();
+
+						algorithmState.map = map;
+						algorithmState.lookup = (x, y) => {
+							const value = map[ y ]?.[ x ];
+							if(value) {
+								return value;
+							}
+
+							return null;
+						};
+					}
+					const generator = new CellularAutomata();
+					const map = generator.generate();
+
+					return {
+						data: algorithmState.lookup(x, y) ? TerrainDict.VOID.type : TerrainDict.DIRT.type,
 					};
 				},
 			},
