@@ -520,8 +520,6 @@ export const State = Node.CreateMany({
 							return null;
 						};
 					}
-					const generator = new CellularAutomata();
-					const map = generator.generate();
 
 					return {
 						data: algorithmState.lookup(x, y) ? TerrainDict.VOID.type : TerrainDict.DIRT.type,
