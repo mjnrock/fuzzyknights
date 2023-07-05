@@ -23,30 +23,32 @@ export function Editor() {
 		const onKeyDown = e => {
 			if(e.code === "F5" || (e.ctrlKey && e.code === "F5") || e.code === "F12") {
 				return;
-			} else {
-				e.preventDefault();
 			}
 
-			if(e.code === "Space") {
+			if(e.code === "Space" || e.code === "KeyM") {
+				e.preventDefault();
 				brushesDispatch({
 					type: "pan",
 				});
 			} else if(e.code === "KeyP") {
+				e.preventDefault();
 				brushesDispatch({
 					type: "point",
 				});
 			} else if(e.code === "KeyL") {
+				e.preventDefault();
 				brushesDispatch({
 					type: "plus",
 				});
 			} else if(e.code === "KeyR") {
+				e.preventDefault();
 				brushesDispatch({
 					type: "rectangle",
 				});
 			}
 		};
 		const onKeyUp = e => {
-			e.preventDefault();
+			// e.preventDefault();
 		};
 
 		window.addEventListener("keydown", onKeyDown);

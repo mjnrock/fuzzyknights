@@ -180,29 +180,44 @@ export function TileMapSizing({ data, update }) {
 				<div className="flex flex-row flex-1 w-5/6 text-center">
 					<input
 						type="number"
-						min={ 0.1 }
+						min={ 0.125 }
 						max={ 10 }
-						step={ 0.1 }
+						step={ 1 }
 						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
 						value={ data.sw }
-						onChange={ (e) => update({
-							type: "resizeScale",
-							data: [ +e.target.value, data.sh ],
-						}) }
+						onChange={ (e) => {
+							const currentValue = +e.target.value;
+							const newValue = currentValue < data.sw ? currentValue / 2 : currentValue * 2;
+							if(newValue >= 0.125 && newValue <= 10) {
+								update({
+									type: "resizeScale",
+									data: [ newValue, data.sh ],
+								})
+							}
+						} }
+						disabled={ true }
 					/>
 					<div className="m-auto font-mono text-xs text-gray-400">&nbsp;x&nbsp;</div>
 					<input
 						type="number"
-						min={ 0.1 }
+						min={ 0.125 }
 						max={ 10 }
-						step={ 0.1 }
+						step={ 1 }
 						className="w-full p-2 text-center border border-gray-300 border-solid rounded"
 						value={ data.sh }
-						onChange={ (e) => update({
-							type: "resizeScale",
-							data: [ data.sw, +e.target.value ],
-						}) }
+						onChange={ (e) => {
+							const currentValue = +e.target.value;
+							const newValue = currentValue < data.sh ? currentValue / 2 : currentValue * 2;
+							if(newValue >= 0.125 && newValue <= 10) {
+								update({
+									type: "resizeScale",
+									data: [ data.sw, newValue ],
+								})
+							}
+						} }
+						disabled={ true }
 					/>
+
 				</div>
 				<div className="flex flex-row items-center w-1/6">
 					<button
@@ -230,8 +245,9 @@ export function TileMapSizing({ data, update }) {
 						value={ data.offsetX }
 						onChange={ (e) => update({
 							type: "offset",
-							data: [ +e.target.value, data.offsetX ],
+							data: [ +e.target.value, data.offsetY ],
 						}) }
+						disabled={ true }
 					/>
 					<div className="m-auto font-mono text-xs text-gray-400">&nbsp;x&nbsp;</div>
 					<input
@@ -240,8 +256,9 @@ export function TileMapSizing({ data, update }) {
 						value={ data.offsetY }
 						onChange={ (e) => update({
 							type: "offset",
-							data: [ data.offsetY, +e.target.value ],
+							data: [ data.offsetX, +e.target.value ],
 						}) }
+						disabled={ true }
 					/>
 				</div>
 				<div className="flex flex-row items-center w-1/6">

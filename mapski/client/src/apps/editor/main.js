@@ -37,24 +37,43 @@ export const Reducers = {
 		},
 		resizeTile: (state, [ tw, th ]) => {
 			let { width, height, columns, rows, autoSize } = state;
+			let newTw = Math.max(tw, 1),
+				newTh = Math.max(th, 1);
+
 			if(autoSize) {
 				// when autoSize is checked, resize canvas too
-				width = tw * columns;
-				height = th * rows;
+				width = newTw * columns;
+				height = newTh * rows;
 			}
+
+			if(newTw === state.tw && newTh === state.th) {
+				return state;
+			}
+
 			return {
 				...state,
-				tw: Math.max(tw, 1),
-				th: Math.max(th, 1),
+				offsetX: ~~(state.offsetX - (state.offsetX % (newTw * state.sw))),
+				offsetY: ~~(state.offsetY - (state.offsetY % (newTh * state.sh))),
+				tw: newTw,
+				th: newTh,
 				width,
 				height,
 			};
 		},
 		resizeScale: (state, [ sw, sh ]) => {
+			let newSw = Math.min(Math.max(sw, 0.125), 10),
+				newSh = Math.min(Math.max(sh, 0.125), 10);
+
+			if(newSw === state.sw && newSh === state.sh) {
+				return state;
+			}
+
 			return {
 				...state,
-				sw: Math.min(Math.max(sw, 0.1), 10),
-				sh: Math.min(Math.max(sh, 0.1), 10),
+				offsetX: ~~(state.offsetX - (state.offsetX % (state.tw * newSw))),
+				offsetY: ~~(state.offsetY - (state.offsetY % (state.th * newSh))),
+				sw: newSw,
+				sh: newSh,
 			};
 		},
 		resizeCanvas: (state, [ width, height ]) => {
@@ -146,19 +165,46 @@ export const Reducers = {
 			};
 		},
 		pan: (state, [ deltaX, deltaY ]) => {
+			let newOffsetX = (state.offsetX || 0) + (deltaX * state.tw * state.sw * -1);
+			let newOffsetY = (state.offsetY || 0) + (deltaY * state.th * state.sh * -1);
+
+			// Calculate the residuals
+			let residualX = newOffsetX % (state.tw * state.sw);
+			let residualY = newOffsetY % (state.th * state.sh);
+
+			// Adjust for the residuals if they exist
+			if(residualX !== 0) {
+				newOffsetX += residualX * state.sw * Math.sign(deltaX);
+			}
+			if(residualY !== 0) {
+				newOffsetY += residualY * state.sh * Math.sign(deltaY);
+			}
+
 			return {
 				...state,
-				offsetX: ~~((state.offsetX || 0) + (deltaX * state.tw * state.sw * -1)),
-				offsetY: ~~((state.offsetY || 0) + (deltaY * state.th * state.sh * -1)),
+				offsetX: ~~newOffsetX,
+				offsetY: ~~newOffsetY,
 			};
 		},
-		offset: (state, [ offsetX, offsetY ]) => {
+		offset: (state, [ offsetX, offsetY, alignToTiles = false ]) => {
+			let newOffsetX = offsetX || 0;
+			let newOffsetY = offsetY || 0;
+
+			if(alignToTiles) {
+				return {
+					...state,
+					offsetX: ~~(newOffsetX - (newOffsetX % (state.tw * state.sw))),
+					offsetY: ~~(newOffsetY - (newOffsetY % (state.th * state.sh))),
+				};
+			}
+
 			return {
 				...state,
-				offsetX: ~~offsetX || 0,
-				offsetY: ~~offsetY || 0,
+				offsetX: ~~newOffsetX,
+				offsetY: ~~newOffsetY,
 			};
 		},
+
 	},
 	terrain: {
 		set: (state, data) => {
@@ -311,7 +357,7 @@ export const Reducers = {
 
 		pan: (state, data) => ({
 			...state,
-			brush: "pan", 
+			brush: "pan",
 		}),
 		point: (state, data) => ({
 			...state,
