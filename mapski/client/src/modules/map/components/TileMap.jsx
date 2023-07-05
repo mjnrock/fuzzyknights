@@ -135,7 +135,6 @@ export function TileMap({ data, update }) {
 			}
 		}
 
-
 		let type;
 		switch(e.type) {
 			case "mousemove":

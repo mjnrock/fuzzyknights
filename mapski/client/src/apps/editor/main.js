@@ -387,6 +387,7 @@ export const Reducers = {
 		pan: (state, data) => ({
 			...state,
 			brush: "pan",
+			brushData: [],
 		}),
 		point: (state, data) => ({
 			...state,
