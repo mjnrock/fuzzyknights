@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
-import { BsPen, BsPlus, BsSquare, BsCheck, BsArrowsMove, BsBrush, BsCpu, BsArrowClockwise } from "react-icons/bs";
+import { BsPen, BsPlus, BsSquare, BsCheck, BsArrowsMove, BsBrush, BsCpu, BsArrowClockwise, BsPlay, BsLock, BsUnlock } from "react-icons/bs";
 
 export function Button({ text, active, children, ...props } = {}) {
 	return (
@@ -63,6 +63,8 @@ export function ViewPalette({ data, update }) {
 	const { mapDispatch, brushesDispatch } = update;
 
 	const [ selectedAlgorithm, setSelectedAlgorithm ] = useState(Object.keys(mapData.algorithms)[ Object.keys(mapData.algorithms).length - 1 ]);
+	const [ algorithmSeed, setAlgorithmSeed ] = useState(Date.now());
+	const [ isDefaultSeeding, setIsDefaultSeeding ] = useState(true);
 
 	return (
 		<div className="flex flex-row items-center justify-center gap-2">
@@ -108,17 +110,59 @@ export function ViewPalette({ data, update }) {
 					data={ data }
 					onSelect={ setSelectedAlgorithm }
 				/>
-				<Button
-					active={ false }
-					onClick={ e => mapDispatch({
-						type: "algorithm",
-						data: {
-							algorithm: selectedAlgorithm,
-						},
-					}) }
+				<button
+					className="flex-1 p-2 text-center text-gray-400 border border-gray-300 border-solid rounded shadow cursor-pointer bg-neutral-50 hover:bg-gray-400 hover:text-neutral-100 active:bg-gray-500"
+					onClick={ e => {
+						let seed;
+						if(isDefaultSeeding) {
+							seed = Date.now();
+							setAlgorithmSeed(seed);
+						} else {
+							if(algorithmSeed == null) {
+								setAlgorithmSeed(seed);
+							} else {
+								seed = algorithmSeed;
+							}
+						}
+
+						mapDispatch({
+							type: "algorithm",
+							data: {
+								algorithm: selectedAlgorithm,
+								seed,
+							},
+						});
+					} }
+					title="Run the selected algorithm"
 				>
-					<BsArrowClockwise className="text-2xl" />
-				</Button>
+					{ isDefaultSeeding ? <BsArrowClockwise className="text-2xl" /> : <BsPlay className="text-2xl" /> }
+				</button>
+				<input
+					type="number"
+					className={ `flex-1 p-2 text-center border border-gray-300 border-solid rounded shadow ${ isDefaultSeeding ? "cursor-copy bg-gray-100 text-neutral-500 hover:text-neutral-600 active:text-neutral-700 hover:bg-gray-200 active:bg-gray-300" : "text-neutral-500 bg-white active:bg-gray-100 hover:bg-gray-100" }` }
+					value={ algorithmSeed }
+					onChange={ e => setAlgorithmSeed(+e.target.value) }
+					onClick={ async e => {
+						if(isDefaultSeeding) {
+							e.preventDefault();
+
+							try {
+								await navigator.clipboard.writeText(algorithmSeed);
+							} catch(err) {
+								console.error(err);
+							}
+						}
+					} }
+					readOnly={ isDefaultSeeding }
+					title={ isDefaultSeeding ? "Click to copy" : "" }
+				/>
+				<button
+					className={ `flex-1 p-2 text-center border border-solid rounded shadow cursor-pointer ${ isDefaultSeeding ? "bg-emerald-50 text-emerald-500 hover:bg-emerald-100" : "bg-neutral-50 text-neutral-500 hover:bg-neutral-100" }` }
+					onClick={ e => setIsDefaultSeeding(prev => !prev) }
+					title="Toggle default or custom seeding"
+				>
+					{ isDefaultSeeding ? <BsLock className="text-2xl text-emerald-400" /> : <BsUnlock className="text-2xl text-neutral-400" /> }
+				</button>
 			</div>
 		</div>
 	);

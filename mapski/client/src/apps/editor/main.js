@@ -8,6 +8,7 @@ import { TerrainDict, TerrainMapData } from "./data/TerrainMap";
 import { BsFolder2Open, BsSave } from "react-icons/bs";
 
 import { createNoise2D } from "simplex-noise";
+import alea from "alea";
 
 export const Reducers = {
 	menubar: {},
@@ -485,10 +486,11 @@ export const State = Node.CreateMany({
 				},
 				simplexNoise: (x, y, key, tileMap, state, data, algorithmState) => {
 					if(!algorithmState.noise2D) {
-						algorithmState.noise2D = createNoise2D();
+						const seed = data?.seed != null ? data.seed : Date.now();
+
+						algorithmState.noise2D = createNoise2D(alea(seed));
 					}
 
-					// const simplex = new SimplexNoise();
 					const value = algorithmState.noise2D(x / 10, y / 10);
 
 					// const index = Math.floor(Math.abs(value) * Object.keys(TerrainDict).length);
