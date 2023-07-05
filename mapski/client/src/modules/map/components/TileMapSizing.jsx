@@ -12,16 +12,16 @@ export function ResetToDefault({ update }) {
 		update({
 			type: "merge",
 			data: {
-				columns: 10,
-				rows: 10,
-				tw: 64,
-				th: 64,
+				columns: 25,
+				rows: 25,
+				tw: 32,
+				th: 32,
 				sw: 1,
 				sh: 1,
 				offsetX: 0,
 				offsetY: 0,
-				width: 640,
-				height: 640,
+				width: 800,
+				height: 800,
 				autoSize: true,
 			},
 		});
