@@ -204,10 +204,9 @@ export function TileMap({ data, update }) {
 	}, [ canvas.current, setLastEvent ]);
 
 	useEffect(() => {
-		const handleScroll = (e) => {
-			e.preventDefault();
-
+		const handleScroll = (e) => {			
 			if(e.ctrlKey) {
+				e.preventDefault();
 				if(e.deltaY < 0) {
 					// Zoom in
 					mapDispatch({

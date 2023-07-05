@@ -5,7 +5,9 @@ import { Node } from "../../lib/Node";
 
 import { TerrainDict, TerrainMapData } from "./data/TerrainMap";
 
-import { BsFolder2Open, BsSave } from 'react-icons/bs';
+import { BsFolder2Open, BsSave } from "react-icons/bs";
+
+import { createNoise2D } from "simplex-noise";
 
 export const Reducers = {
 	menubar: {},
@@ -136,27 +138,53 @@ export const Reducers = {
 
 			return state;
 		},
-		solidFill: (state, data) => {
-			const currentTerrain = State.terrain?.state?.selected || null;	// This assumes that 0 is the null terrain key (i.e. { 0: null }.
-			return TileMapData.Next({
-				...state,
-				tileData: currentTerrain,
-			});
-		},
-		randomize: (state, data) => {
-			const tiles = {};
+		algorithm: (state, data) => {
+			let algorithms = state.algorithms || {};
+			let algorithm = data?.algorithm || null;
+
+			if(typeof algorithm === "string") {
+				algorithm = algorithms[ algorithm ];
+			}
+
+			if(typeof algorithm !== "function") {
+				return state;
+			}
+
+			const tileMap = new Map();
+			const algorithmState = {};
+			// Prepopulate tileMap with default values
+			// In this context, this gives the algorithm access to the entire tileMap, if needed
 			for(let y = 0; y < state.rows; y++) {
 				for(let x = 0; x < state.columns; x++) {
-					const index = Math.floor(Math.random() * Object.keys(TerrainDict).length);
-					const data = Object.values(TerrainDict)[ index ].type;
-
-					tiles[ y ] = tiles[ y ] || {};
-					tiles[ y ][ x ] = {
+					tileMap.set(`${ x },${ y }`, {
 						x,
 						y,
-						data,
-					};
+						data: null,
+					});
 				}
+			}
+			for(let y = 0; y < state.rows; y++) {
+				for(let x = 0; x < state.columns; x++) {
+					const key = `${ x },${ y }`;
+					let currentObject = tileMap.get(key);
+					let resultObject = algorithm(x, y, key, tileMap, state, data, algorithmState);
+
+					// Merge the default object with the result from your algorithm
+					const mergedObject = {
+						...currentObject,
+						...resultObject
+					};
+
+					// Set the merged object as the new value in tileMap
+					tileMap.set(`${ x },${ y }`, mergedObject);
+				}
+			}
+
+			const tiles = [];
+			for(const [ key, value ] of tileMap.entries()) {
+				const [ x, y ] = key.split(",").map(Number);
+				tiles[ y ] = tiles[ y ] || {};
+				tiles[ y ][ x ] = value;
 			}
 
 			return {
@@ -441,6 +469,38 @@ export const State = Node.CreateMany({
 				const data = Object.values(TerrainDict)[ index ].type;
 
 				return data;
+			},
+
+			algorithms: {
+				selectedFill: (x, y, key, tileMap, state, data) => ({
+					data: State.terrain?.state?.selected || null,
+				}),
+				randomize: (x, y, key, tileMap, state, data) => {
+					const index = Math.floor(Math.random() * Object.keys(TerrainDict).length);
+					const value = Object.values(TerrainDict)[ index ].type;
+
+					return {
+						data: value,
+					};
+				},
+				simplexNoise: (x, y, key, tileMap, state, data, algorithmState) => {
+					if(!algorithmState.noise2D) {
+						algorithmState.noise2D = createNoise2D();
+					}
+
+					// const simplex = new SimplexNoise();
+					const value = algorithmState.noise2D(x / 10, y / 10);
+
+					// const index = Math.floor(Math.abs(value) * Object.keys(TerrainDict).length);
+					//FIXME -- Currently uses all available terrain types, which may not be desirable
+					//STUB
+					const index = Math.floor(Math.abs(value) * (Object.keys(TerrainDict).length - 1)) + 1;
+					const terrain = Object.values(TerrainDict)[ index ];
+
+					return {
+						data: terrain.type,
+					};
+				},
 			},
 		}),
 		reducers: Reducers.map,
