@@ -47,8 +47,14 @@ export function Editor() {
 				});
 			}
 		};
-		const onKeyUp = e => {
-			// e.preventDefault();
+		const onKeyUp = e => { 
+			if(e.code === "Space" && e.ctrlKey) {
+				e.preventDefault();
+				mapDispatch({
+					type: "offset",
+					data: [ 0, 0 ],
+				});
+			}
 		};
 
 		window.addEventListener("keydown", onKeyDown);
@@ -102,7 +108,7 @@ export function Editor() {
 			</div>
 
 			<div className="flex flex-row items-center justify-center w-full gap-2">
-				<ViewPalette data={ {map,brushes} } update={ { mapDispatch, brushesDispatch } } />
+				<ViewPalette data={ { map, brushes } } update={ { mapDispatch, brushesDispatch } } />
 			</div>
 			<div className="flex flex-row gap-2">
 				<div className="flex flex-col gap-2">

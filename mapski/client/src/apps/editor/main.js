@@ -10,6 +10,7 @@ import { BsFolder2Open, BsSave } from "react-icons/bs";
 import { CellularAutomata } from "../../util/algorithms/CellularAutomata";
 import { createNoise2D } from "simplex-noise";
 import alea from "alea";
+import Chance from "chance";
 
 export const Reducers = {
 	menubar: {},
@@ -217,6 +218,8 @@ export const Reducers = {
 			};
 		},
 		offset: (state, [ offsetX, offsetY, alignToTiles = false ]) => {
+
+			console.log("offset", offsetX, offsetY, alignToTiles);
 			let newOffsetX = offsetX || 0;
 			let newOffsetY = offsetY || 0;
 
@@ -479,7 +482,8 @@ export const State = Node.CreateMany({
 					data: State.terrain?.state?.selected || null,
 				}),
 				randomize: (x, y, key, tileMap, state, data) => {
-					const index = Math.floor(Math.random() * Object.keys(TerrainDict).length);
+					const seed = data?.seed != null ? data.seed : Date.now();
+					const index = Math.floor(alea(`${ seed }${ x }${ y }`)() * Object.keys(TerrainDict).length);
 					const value = Object.values(TerrainDict)[ index ].type;
 
 					return {
