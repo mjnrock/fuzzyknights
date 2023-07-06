@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNode } from "../lib/react/useNode";
+import { useNode, useNodeEvent } from "../lib/react/useNode";
 
 import TileMapJSX from "../modules/map/components/TileMap";
 import TileMapSizing from "../modules/map/components/TileMapSizing";
@@ -17,6 +17,8 @@ export function Editor() {
 	const { state: map, dispatch: mapDispatch } = useNode(State.map, Reducers.map);
 	const { state: terrain, dispatch: terrainDispatch } = useNode(State.terrain, Reducers.terrain);
 	const { state: brushes, dispatch: brushesDispatch } = useNode(State.brushes, Reducers.brushes);
+
+	const { emit } = useNodeEvent(State.map, "update", (...args) => console.log("Map update:", ...args));
 
 	//TODO: This is effectively an app-level keybind.  Move to a more appropriate location.
 	useEffect(() => {
