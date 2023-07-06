@@ -532,6 +532,11 @@ export const State = Node.CreateMany({
 			},
 		}),
 		reducers: Reducers.map,
+		events: {
+			update: [
+				(state) => console.log("map update", state),
+			],
+		},
 	},
 	terrain: {
 		state: {
