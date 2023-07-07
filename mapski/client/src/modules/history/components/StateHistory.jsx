@@ -134,7 +134,10 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 									<button
 										type="button"
 										className="flex justify-center flex-grow px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md basis-1/6 bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-emerald-400"
-										onClick={ () => setIsModalOpen(false) }
+										onClick={ () => {
+											handleClick({ type: "map", state: selectedState }, selectedIndex)({ type: "click" });
+											setIsModalOpen(false);
+										} }
 									>
 										Revert
 									</button>
@@ -151,10 +154,7 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 									<button
 										type="button"
 										className="flex justify-center flex-grow px-4 py-2 text-sm font-medium text-white bg-gray-400 border border-transparent rounded-md basis-1/3 hover:bg-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-300"
-										onClick={ () => {
-											handleClick({ type: "map", state: selectedState }, selectedIndex)({ type: "click" });
-											setIsModalOpen(false);
-										} }
+										onClick={ () => setIsModalOpen(false) }
 									>
 										Cancel
 									</button>

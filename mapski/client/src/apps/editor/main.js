@@ -304,6 +304,16 @@ export const Reducers = {
 
 			return next;
 		},
+		cull: (state) => {
+			const { history, index } = state;
+			const next = {
+				...state,
+				history: history.slice(0, index),
+				index: Math.max(index - 1, 0),
+			};
+
+			return next;
+		},
 	},
 	terrain: {
 		set: (state, data) => {

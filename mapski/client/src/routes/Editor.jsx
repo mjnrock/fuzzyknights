@@ -85,6 +85,11 @@ export function Editor() {
 				historyDispatch({
 					type: "redo",
 				});
+			} else if(e.code === "Backspace" && e.ctrlKey && e.shiftKey) {
+				e.preventDefault();
+				historyDispatch({
+					type: "cull",
+				});
 			}
 		};
 
