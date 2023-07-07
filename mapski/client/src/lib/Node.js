@@ -1,3 +1,4 @@
+import clone from "../util/clone";
 import { IdentityClass } from "./Identity";
 
 export class Node extends IdentityClass {
@@ -50,11 +51,15 @@ export class Node extends IdentityClass {
 
 
 	dispatch(action, ...args) {
-		let previous = { ...this.state };
+		let previous = clone(this.state);
 		let state = this.state;
 
 		if(this.events.reducers[ action ]) {
 			state = this.events.reducers[ action ].call(this, state, ...args);
+		}
+
+		if(JSON.stringify(state) === JSON.stringify(previous)) {
+			return state;
 		}
 
 		this.state = { ...state };

@@ -76,6 +76,9 @@ export function Editor() {
 				e.preventDefault();
 				historyDispatch({
 					type: "undo",
+					data: {
+						cull: e.shiftKey,
+					}
 				});
 			} else if(e.code === "KeyY" && e.ctrlKey) {
 				e.preventDefault();
@@ -147,7 +150,7 @@ export function Editor() {
 				<div className="flex flex-col gap-2">
 					<div className="flex flex-row gap-2">
 						<div className="flex flex-col gap-2">
-							<StateHistory data={ { history } } update={ { mapDispatch, historyDispatch } } />
+							<StateHistory data={ { map, history, terrain } } update={ { mapDispatch, historyDispatch } } />
 							<TileMapSizing data={ map } update={ mapDispatch } />
 						</div>
 					</div>

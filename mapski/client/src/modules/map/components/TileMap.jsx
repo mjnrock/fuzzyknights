@@ -203,7 +203,7 @@ export function TileMap({ data, update }) {
 	}, [ canvas.current, setLastEvent ]);
 
 	useEffect(() => {
-		const handleScroll = (e) => {			
+		const handleScroll = (e) => {
 			if(e.ctrlKey) {
 				e.preventDefault();
 				if(e.deltaY < 0) {
@@ -241,6 +241,34 @@ export function TileMap({ data, update }) {
 			<canvas
 				ref={ canvas }
 			/>
+		</div>
+	);
+};
+
+
+export function TileMapPreview({ data }) {
+	const { map: mapData } = data;
+	const canvas = useRef(document.createElement("canvas"));
+
+	useEffect(() => {
+		if(!canvas.current) return;
+
+		if(mapData.autoSize) {
+			// Autosize canvas based on the tile dimensions, count and scaling
+			canvas.current.width = mapData.tw * mapData.columns;
+			canvas.current.height = mapData.th * mapData.rows;
+		} else {
+			// Fixed canvas size
+			canvas.current.width = mapData.width;
+			canvas.current.height = mapData.height;
+		}
+
+		drawTerrain(canvas.current, data);
+	}, [ canvas.current, mapData ]);
+
+	return (
+		<div className="flex flex-row items-center justify-center w-full gap-2">
+			<canvas ref={ canvas } style={ { width: 320, height: 320 } } />
 		</div>
 	);
 };

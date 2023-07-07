@@ -10,7 +10,6 @@ import { BsFolder2Open, BsSave } from "react-icons/bs";
 import { CellularAutomata } from "../../util/algorithms/CellularAutomata";
 import { createNoise2D } from "simplex-noise";
 import alea from "alea";
-import Chance from "chance";
 import { clone } from "../../util/clone";
 
 export const Reducers = {
@@ -127,7 +126,11 @@ export const Reducers = {
 				const { x, y, data: tileData } = data;
 				const tile = State.map?.state?.tiles?.[ y ]?.[ x ];
 				if(tile) {
-					return {
+					if(tile.data === tileData) {
+						return state;
+					}
+
+					const next = {
 						...state,
 						tiles: {
 							...state.tiles,
@@ -140,6 +143,8 @@ export const Reducers = {
 							},
 						},
 					};
+
+					return next;
 				}
 			}
 
@@ -270,16 +275,27 @@ export const Reducers = {
 
 			return next;
 		},
-		undo: (state, data) => {
+		undo: (state, data = {}) => {
 			const { history, index } = state;
-			const next = {
-				...state,
-				index: Math.max(index - 1, 0),
-			};
+			const { cull } = data;
+
+			let next;
+			if(cull) {
+				next = {
+					...state,
+					history: history.slice(0, index),
+					index: Math.max(index - 1, 0),
+				};
+			} else {
+				next = {
+					...state,
+					index: Math.max(index - 1, 0),
+				};
+			}
 
 			return next;
 		},
-		redo: (state, data) => {
+		redo: (state, data = {}) => {
 			const { history, index } = state;
 			const next = {
 				...state,
@@ -618,13 +634,6 @@ export const State = Node.CreateMany({
 			index: -1,
 		},
 		reducers: Reducers.history,
-		// events: {
-		// 	update: [
-		// 		(state, previous, action) => {
-		// 			console.log(action, state);
-		// 		},
-		// 	],
-		// },
 		effects: {
 			undo: [
 				(state) => {
@@ -635,10 +644,6 @@ export const State = Node.CreateMany({
 						IMM(reversion.type, {
 							type: "reversion",
 							data: reversion.state,
-						});
-						IMM("history", {
-							type: "setIndex",
-							data: index - 1,
 						});
 					}
 				},
@@ -652,10 +657,6 @@ export const State = Node.CreateMany({
 						IMM(reversion.type, {
 							type: "reversion",
 							data: reversion.state,
-						});
-						IMM("history", {
-							type: "setIndex",
-							data: index + 1,
 						});
 					}
 				}
