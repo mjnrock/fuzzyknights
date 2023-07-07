@@ -1,3 +1,4 @@
+import clone from "../util/clone";
 import { IdentityClass } from "./Identity";
 
 export class Node extends IdentityClass {
@@ -27,6 +28,13 @@ export class Node extends IdentityClass {
 			...events,
 		};
 
+		/**
+		 * This can be a bit confusing, but `effects` are functions that are called
+		 * when a *specific* action is dispatched. If you want a "catch all" effect,
+		 * you can use the `Node.EventTypes.UPDATE` event.  For example, if you dispatch
+		 * an action called `foo`, then any effects registered to `foo` will be called,
+		 * and any handlers on the `Node.EventTypes.UPDATE` event will be called, also.
+		 */
 		for(const [ a, e ] of Object.entries(effects)) {
 			this.addEffect(a, ...(Array.isArray(e) ? e : [ e ]));
 		}
@@ -43,15 +51,19 @@ export class Node extends IdentityClass {
 
 
 	dispatch(action, ...args) {
-		let previous = { ...this.state };
+		let previous = clone(this.state);
 		let state = this.state;
 
 		if(this.events.reducers[ action ]) {
 			state = this.events.reducers[ action ].call(this, state, ...args);
 		}
 
+		if(JSON.stringify(state) === JSON.stringify(previous)) {
+			return state;
+		}
+
 		this.state = { ...state };
-		this.emit(Node.EventTypes.UPDATE, state, previous, this);
+		this.emit(Node.EventTypes.UPDATE, state, previous, action);
 
 		if(this.events.effects[ action ]) {
 			for(const effect of this.events.effects[ action ]) {

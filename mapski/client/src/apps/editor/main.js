@@ -10,11 +10,14 @@ import { BsFolder2Open, BsSave } from "react-icons/bs";
 import { CellularAutomata } from "../../util/algorithms/CellularAutomata";
 import { createNoise2D } from "simplex-noise";
 import alea from "alea";
-import Chance from "chance";
+import { clone } from "../../util/clone";
 
 export const Reducers = {
 	menubar: {},
 	map: {
+		reversion: (state, data) => {
+			return TileMapData.Next(data);
+		},
 		set: (state, data) => {
 			return TileMapData.Next(data);
 		},
@@ -123,7 +126,11 @@ export const Reducers = {
 				const { x, y, data: tileData } = data;
 				const tile = State.map?.state?.tiles?.[ y ]?.[ x ];
 				if(tile) {
-					return {
+					if(tile.data === tileData) {
+						return state;
+					}
+
+					const next = {
 						...state,
 						tiles: {
 							...state.tiles,
@@ -136,6 +143,8 @@ export const Reducers = {
 							},
 						},
 					};
+
+					return next;
 				}
 			}
 
@@ -237,7 +246,84 @@ export const Reducers = {
 				offsetY: ~~newOffsetY,
 			};
 		},
+	},
+	history: {
+		set: (state, data) => {
+			return {
+				...data,
+			};
+		},
+		setIndex: (state, data) => {
+			const { history, index } = state;
+			const next = {
+				...state,
+				index: Math.min(Math.max(data, 0), history.length - 1),
+			};
 
+			return next;
+		},
+		push: (state, data) => {
+			const { history, index } = state;
+			const next = {
+				...state,
+				history: [
+					...history,
+					data,
+				],
+				index: index + 1,
+			};
+
+			return next;
+		},
+		undo: (state, data = {}) => {
+			const { history, index } = state;
+			const { cull } = data;
+
+			let next;
+			if(cull) {
+				next = {
+					...state,
+					history: history.slice(0, index),
+					index: Math.max(index - 1, 0),
+				};
+			} else {
+				next = {
+					...state,
+					index: Math.max(index - 1, 0),
+				};
+			}
+
+			return next;
+		},
+		redo: (state, data = {}) => {
+			const { history, index } = state;
+			const next = {
+				...state,
+				index: Math.max(Math.min(index + 1, history.length - 1), 0),
+			};
+
+			return next;
+		},
+		cull: (state) => {
+			const { history, index } = state;
+			const next = {
+				...state,
+				history: history.slice(0, index),
+				index: Math.max(index - 1, 0),
+			};
+
+			return next;
+		},
+		rebase: (state) => {
+			const { history, index } = state;
+			const next = {
+				...state,
+				history: [ history[ history.length - 1 ] ],
+				index: 0,
+			};
+
+			return next;
+		},
 	},
 	terrain: {
 		set: (state, data) => {
@@ -532,6 +618,72 @@ export const State = Node.CreateMany({
 			},
 		}),
 		reducers: Reducers.map,
+		events: {
+			update: [
+				(state, previous, action) => {
+					if(action !== "reversion") {
+						if(JSON.stringify(state.tiles) !== JSON.stringify(previous.tiles)) {
+							let currentHistoryIndex = State.history?.state?.index || 0;
+							let currentHistory = State.history?.state?.history || [];
+
+							if(currentHistoryIndex !== currentHistory.length - 1) {
+								currentHistory = currentHistory.slice(0, currentHistoryIndex + 1);
+								IMM("history", {
+									type: "set",
+									data: {
+										history: currentHistory,
+										index: currentHistoryIndex,
+									},
+								});
+							}
+
+							IMM("history", {
+								type: "push",
+								data: {
+									type: "map",
+									state: clone(state),
+								},
+							});
+						}
+					}
+				},
+			],
+		},
+	},
+	history: {
+		state: {
+			history: [],
+			index: -1,
+		},
+		reducers: Reducers.history,
+		effects: {
+			undo: [
+				(state) => {
+					const { history, index } = state;
+					const reversion = history[ index ];
+
+					if(reversion) {
+						IMM(reversion.type, {
+							type: "reversion",
+							data: reversion.state,
+						});
+					}
+				},
+			],
+			redo: [
+				(state) => {
+					const { history, index } = state;
+					const reversion = history[ index ];
+
+					if(reversion) {
+						IMM(reversion.type, {
+							type: "reversion",
+							data: reversion.state,
+						});
+					}
+				}
+			],
+		},
 	},
 	terrain: {
 		state: {

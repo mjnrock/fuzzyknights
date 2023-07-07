@@ -24,4 +24,21 @@ export function useNode(node, reducerMap) {
 	};
 };
 
-export default useNode;
+export function useNodeEvent(node, event, callback) {
+	useEffect(() => {
+		node.addEventListeners(event, callback);
+		return () => {
+			node.removeEventListeners(event, callback);
+		};
+	}, []);
+
+	return {
+		emit: node.emit.bind(node, event),
+		emitAsync: node.emitAsync.bind(node, event),
+	};
+};
+
+export default {
+	useNode,
+	useNodeEvent,
+};
