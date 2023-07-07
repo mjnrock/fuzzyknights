@@ -314,6 +314,16 @@ export const Reducers = {
 
 			return next;
 		},
+		rebase: (state) => {
+			const { history, index } = state;
+			const next = {
+				...state,
+				history: [ history[ history.length - 1 ] ],
+				index: 0,
+			};
+
+			return next;
+		},
 	},
 	terrain: {
 		set: (state, data) => {

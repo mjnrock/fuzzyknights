@@ -15,19 +15,27 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 
 	const scrollRef = useRef(null);
 
-	const handleClick = useCallback((state, index, cull = false) => {
+	const handleClick = useCallback((state, index, option) => {
 		return (event) => {
 			if(event.type === "dblclick") {
 				setSelectedState(state.state);
 				setSelectedIndex(index);
 				setIsModalOpen(true);
 			} else {
-				if(cull) {
+				if(option === "cull") {
 					historyDispatch({
 						type: "set",
 						data: {
 							history: historyData.history.slice(0, index + 1),
 							index,
+						},
+					});
+				} else if(option === "rebase") {
+					historyDispatch({
+						type: "set",
+						data: {
+							history: [ state ],
+							index: 0,
 						},
 					});
 				} else {
@@ -65,7 +73,7 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 					className="flex items-center justify-between w-full gap-2"
 					onClick={ () => setIsCollapsed(!isCollapsed) }
 				>
-					<h2 className="text-lg text-gray-700">State History</h2>
+					<h2 className="text-lg text-gray-700">State History ({ historyData.history.length })</h2>
 					{ isCollapsed ? <BsChevronRight /> : <BsChevronDown /> }
 				</button>
 			</div>
@@ -78,7 +86,7 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 							onDoubleClick={ handleClick(state, index) }
 						>
 							<div className="font-mono">{ index }:</div>
-							<div className="w-full text-center">{ state.type }</div>
+							<TileMapPreview key={ index } data={ { map: state.state, terrain: terrainData } } width={ 64 } height={ 64 } />
 						</div>
 					)) }
 				</div>
@@ -145,11 +153,21 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 										type="button"
 										className="flex justify-center flex-grow px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md basis-1/12 bg-rose-500 hover:bg-rose-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-rose-400"
 										onClick={ () => {
-											handleClick({ type: "map", state: selectedState }, selectedIndex, true)({ type: "click" });
+											handleClick({ type: "map", state: selectedState }, selectedIndex, "cull")({ type: "click" });
 											setIsModalOpen(false);
 										} }
 									>
 										Revert and Cull
+									</button>
+									<button
+										type="button"
+										className="flex justify-center flex-grow px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md basis-1/12 bg-rose-500 hover:bg-rose-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-rose-400"
+										onClick={ () => {
+											handleClick({ type: "map", state: selectedState }, selectedIndex, "rebase")({ type: "click" });
+											setIsModalOpen(false);
+										} }
+									>
+										Rebase
 									</button>
 									<button
 										type="button"

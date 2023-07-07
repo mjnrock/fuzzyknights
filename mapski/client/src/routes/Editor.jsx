@@ -90,6 +90,11 @@ export function Editor() {
 				historyDispatch({
 					type: "cull",
 				});
+			} else if(e.code === "Enter" && e.ctrlKey && e.shiftKey) {
+				e.preventDefault();
+				historyDispatch({
+					type: "rebase",
+				});
 			}
 		};
 

@@ -246,7 +246,7 @@ export function TileMap({ data, update }) {
 };
 
 
-export function TileMapPreview({ data }) {
+export function TileMapPreview({ data, width = 320, height = 320 }) {
 	const { map: mapData } = data;
 	const canvas = useRef(document.createElement("canvas"));
 
@@ -268,7 +268,7 @@ export function TileMapPreview({ data }) {
 
 	return (
 		<div className="flex flex-row items-center justify-center w-full gap-2">
-			<canvas ref={ canvas } style={ { width: 320, height: 320 } } />
+			<canvas ref={ canvas } style={ { width, height } } />
 		</div>
 	);
 };
