@@ -66,6 +66,7 @@ export function Editor() {
 			}
 		};
 		const onKeyUp = e => {
+			console.log(e.code)
 			if(e.code === "Space" && e.ctrlKey) {
 				e.preventDefault();
 				mapDispatch({

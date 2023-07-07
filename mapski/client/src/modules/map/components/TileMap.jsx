@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 
-export function drawTerrain(canvas, data) {
+export function drawTerrain(canvas, data, ignoreScale = false) {
 	const { map: mapData, terrain: terrainData } = data;
 	const ctx = canvas.getContext("2d");
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-	const tileWidthScaled = mapData.tw * mapData.sw;   // apply horizontal scaling
-	const tileHeightScaled = mapData.th * mapData.sh;  // apply vertical scaling
+	const tileWidthScaled = mapData.tw * (ignoreScale ? 1 : mapData.sw);   // apply horizontal scaling
+	const tileHeightScaled = mapData.th * (ignoreScale ? 1 : mapData.sh);  // apply vertical scaling
 	const tileCenterWidthScaled = tileWidthScaled / 2;
 	const tileCenterHeightScaled = tileHeightScaled / 2;
 
@@ -247,16 +247,17 @@ export function TileMap({ data, update }) {
 
 
 export function TileMapPreview({ data, width = 320, height = 320 }) {
+	const { map: mapData } = data;
 	const canvas = useRef(document.createElement("canvas"));
 
 	useEffect(() => {
 		if(!canvas.current) return;
 
-		canvas.current.width = width;
-		canvas.current.height = height;
+		canvas.current.width = mapData.width;
+		canvas.current.height = mapData.height;
 
-		drawTerrain(canvas.current, data);
-	}, [ canvas.current ]);
+		drawTerrain(canvas.current, data, true);
+	}, [ canvas.current, mapData ]);
 
 	return (
 		<div className="flex flex-row items-center justify-center w-full gap-2">
