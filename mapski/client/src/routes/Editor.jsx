@@ -139,10 +139,6 @@ export function Editor() {
 				<ViewPalette data={ { map, brushes } } update={ { mapDispatch, brushesDispatch } } />
 			</div>
 
-			<div className="flex flex-row items-center justify-center w-full gap-2">
-				<StateHistory data={ {history} } update={ { mapDispatch, historyDispatch } } />
-			</div>
-
 			<div className="flex flex-row gap-2">
 				<div className="flex flex-col gap-2">
 					<TerrainMap data={ terrain } update={ terrainDispatch } />
@@ -150,7 +146,10 @@ export function Editor() {
 
 				<div className="flex flex-col gap-2">
 					<div className="flex flex-row gap-2">
-						<TileMapSizing data={ map } update={ mapDispatch } />
+						<div className="flex flex-col gap-2">
+							<StateHistory data={ { history } } update={ { mapDispatch, historyDispatch } } />
+							<TileMapSizing data={ map } update={ mapDispatch } />
+						</div>
 					</div>
 					<div className="flex flex-row gap-2">
 						<div className="cursor-crosshair">
