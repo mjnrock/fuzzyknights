@@ -247,24 +247,16 @@ export function TileMap({ data, update }) {
 
 
 export function TileMapPreview({ data, width = 320, height = 320 }) {
-	const { map: mapData } = data;
 	const canvas = useRef(document.createElement("canvas"));
 
 	useEffect(() => {
 		if(!canvas.current) return;
 
-		if(mapData.autoSize) {
-			// Autosize canvas based on the tile dimensions, count and scaling
-			canvas.current.width = mapData.tw * mapData.columns;
-			canvas.current.height = mapData.th * mapData.rows;
-		} else {
-			// Fixed canvas size
-			canvas.current.width = mapData.width;
-			canvas.current.height = mapData.height;
-		}
+		canvas.current.width = width;
+		canvas.current.height = height;
 
 		drawTerrain(canvas.current, data);
-	}, [ canvas.current, mapData ]);
+	}, [ canvas.current ]);
 
 	return (
 		<div className="flex flex-row items-center justify-center w-full gap-2">
