@@ -11,10 +11,14 @@ import { CellularAutomata } from "../../util/algorithms/CellularAutomata";
 import { createNoise2D } from "simplex-noise";
 import alea from "alea";
 import Chance from "chance";
+import { clone } from "../../util/clone";
 
 export const Reducers = {
 	menubar: {},
 	map: {
+		reversion: (state, data) => {
+			return TileMapData.Next(data);
+		},
 		set: (state, data) => {
 			return TileMapData.Next(data);
 		},
@@ -237,7 +241,53 @@ export const Reducers = {
 				offsetY: ~~newOffsetY,
 			};
 		},
+	},
+	history: {
+		set: (state, data) => {
+			return {
+				...data,
+			};
+		},
+		setIndex: (state, data) => {
+			const { history, index } = state;
+			const next = {
+				...state,
+				index: Math.min(Math.max(data, 0), history.length - 1),
+			};
 
+			return next;
+		},
+		push: (state, data) => {
+			const { history, index } = state;
+			const next = {
+				...state,
+				history: [
+					...history,
+					data,
+				],
+				index: index + 1,
+			};
+
+			return next;
+		},
+		undo: (state, data) => {
+			const { history, index } = state;
+			const next = {
+				...state,
+				index: Math.max(index - 1, 0),
+			};
+
+			return next;
+		},
+		redo: (state, data) => {
+			const { history, index } = state;
+			const next = {
+				...state,
+				index: Math.max(Math.min(index + 1, history.length - 1), 0),
+			};
+
+			return next;
+		},
 	},
 	terrain: {
 		set: (state, data) => {
@@ -534,7 +584,81 @@ export const State = Node.CreateMany({
 		reducers: Reducers.map,
 		events: {
 			update: [
-				(state) => console.log("map update", state),
+				(state, previous, action) => {
+					if(action !== "reversion") {
+						let currentHistoryIndex = State.history?.state?.index || 0;
+						let currentHistory = State.history?.state?.history || [];
+
+						if(currentHistoryIndex !== currentHistory.length - 1) {
+							currentHistory = currentHistory.slice(0, currentHistoryIndex + 1);
+							IMM("history", {
+								type: "set",
+								data: {
+									history: currentHistory,
+									index: currentHistoryIndex,
+								},
+							});
+						}
+
+						IMM("history", {
+							type: "push",
+							data: {
+								type: "map",
+								state: clone(state),
+							},
+						});
+					}
+				},
+			],
+		},
+	},
+	history: {
+		state: {
+			history: [],
+			index: -1,
+		},
+		reducers: Reducers.history,
+		// events: {
+		// 	update: [
+		// 		(state, previous, action) => {
+		// 			console.log(action, state);
+		// 		},
+		// 	],
+		// },
+		effects: {
+			undo: [
+				(state) => {
+					const { history, index } = state;
+					const reversion = history[ index ];
+
+					if(reversion) {
+						IMM(reversion.type, {
+							type: "reversion",
+							data: reversion.state,
+						});
+						IMM("history", {
+							type: "setIndex",
+							data: index - 1,
+						});
+					}
+				},
+			],
+			redo: [
+				(state) => {
+					const { history, index } = state;
+					const reversion = history[ index ];
+
+					if(reversion) {
+						IMM(reversion.type, {
+							type: "reversion",
+							data: reversion.state,
+						});
+						IMM("history", {
+							type: "setIndex",
+							data: index + 1,
+						});
+					}
+				}
 			],
 		},
 	},

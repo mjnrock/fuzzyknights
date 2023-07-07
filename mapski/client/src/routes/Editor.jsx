@@ -11,14 +11,30 @@ import { Reducers, State } from "../apps/editor/main";
 
 import FileMenu from "../modules/menubar/components/FileMenu";
 import { FileIO } from "../util/FileIO";
+import { clone } from "../util/clone";
+import StateHistory from "../modules/history/components/StateHistory";
+
+//TODO: Because of the feedback loop, `map` has been given a "reversion" reducer, but it's identical to the "set" reducer.
 
 export function Editor() {
 	const { state: menubar, dispatch: menubarDispatch } = useNode(State.menubar, Reducers.menubar);
 	const { state: map, dispatch: mapDispatch } = useNode(State.map, Reducers.map);
+	const { state: history, dispatch: historyDispatch } = useNode(State.history, Reducers.history);
 	const { state: terrain, dispatch: terrainDispatch } = useNode(State.terrain, Reducers.terrain);
 	const { state: brushes, dispatch: brushesDispatch } = useNode(State.brushes, Reducers.brushes);
 
-	const { emit } = useNodeEvent(State.map, "update", (...args) => console.log("Map update:", ...args));
+	useEffect(() => {
+		// Load the state into history as the first point of reversion.
+		historyDispatch({
+			type: "push",
+			data: {
+				type: "map",
+				state: clone(map),
+			},
+		});
+	}, []);
+
+	// const { emit } = useNodeEvent(State.map, "update", (...args) => console.log("Map update:", ...args));
 
 	//TODO: This is effectively an app-level keybind.  Move to a more appropriate location.
 	useEffect(() => {
@@ -49,12 +65,22 @@ export function Editor() {
 				});
 			}
 		};
-		const onKeyUp = e => { 
+		const onKeyUp = e => {
 			if(e.code === "Space" && e.ctrlKey) {
 				e.preventDefault();
 				mapDispatch({
 					type: "offset",
 					data: [ 0, 0 ],
+				});
+			} else if(e.code === "KeyZ" && e.ctrlKey) {
+				e.preventDefault();
+				historyDispatch({
+					type: "undo",
+				});
+			} else if(e.code === "KeyY" && e.ctrlKey) {
+				e.preventDefault();
+				historyDispatch({
+					type: "redo",
 				});
 			}
 		};
@@ -112,6 +138,11 @@ export function Editor() {
 			<div className="flex flex-row items-center justify-center w-full gap-2">
 				<ViewPalette data={ { map, brushes } } update={ { mapDispatch, brushesDispatch } } />
 			</div>
+
+			<div className="flex flex-row items-center justify-center w-full gap-2">
+				<StateHistory data={ {history} } update={ { mapDispatch, historyDispatch } } />
+			</div>
+
 			<div className="flex flex-row gap-2">
 				<div className="flex flex-col gap-2">
 					<TerrainMap data={ terrain } update={ terrainDispatch } />
