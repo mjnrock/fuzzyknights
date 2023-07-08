@@ -175,17 +175,17 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 								</Dialog.Title>
 								<div className="flex flex-col gap-2">
 									<div className="flex flex-row items-center justify-center gap-4">
-										<div className="flex flex-col items-center justify-center font-thin">
+										<div className="flex flex-col items-center justify-center p-1 italic font-thin border border-solid rounded shadow-sm">
+											<TileMapPreview data={ { map: mapData, terrain: terrainData } } />
+											Current
+										</div>
+										<div className="flex flex-col items-center justify-center p-1 font-semibold border border-solid rounded shadow-md">
 											<TileMapPreview data={ { map: selectedState, terrain: terrainData } } />
 											Selected
 										</div>
-										<div className="flex flex-col items-center justify-center font-thin">
+										<div className="flex flex-col items-center justify-center p-1 italic font-thin border border-solid rounded shadow-sm">
 											{ deltaState && <TileMapPreview data={ { map: deltaState, terrain: terrainData } } /> }
 											Delta
-										</div>
-										<div className="flex flex-col items-center justify-center font-thin">
-											<TileMapPreview data={ { map: mapData, terrain: terrainData } } />
-											Current
 										</div>
 									</div>
 									<JsonViewer data={ selectedState } />
