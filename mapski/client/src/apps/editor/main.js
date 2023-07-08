@@ -333,10 +333,16 @@ export const Reducers = {
 		},
 		cull: (state) => {
 			const { history, index } = state;
+
+			let boundedIndex = Math.max(Math.min(index + 1, history.length), 0);
+			if(boundedIndex === history.length) {
+				return state;
+			}
+
 			const next = {
 				...state,
-				history: history.slice(0, index),
-				index: Math.max(index - 1, 0),
+				history: history.slice(0, boundedIndex),
+				index: Math.max(boundedIndex, 0),
 			};
 
 			return next;
@@ -345,7 +351,7 @@ export const Reducers = {
 			const { history, index } = state;
 			const next = {
 				...state,
-				history: [ history[ history.length - 1 ] ],
+				history: [ history[ index ] ],
 				index: 0,
 			};
 
@@ -654,7 +660,7 @@ export const State = Node.CreateMany({
 						if(JSON.stringify(state.tiles) !== JSON.stringify(previous.tiles)) {
 							let currentHistoryIndex = State.history?.state?.index || 0;
 							let currentHistory = State.history?.state?.history || [];
-				
+
 							if(currentHistoryIndex !== currentHistory.length - 1) {
 								currentHistory = currentHistory.slice(0, currentHistoryIndex + 1);
 								IMM("history", {
@@ -665,7 +671,7 @@ export const State = Node.CreateMany({
 									},
 								});
 							}
-				
+
 							IMM("history", {
 								type: "push",
 								data: {

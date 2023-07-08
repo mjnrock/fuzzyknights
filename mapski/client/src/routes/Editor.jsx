@@ -87,7 +87,7 @@ export function Editor() {
 				historyDispatch({
 					type: "cull",
 				});
-			} else if(e.code === "Enter" && e.ctrlKey && e.shiftKey) {
+			} else if(e.code === "Enter" && e.ctrlKey && e.shiftKey && e.altKey) {
 				e.preventDefault();
 				historyDispatch({
 					type: "rebase",
