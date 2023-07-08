@@ -675,7 +675,7 @@ export const State = Node.CreateMany({
 							});
 						}
 					}
-				}, 500),
+				}, 350),
 			],
 		},
 	},

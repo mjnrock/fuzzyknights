@@ -27,7 +27,7 @@ export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 		fileInputRef.current.click();
 	};
 
-	const handleMouseDown = (e) => {
+	const handleMouseUp = (e) => {
 		e.preventDefault();
 
 		if(e.ctrlKey) {
@@ -81,7 +81,7 @@ export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 					className="w-16 h-16 m-2 border border-gray-800 border-solid rounded shadow-md cursor-pointer"
 					style={ { backgroundColor: terrain.texture } }
 					onContextMenu={ e => e.preventDefault() }
-					onMouseDown={ handleMouseDown }
+					onMouseUp={ handleMouseUp }
 					title="Ctrl+Left: Change texture | Ctrl+Right: Change color"
 				/>
 			) : (
@@ -91,7 +91,7 @@ export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 					width={ 64 }
 					height={ 64 }
 					onContextMenu={ e => e.preventDefault() }
-					onMouseDown={ handleMouseDown }
+					onMouseUp={ handleMouseUp }
 					title="Ctrl+Left: Change texture | Ctrl+Right: Change color"
 				/>
 			) }

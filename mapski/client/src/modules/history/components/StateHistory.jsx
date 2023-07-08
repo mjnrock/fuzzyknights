@@ -3,24 +3,28 @@ import { useEffect, useRef, useCallback, useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import JsonViewer from "../../../components/JsonViewer";
 import { TileMapPreview } from "../../map/components/TileMap";
+import { clone } from "../../../util/clone";
 
 export function StateHistory({ data, update, direction = "horizontal" }) {
-	const { history: historyData, terrain: terrainData } = data;
+	const { map: mapData, history: historyData, terrain: terrainData } = data;
 	const { mapDispatch, historyDispatch } = update;
 
 	const [ isCollapsed, setIsCollapsed ] = useState(false);
 	const [ isModalOpen, setIsModalOpen ] = useState(false);
 	const [ selectedState, setSelectedState ] = useState(null);
 	const [ selectedIndex, setSelectedIndex ] = useState(null);
+	const [ deltaState, setDeltaState ] = useState(null);
 
 	const scrollRef = useRef(null);
 
 	const handleClick = useCallback((state, index, option) => {
 		return (event) => {
+			setSelectedState(state.state);
+			setSelectedIndex(index);
 			if(event.type === "contextmenu") {
 				event.preventDefault();
-				setSelectedState(state.state);
-				setSelectedIndex(index);
+				// setSelectedState(state.state);
+				// setSelectedIndex(index);
 				setIsModalOpen(true);
 			} else if(event.type === "click") {
 				historyDispatch({
@@ -79,6 +83,27 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 			}
 		}
 	}, [ historyData, direction ]);
+
+	useEffect(() => {
+		if(!selectedState) return;
+
+		const nextDeltaState = clone(selectedState);
+
+		for(let y = 0; y < mapData.columns; y++) {
+			for(let x = 0; x < mapData.rows; x++) {
+				const currentData = mapData?.tiles?.[ y ]?.[ x ]?.data;
+				const selectedData = selectedState?.tiles?.[ y ]?.[ x ]?.data;
+
+				nextDeltaState.tiles[ y ][ x ] = {
+					x,
+					y,
+					data: currentData !== selectedData ? selectedData : null,
+				};
+			}
+		}
+
+		setDeltaState(nextDeltaState);
+	}, [ selectedState ]);
 
 	return (
 		<div className={ `inline-flex flex-col items-start justify-center max-h-screen p-2 border border-solid rounded select-none border-neutral-200 bg-neutral-50 ${ isCollapsed ? "max-h-14" : "" }` }>
@@ -144,12 +169,25 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 							<div className="inline-block w-full h-full max-w-6xl p-6 overflow-hidden overflow-y-auto text-left align-middle transition-all transform bg-white rounded shadow-xl">
 								<Dialog.Title
 									as="h3"
-									className="text-lg font-medium leading-6 text-center text-gray-900"
+									className="mb-4 text-lg font-medium leading-6 text-center text-gray-90"
 								>
 									State Data #{ selectedIndex }
 								</Dialog.Title>
-								<div className="flex flex-col gap-2 mt-2">
-									<TileMapPreview data={ { map: selectedState, terrain: terrainData } } />
+								<div className="flex flex-col gap-2">
+									<div className="flex flex-row items-center justify-center gap-4">
+										<div className="flex flex-col items-center justify-center font-thin">
+											<TileMapPreview data={ { map: selectedState, terrain: terrainData } } />
+											Selected
+										</div>
+										<div className="flex flex-col items-center justify-center font-thin">
+											{ deltaState && <TileMapPreview data={ { map: deltaState, terrain: terrainData } } /> }
+											Delta
+										</div>
+										<div className="flex flex-col items-center justify-center font-thin">
+											<TileMapPreview data={ { map: mapData, terrain: terrainData } } />
+											Current
+										</div>
+									</div>
 									<JsonViewer data={ selectedState } />
 								</div>
 
