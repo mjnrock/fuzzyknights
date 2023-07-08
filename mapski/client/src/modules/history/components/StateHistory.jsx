@@ -17,10 +17,24 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 
 	const handleClick = useCallback((state, index, option) => {
 		return (event) => {
-			if(event.type === "dblclick") {
+			if(event.type === "contextmenu") {
+				event.preventDefault();
 				setSelectedState(state.state);
 				setSelectedIndex(index);
 				setIsModalOpen(true);
+			} else if(event.type === "click") {
+				historyDispatch({
+					type: "setIndex",
+					data: index,
+				});
+
+				//TODO: Make this more generically handled, rather than so hardcoded
+				if(state.type === "map") {
+					mapDispatch({
+						type: "reversion",
+						data: state.state,
+					});
+				}
 			} else {
 				if(option === "cull") {
 					historyDispatch({
@@ -57,7 +71,7 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 	}, [ historyData, historyDispatch, mapDispatch ]);
 
 	useEffect(() => {
-		if(scrollRef.current) {
+		if(scrollRef.current && historyData.index === historyData.history.length - 1) {
 			if(direction === "vertical") {
 				scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
 			} else {
@@ -78,12 +92,13 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 				</button>
 			</div>
 			{ !isCollapsed && (
-				<div className={ `flex ${ direction === "vertical" ? "flex-col overflow-y-auto max-h-64 w-full" : "flex-row overflow-x-auto max-w-lg" } gap-1` } ref={ scrollRef }>
+				<div className={ `scrollbar-w-2 scrollbar-track-gray-200 scrollbar-thumb-gray-500 flex ${ direction === "vertical" ? "flex-col overflow-y-scroll  max-h-64 w-full" : "flex-row overflow-x-scroll  max-w-lg" } gap-1` } ref={ scrollRef }>
 					{ historyData && historyData.history.map((state, index) => (
 						<div
 							key={ index }
 							className={ `px-2 py-1 my-1 flex flex-row gap-1 rounded shadow cursor-pointer ${ historyData.index === index ? "bg-gray-200 hover:bg-gray-300" : "bg-white hover:bg-gray-100" }` }
-							onDoubleClick={ handleClick(state, index) }
+							onClick={ handleClick(state, index) }
+							onContextMenu={ handleClick(state, index) }
 						>
 							<div className="font-mono">{ index }:</div>
 							<TileMapPreview key={ index } data={ { map: state.state, terrain: terrainData } } width={ 64 } height={ 64 } />
@@ -141,9 +156,9 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 								<div className="flex w-full gap-2 mt-4">
 									<button
 										type="button"
-										className="flex justify-center flex-grow px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md basis-1/6 bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-emerald-400"
+										className="flex justify-center flex-grow px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md basis-1/12 bg-sky-500 hover:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-sky-400"
 										onClick={ () => {
-											handleClick({ type: "map", state: selectedState }, selectedIndex)({ type: "click" });
+											handleClick({ type: "map", state: selectedState }, selectedIndex)({ type: "modal" });
 											setIsModalOpen(false);
 										} }
 									>
@@ -151,9 +166,9 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 									</button>
 									<button
 										type="button"
-										className="flex justify-center flex-grow px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md basis-1/12 bg-rose-500 hover:bg-rose-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-rose-400"
+										className="flex justify-center flex-grow px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md basis-1/12 bg-violet-500 hover:bg-violet-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-violet-400"
 										onClick={ () => {
-											handleClick({ type: "map", state: selectedState }, selectedIndex, "cull")({ type: "click" });
+											handleClick({ type: "map", state: selectedState }, selectedIndex, "cull")({ type: "modal" });
 											setIsModalOpen(false);
 										} }
 									>
@@ -163,7 +178,7 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 										type="button"
 										className="flex justify-center flex-grow px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md basis-1/12 bg-rose-500 hover:bg-rose-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-rose-400"
 										onClick={ () => {
-											handleClick({ type: "map", state: selectedState }, selectedIndex, "rebase")({ type: "click" });
+											handleClick({ type: "map", state: selectedState }, selectedIndex, "rebase")({ type: "modal" });
 											setIsModalOpen(false);
 										} }
 									>

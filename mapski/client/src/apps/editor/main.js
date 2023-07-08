@@ -12,6 +12,35 @@ import { createNoise2D } from "simplex-noise";
 import alea from "alea";
 import { clone } from "../../util/clone";
 
+import { debounce } from "../../util/debounce";
+let debouncedHistoryUpdate = debounce((state, previous, action) => {
+	if(action !== "reversion") {
+		if(JSON.stringify(state.tiles) !== JSON.stringify(previous.tiles)) {
+			let currentHistoryIndex = State.history?.state?.index || 0;
+			let currentHistory = State.history?.state?.history || [];
+
+			if(currentHistoryIndex !== currentHistory.length - 1) {
+				currentHistory = currentHistory.slice(0, currentHistoryIndex + 1);
+				IMM("history", {
+					type: "set",
+					data: {
+						history: currentHistory,
+						index: currentHistoryIndex,
+					},
+				});
+			}
+
+			IMM("history", {
+				type: "push",
+				data: {
+					type: "map",
+					state: clone(state),
+				},
+			});
+		}
+	}
+}, 650);
+
 export const Reducers = {
 	menubar: {},
 	map: {
@@ -227,8 +256,6 @@ export const Reducers = {
 			};
 		},
 		offset: (state, [ offsetX, offsetY, alignToTiles = false ]) => {
-
-			console.log("offset", offsetX, offsetY, alignToTiles);
 			let newOffsetX = offsetX || 0;
 			let newOffsetY = offsetY || 0;
 
@@ -470,6 +497,7 @@ export const Reducers = {
 
 			return {
 				...state,
+				special: null,
 				isActive: false,
 			};
 		},
@@ -620,12 +648,13 @@ export const State = Node.CreateMany({
 		reducers: Reducers.map,
 		events: {
 			update: [
-				(state, previous, action) => {
+				/* Reduce the eagerness of history state updates with a debounce */
+				debounce((state, previous, action) => {
 					if(action !== "reversion") {
 						if(JSON.stringify(state.tiles) !== JSON.stringify(previous.tiles)) {
 							let currentHistoryIndex = State.history?.state?.index || 0;
 							let currentHistory = State.history?.state?.history || [];
-
+				
 							if(currentHistoryIndex !== currentHistory.length - 1) {
 								currentHistory = currentHistory.slice(0, currentHistoryIndex + 1);
 								IMM("history", {
@@ -636,7 +665,7 @@ export const State = Node.CreateMany({
 									},
 								});
 							}
-
+				
 							IMM("history", {
 								type: "push",
 								data: {
@@ -646,7 +675,7 @@ export const State = Node.CreateMany({
 							});
 						}
 					}
-				},
+				}, 500),
 			],
 		},
 	},

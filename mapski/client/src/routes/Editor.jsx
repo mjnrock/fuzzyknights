@@ -63,6 +63,16 @@ export function Editor() {
 				brushesDispatch({
 					type: "rectangle",
 				});
+			} else if(e.code === "KeyZ" && e.ctrlKey) {
+				e.preventDefault();
+				historyDispatch({
+					type: "undo",
+				});
+			} else if(e.code === "KeyY" && e.ctrlKey) {
+				e.preventDefault();
+				historyDispatch({
+					type: "redo",
+				});
 			}
 		};
 		const onKeyUp = e => {
@@ -71,19 +81,6 @@ export function Editor() {
 				mapDispatch({
 					type: "offset",
 					data: [ 0, 0 ],
-				});
-			} else if(e.code === "KeyZ" && e.ctrlKey) {
-				e.preventDefault();
-				historyDispatch({
-					type: "undo",
-					data: {
-						cull: e.shiftKey,
-					}
-				});
-			} else if(e.code === "KeyY" && e.ctrlKey) {
-				e.preventDefault();
-				historyDispatch({
-					type: "redo",
 				});
 			} else if(e.code === "Backspace" && e.ctrlKey && e.shiftKey) {
 				e.preventDefault();
