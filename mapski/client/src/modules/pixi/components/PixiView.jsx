@@ -13,7 +13,7 @@ export function PixiView({ app } = {}) {
 	}, []);
 
 	return (
-		<div ref={ canvasRef } />
+		<div ref={ canvasRef } className="m-2 border border-solid rounded shadow border-neutral-200"/>
 	);
 };
 

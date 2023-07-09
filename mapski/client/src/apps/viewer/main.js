@@ -46,9 +46,6 @@ export const Reducers = {
 			const terrain = State?.terrain?.state;
 			const next = {
 				...state,
-				assets: {},
-				sprites: {},  // We initialize the sprites object here
-				stage: new PIXI.Container(), // assuming PIXI.Container is initialized
 			};
 
 			for(let key in terrain) {
@@ -81,63 +78,117 @@ export const Reducers = {
 					sprite.width = State?.map?.state?.tw * State?.viewport?.state?.zoom;
 					sprite.height = State?.map?.state?.th * State?.viewport?.state?.zoom;
 
+					
 					// Store the sprite in the sprites object with the x, y as the key
 					next.sprites[ `${ x },${ y }` ] = sprite;
-
+					
 					// Add the sprite to the stage
 					next.stage.addChild(sprite);
 				}
 			}
 
-			const { width, height } = State.viewport.state.canvas;
-			//FIXME: It should use the viewport, but it currently just uses the hardcoded defaults of width and height (800, 600) -- thus, the values below demo the whole map (but that's not the goal)
-			next.app.renderer.resize(
-				State?.map?.state?.tw * State?.map?.state?.cols * State?.viewport?.state?.zoom,
-				State?.map?.state?.th * State?.map?.state?.rows * State?.viewport?.state?.zoom
-			);
+			const { width, height } = State?.viewport?.state?.canvas;
+			next.app.renderer.resize(width, height);
 			next.app.stage = next.stage;
 
 			//STUB: START FPS COUNTER
-				const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
-				fpsText.x = 10;
-				fpsText.y = 10;
-				next.stage.addChild(fpsText);
+			const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
+			fpsText.x = 10;
+			fpsText.y = 10;
+			next.stage.addChild(fpsText);
 
-				let lastTime = 0;
-				const fpsWindow = [];
-				next.app.ticker.add((delta) => {
-					const now = performance.now();
-					const elapsedTime = now - lastTime;
+			let lastTime = 0;
+			const fpsWindow = [];
+			next.app.ticker.add((delta) => {
+				const now = performance.now();
+				const elapsedTime = now - lastTime;
 
-					// Skip this frame if elapsed time is 0, to avoid division by zero
-					if(elapsedTime === 0) return;
+				// Skip this frame if elapsed time is 0, to avoid division by zero
+				if(elapsedTime === 0) return;
 
-					const fps = 1000 / elapsedTime;
-					lastTime = now;
-					fpsWindow.push(fps);
-					if(fpsWindow.length > 250) {
-						fpsWindow.shift();
-					}
-					const avgFPS = fpsWindow.reduce((a, b) => a + b, 0) / fpsWindow.length;
-					fpsText.text = `FPS: ${ Math.round(avgFPS) }`;
-				});
+				const fps = 1000 / elapsedTime;
+				lastTime = now;
+				fpsWindow.push(fps);
+				if(fpsWindow.length > 250) {
+					fpsWindow.shift();
+				}
+				const avgFPS = fpsWindow.reduce((a, b) => a + b, 0) / fpsWindow.length;
+				fpsText.text = `FPS: ${ Math.round(avgFPS) }`;
+			});
 			//STUB: END FPS COUNTER
 
 			return next;
 		},
 	},
 	viewport: {
+		merge: (state, data) => {
+			console.log(data)
+			return {
+				...state,
+				...data,
+			};
+		},
+		move: (state, data) => {
+			const { x, y } = data;
+			
+			let nx = state.x + x;
+			let ny = state.y + y;
+
+			if(nx < 0) nx = 0;
+			if(ny < 0) ny = 0;
+			if(nx > State.map.state.cols) nx = State.map.state.cols;
+			if(ny > State.map.state.rows) ny = State.map.state.rows;
+
+			return {
+				...state,
+				x: nx,
+				y: ny,
+			};
+		},
+		zoom: (state, data) => {
+			const { zoom } = data;
+
+			return {
+				...state,
+				zoom: state.zoom * zoom,
+			};
+		},
 		tick(state, data) {
-			const { subject, dt } = data;	// dt = delta time (ms)
-			const delta = subject(state, dt);
+			const { subject } = state;
+			const { dt } = data;	// dt = delta time (ms)
+
 			const next = {
 				...state,
-				...delta,
-				canvas: {
-					width: (Math.abs(delta.x - delta.w) * State?.map?.tw) * delta.zoom,
-					height: (Math.abs(delta.y - delta.h) * State?.map?.th) * delta.zoom,
-				},
 			};
+
+			// iterate over the sprites and update their positions
+			for(let key in State?.pixi?.state?.sprites) {
+				// based on the viewport's x, y, w, h, zoom, only render those sprites that are visible -- and scale them appropriately to the zoom
+				const sprite = State?.pixi?.state?.sprites[ key ];
+				const [ x, y ] = key.split(",").map((v) => parseInt(v));
+				const { tw, th } = State?.map?.state;
+				const { x: vx, y: vy, w, h, zoom } = next;
+
+				// if the sprite is within the viewport (+/- 1/2 of the .w and .h) then render it
+				if(x >= vx - w / 2 && x <= vx + w / 2 && y >= vy - h / 2 && y <= vy + h / 2) {
+					sprite.visible = true;
+					sprite.x = (x - vx + w / 2) * tw * zoom;
+					sprite.y = (y - vy + h / 2) * th * zoom;
+
+					//  if the viewport is smaller than the canvas, center the sprites
+					if(w < State?.viewport?.state?.canvas?.width) {
+						sprite.x += (State?.viewport?.state?.canvas?.width - w * tw * zoom) / 2;
+					}
+					if(h < State?.viewport?.state?.canvas?.height) {
+						sprite.y += (State?.viewport?.state?.canvas?.height - h * th * zoom) / 2;
+					}
+
+					sprite.width = tw * zoom;
+					sprite.height = th * zoom;
+				} else {
+					sprite.visible = false;
+				}
+			}
 
 			State?.pixi?.state?.renderer?.render(State?.pixi?.state?.stage);
 
@@ -179,13 +230,14 @@ export const State = Node.CreateMany({
 				width: 800,
 				height: 600,
 				antialias: true,
-				transparent: false,
+				transparent: true,
 				resolution: window.devicePixelRatio || 1,
 				autoResize: true,
-				backgroundColor: 0x000000,
+				backgroundColor: "#DDD",
 			}),
 			stage: new PIXI.Container(),
 			assets: {},
+			sprites: {},
 		},
 		reducers: Reducers.pixi,
 		effects: {
@@ -197,13 +249,13 @@ export const State = Node.CreateMany({
 	viewport: {
 		state: {
 			canvas: {
-				width: 800,	//px
-				height: 600,	//px
+				width: 640,		//px
+				height: 640,	//px
 			},
 			x: 0,	// px
 			y: 0,	// px
-			w: 12,	// px
-			h: 12,	// px
+			w: 200,	// px
+			h: 200,	// px
 			zoom: 1.00,	// 1 = 100%
 			subject: (state) => {
 				return {
@@ -212,13 +264,6 @@ export const State = Node.CreateMany({
 			},	// (state, dt)=> [x,y,w,h,zoom]
 		},
 		reducers: Reducers.viewport,
-		effects: {
-			tick: (state, data) => {
-				// resize the pixi canvas to the viewport's canvas dictated size
-				const { width, height } = state.canvas;
-				State?.pixi?.state?.renderer?.resize(width, height);
-			},
-		}
 	},
 });
 
