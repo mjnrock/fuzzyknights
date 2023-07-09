@@ -97,8 +97,6 @@ export const Reducers = {
 			);
 			next.app.stage = next.stage;
 
-			next.app.start();
-
 			//STUB: START FPS COUNTER
 				const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
 				fpsText.x = 10;

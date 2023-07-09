@@ -94,10 +94,12 @@ export function StateHistory({ data, update, direction = "horizontal" }) {
 				const currentData = mapData?.tiles?.[ y ]?.[ x ]?.data;
 				const selectedData = selectedState?.tiles?.[ y ]?.[ x ]?.data;
 
+				let nextData = currentData !== selectedData ? selectedData : null;
+				if(selectedData == null && currentData != null) nextData = `VOID`;	// Handle eraser case, VOID is an arbitrary choice here
 				nextDeltaState.tiles[ y ][ x ] = {
 					x,
 					y,
-					data: currentData !== selectedData ? selectedData : null,
+					data: nextData,
 				};
 			}
 		}
