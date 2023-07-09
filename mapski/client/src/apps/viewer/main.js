@@ -1,22 +1,31 @@
 import * as PIXI from "pixi.js";
 import { Node } from "../../lib/Node";
+import Base64 from "../../util/Base64";
 
 import { TerrainDict } from "./data/TerrainMap.js";
 
-import DATA from "./data/maps/3f9b9c61-91dd-4fed-b22c-abf90163fd1c.json";
-import Base64 from "../../util/Base64";
-
-console.log(DATA);
+import FS_SavedMap from "./data/maps/TEST.json";
 
 export const Reducers = {
 	terrain: {
 		/**
 		 * Load the terrain map enum data
 		 */
-		load: (state, data) => {
+		load: async (state, data) => {
+			const merge = {
+				...data.terrains,
+			};
+
+			for(let key in merge) {
+				const { texture } = merge[ key ];
+				if(typeof texture === "string" && !texture.startsWith("#")) {
+					merge[ key ].texture = await Base64.Decode(texture);
+				}
+			}
+
 			return {
 				...state,
-				...data,
+				...merge,
 			};
 		},
 	},
@@ -25,30 +34,10 @@ export const Reducers = {
 		 * Load the map schema data and convert it into terrain data
 		 */
 		load: (state, data) => {
-			const { rows, columns, tw, th, tiles } = data;
-			let next = {
+			return {
 				...state,
-				rows,
-				columns,
-				tw,
-				th,
-				tiles,
+				...data,
 			};
-
-			console.log(next)
-
-			// Convert tile data (from editor.map) intto terrain data
-			for(let y = 0; y < rows; y++) {
-				next.tiles[ y ] = next.tiles[ y ] || [];
-				for(let x = 0; x < columns; x++) {
-					const tile = tiles[ y ][ x ];
-					const { data } = tile;
-
-					next.tiles[ y ][ x ] = State?.terrain?.state?.[ data ];	// Terrain data for that type (type, texture, etc.)
-				}
-			}
-
-			return next;
 		},
 	},
 	pixi: {
@@ -64,7 +53,9 @@ export const Reducers = {
 
 			for(let key in terrain) {
 				const { texture } = terrain[ key ];
-				if(texture.startsWith("#")) {
+				if(texture instanceof HTMLCanvasElement) {
+					next.assets[ key ] = PIXI.Texture.from(texture);
+				} else if(texture.startsWith("#")) {
 					const canvas = document.createElement('canvas');
 					canvas.width = 1;
 					canvas.height = 1;
@@ -72,18 +63,17 @@ export const Reducers = {
 					context.fillStyle = texture;
 					context.fillRect(0, 0, 1, 1);
 					next.assets[ key ] = PIXI.Texture.from(canvas);
-				} else {
-					next.assets[ key ] = PIXI.Texture.from(await Base64.Decode(texture));
 				}
 			}
 
 			// Populating stage and sprites
-			let y = 0;
-			for(let yObj of State?.map?.state?.tiles) {
-				for(const x in yObj) {
-					const currentTile = yObj[ x ];
+			for(let y = 0; y < State?.map?.state?.tiles.length; y++) {
+				const row = State?.map?.state?.tiles[ y ];
+				for(let x = 0; x < row.length; x++) {
+					const currentTile = row[ x ];
+
 					// Create a sprite with the appropriate texture
-					let sprite = new PIXI.Sprite(next.assets[ currentTile.type ]);
+					let sprite = new PIXI.Sprite(next.assets[ currentTile.data ]);
 
 					// Set the sprite's position
 					sprite.x = x * State?.map?.state?.tw * State?.viewport?.state?.zoom;
@@ -97,12 +87,43 @@ export const Reducers = {
 					// Add the sprite to the stage
 					next.stage.addChild(sprite);
 				}
-				y++;
 			}
 
+			const { width, height } = State.viewport.state.canvas;
+			//FIXME: It should use the viewport, but it currently just uses the hardcoded defaults of width and height (800, 600) -- thus, the values below demo the whole map (but that's not the goal)
+			next.app.renderer.resize(
+				State?.map?.state?.tw * State?.map?.state?.cols * State?.viewport?.state?.zoom,
+				State?.map?.state?.th * State?.map?.state?.rows * State?.viewport?.state?.zoom
+			);
 			next.app.stage = next.stage;
 
-			console.log(next);
+			next.app.start();
+
+			//STUB: START FPS COUNTER
+				const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
+				fpsText.x = 10;
+				fpsText.y = 10;
+				next.stage.addChild(fpsText);
+
+				let lastTime = 0;
+				const fpsWindow = [];
+				next.app.ticker.add((delta) => {
+					const now = performance.now();
+					const elapsedTime = now - lastTime;
+
+					// Skip this frame if elapsed time is 0, to avoid division by zero
+					if(elapsedTime === 0) return;
+
+					const fps = 1000 / elapsedTime;
+					lastTime = now;
+					fpsWindow.push(fps);
+					if(fpsWindow.length > 250) {
+						fpsWindow.shift();
+					}
+					const avgFPS = fpsWindow.reduce((a, b) => a + b, 0) / fpsWindow.length;
+					fpsText.text = `FPS: ${ Math.round(avgFPS) }`;
+				});
+			//STUB: END FPS COUNTER
 
 			return next;
 		},
@@ -133,6 +154,11 @@ export const State = Node.CreateMany({
 			...TerrainDict,
 		},
 		reducers: Reducers.terrain,
+		effects: {
+			load: (state, data) => {
+				State.map.dispatch("load", FS_SavedMap.map);
+			},
+		},
 	},
 	map: {
 		state: {
@@ -143,6 +169,11 @@ export const State = Node.CreateMany({
 			tiles: [],
 		},
 		reducers: Reducers.map,
+		effects: {
+			load: (state, data) => {
+				State.pixi.dispatchAsync("load");
+			},
+		},
 	},
 	pixi: {
 		state: {
@@ -159,6 +190,11 @@ export const State = Node.CreateMany({
 			assets: {},
 		},
 		reducers: Reducers.pixi,
+		effects: {
+			load: (state, data) => {
+				State.viewport.dispatch("tick", { subject: State.viewport.state.subject, dt: 0 });
+			},
+		},
 	},
 	viewport: {
 		state: {
@@ -188,11 +224,7 @@ export const State = Node.CreateMany({
 	},
 });
 
-console.log(State)
-
-State.map.dispatch("load", DATA.map);
-State.pixi.dispatchAsync("load");
-State.viewport.dispatch("tick", { subject: State.viewport.state.subject, dt: 0 });
+State.terrain.dispatchAsync("load", FS_SavedMap.terrain);
 
 export const IMM = (module, message, ...args) => {
 	const node = State[ module ];

@@ -188,7 +188,6 @@ export const Reducers = {
 						...currentObject,
 						...resultObject
 					};
-
 					// Set the merged object as the new value in tileMap
 					tileMap.set(`${ x },${ y }`, mergedObject);
 				}
@@ -197,7 +196,7 @@ export const Reducers = {
 			const tiles = [];
 			for(const [ key, value ] of tileMap.entries()) {
 				const [ x, y ] = key.split(",").map(Number);
-				tiles[ y ] = tiles[ y ] || {};
+				tiles[ y ] = tiles[ y ] || [];
 				tiles[ y ][ x ] = value;
 			}
 

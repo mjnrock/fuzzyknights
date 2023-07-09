@@ -13,6 +13,7 @@ import FileMenu from "../modules/menubar/components/FileMenu";
 import { FileIO } from "../util/FileIO";
 import { clone } from "../util/clone";
 import StateHistory from "../modules/history/components/StateHistory";
+import Base64 from "../util/Base64";
 
 //TODO: Because of the feedback loop, `map` has been given a "reversion" reducer, but it's identical to the "set" reducer.
 
@@ -107,21 +108,36 @@ export function Editor() {
 
 	//TODO: FileMenu should use events when command patterns are desired.  Build out/refine Node event paradigm.
 	// Once established, move these into events and create an appropriate "emitter" or similar for `useNode`.
-	const saveMap = () => {
+	const saveMap = async () => {
 		console.log("Saving map...");
-		const data = {
+		const data = clone({
 			map,
 			terrain,
-		};
+		});
+
+		for(const [ key, obj ] of Object.entries(data.terrain.terrains)) {
+			if(obj.texture instanceof HTMLCanvasElement) {
+				data.terrain.terrains[ key ].texture = await Base64.Encode(obj.texture);
+			}
+		}
 
 		FileIO.save(data)
 			.then((message) => console.log(message))
 			.catch((error) => console.error(error));
 	};
-	const loadMap = () => {
+	const loadMap = async () => {
 		console.log("Loading map...");
 
 		FileIO.load()
+			.then(async (data) => {
+				for(const [ key, obj ] of Object.entries(data.terrain.terrains)) {
+					if(Base64.test(obj.texture)) {
+						data.terrain.terrains[ key ].texture = await Base64.Decode(obj.texture);
+					}
+				};
+
+				return data;
+			})
 			.then((data) => {
 				mapDispatch({ type: "set", data: data.map });
 				terrainDispatch({ type: "set", data: data.terrain });

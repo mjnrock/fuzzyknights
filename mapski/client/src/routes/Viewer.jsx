@@ -1,10 +1,7 @@
-import { useRef } from "react";
 import { useNode } from "../lib/react/useNode";
-
-import * as PIXI from "pixi.js";
-import { PixiView } from "../modules/pixi/components/PixiView";
-
 import { Reducers, State } from "../apps/viewer/main";
+
+import { PixiView } from "../modules/pixi/components/PixiView";
 
 export function Viewer() {
 	const { state: mapData, dispatch: mapDispatch } = useNode(State.map, Reducers.map);
