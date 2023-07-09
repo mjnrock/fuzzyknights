@@ -10,6 +10,9 @@ export function Viewer() {
 	const { state: viewportData, dispatch: viewportDispatch } = useNode(State.viewport, Reducers.viewport);
 	const { state: pixiData, dispatch: pixiDispatch } = useNode(State.pixi, Reducers.pixi);
 
+	//FIXME: viewportDispatch does not appear to be working, but State.viewport.dispatch does (possibly the other dispatches as well)
+	//NOTE: This is currently preventing the Viewer config form to work
+
 	useEffect(() => {
 
 		// bind the viewport's .tick method to the pixi app's ticker
