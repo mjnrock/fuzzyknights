@@ -135,7 +135,7 @@ export function ViewPalette({ data, update }) {
 					} }
 					title="Run the selected algorithm"
 				>
-					{ isDefaultSeeding ? <BsArrowClockwise className="text-2xl" /> : <BsPlay className="text-2xl" /> }
+					{ isDefaultSeeding ? <BsPlay className="text-2xl" /> : <BsArrowClockwise className="text-2xl" /> }
 				</button>
 				<input
 					type="number"

@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useNode, useNodeEvent } from "../lib/react/useNode";
+import { useEffect, useRef } from "react";
+import { useNode } from "../lib/react/useNode";
 
 import TileMapJSX from "../modules/map/components/TileMap";
 import TileMapSizing from "../modules/map/components/TileMapSizing";
@@ -14,6 +14,9 @@ import { FileIO } from "../util/FileIO";
 import { clone } from "../util/clone";
 import StateHistory from "../modules/history/components/StateHistory";
 
+import * as PIXI from "pixi.js";
+import { PixiView } from "../modules/pixi/components/PixiView";
+
 //TODO: Because of the feedback loop, `map` has been given a "reversion" reducer, but it's identical to the "set" reducer.
 
 export function Editor() {
@@ -22,6 +25,14 @@ export function Editor() {
 	const { state: history, dispatch: historyDispatch } = useNode(State.history, Reducers.history);
 	const { state: terrain, dispatch: terrainDispatch } = useNode(State.terrain, Reducers.terrain);
 	const { state: brushes, dispatch: brushesDispatch } = useNode(State.brushes, Reducers.brushes);
+
+	const pixi = useRef(new PIXI.Application({
+		width: map.columns * map.tw,
+		height: map.rows * map.th,
+		antialias: true,
+		transparent: false,
+		backgroundColor: 0x000000,
+	}));
 
 	useEffect(() => {
 		// Load the state into history as the first point of reversion.
@@ -37,6 +48,7 @@ export function Editor() {
 	// const { emit } = useNodeEvent(State.map, "update", (...args) => console.log("Map update:", ...args));
 
 	//TODO: This is effectively an app-level keybind.  Move to a more appropriate location.
+	//NOTE: Care on the preventDefault() -- it currently blocks typing those letters into inputs.
 	useEffect(() => {
 		const onKeyDown = e => {
 			if(e.code === "F5" || (e.ctrlKey && e.code === "F5") || e.code === "F12") {
@@ -44,32 +56,32 @@ export function Editor() {
 			}
 
 			if(e.code === "Space" || e.code === "KeyM") {
-				e.preventDefault();
+				//e.preventDefault();
 				brushesDispatch({
 					type: "pan",
 				});
 			} else if(e.code === "KeyP") {
-				e.preventDefault();
+				//e.preventDefault();
 				brushesDispatch({
 					type: "point",
 				});
 			} else if(e.code === "KeyL") {
-				e.preventDefault();
+				//e.preventDefault();
 				brushesDispatch({
 					type: "plus",
 				});
 			} else if(e.code === "KeyR") {
-				e.preventDefault();
+				//e.preventDefault();
 				brushesDispatch({
 					type: "rectangle",
 				});
 			} else if(e.code === "KeyZ" && e.ctrlKey) {
-				e.preventDefault();
+				//e.preventDefault();
 				historyDispatch({
 					type: "undo",
 				});
 			} else if(e.code === "KeyY" && e.ctrlKey) {
-				e.preventDefault();
+				//e.preventDefault();
 				historyDispatch({
 					type: "redo",
 				});
@@ -77,18 +89,18 @@ export function Editor() {
 		};
 		const onKeyUp = e => {
 			if(e.code === "Space" && e.ctrlKey) {
-				e.preventDefault();
+				//e.preventDefault();
 				mapDispatch({
 					type: "offset",
 					data: [ 0, 0 ],
 				});
 			} else if(e.code === "Backspace" && e.ctrlKey && e.shiftKey) {
-				e.preventDefault();
+				//e.preventDefault();
 				historyDispatch({
 					type: "cull",
 				});
 			} else if(e.code === "Enter" && e.ctrlKey && e.shiftKey && e.altKey) {
-				e.preventDefault();
+				//e.preventDefault();
 				historyDispatch({
 					type: "rebase",
 				});
