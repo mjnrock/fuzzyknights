@@ -14,9 +14,6 @@ import { FileIO } from "../util/FileIO";
 import { clone } from "../util/clone";
 import StateHistory from "../modules/history/components/StateHistory";
 
-import * as PIXI from "pixi.js";
-import { PixiView } from "../modules/pixi/components/PixiView";
-
 //TODO: Because of the feedback loop, `map` has been given a "reversion" reducer, but it's identical to the "set" reducer.
 
 export function Editor() {
@@ -25,14 +22,6 @@ export function Editor() {
 	const { state: history, dispatch: historyDispatch } = useNode(State.history, Reducers.history);
 	const { state: terrain, dispatch: terrainDispatch } = useNode(State.terrain, Reducers.terrain);
 	const { state: brushes, dispatch: brushesDispatch } = useNode(State.brushes, Reducers.brushes);
-
-	const pixi = useRef(new PIXI.Application({
-		width: map.columns * map.tw,
-		height: map.rows * map.th,
-		antialias: true,
-		transparent: false,
-		backgroundColor: 0x000000,
-	}));
 
 	useEffect(() => {
 		// Load the state into history as the first point of reversion.

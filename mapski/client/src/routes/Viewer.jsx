@@ -1,20 +1,20 @@
 import { useRef } from "react";
+import { useNode } from "../lib/react/useNode";
 
 import * as PIXI from "pixi.js";
 import { PixiView } from "../modules/pixi/components/PixiView";
 
+import { Reducers, State } from "../apps/viewer/main";
+
 export function Viewer() {
-	const pixi = useRef(new PIXI.Application({
-		width: 512,
-		height: 512,
-		transparent: true,
-		antialias: true,
-		resolution: window.devicePixelRatio,
-	}));
+	const { state: mapData, dispatch: mapDispatch } = useNode(State.map, Reducers.map);
+	const { state: terrainData, dispatch: terrainDispatch } = useNode(State.terrain, Reducers.terrain);
+	const { state: viewportData, dispatch: viewportDispatch } = useNode(State.viewport, Reducers.viewport);
+	const { state: pixiData, dispatch: pixiDispatch } = useNode(State.pixi, Reducers.pixi);
 
 	return (
 		<PixiView
-			app={ pixi.current }
+			app={ pixiData.app }
 			className="w-1/2 h-1/2"
 		/>
 	);
