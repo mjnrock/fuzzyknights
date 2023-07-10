@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useNode, useNodeEvent } from "../lib/react/useNode";
+import { useEffect, useRef } from "react";
+import { useNode } from "../lib/react/useNode";
 
 import TileMapJSX from "../modules/map/components/TileMap";
 import TileMapSizing from "../modules/map/components/TileMapSizing";
@@ -13,6 +13,7 @@ import FileMenu from "../modules/menubar/components/FileMenu";
 import { FileIO } from "../util/FileIO";
 import { clone } from "../util/clone";
 import StateHistory from "../modules/history/components/StateHistory";
+import Base64 from "../util/Base64";
 
 //TODO: Because of the feedback loop, `map` has been given a "reversion" reducer, but it's identical to the "set" reducer.
 
@@ -37,6 +38,7 @@ export function Editor() {
 	// const { emit } = useNodeEvent(State.map, "update", (...args) => console.log("Map update:", ...args));
 
 	//TODO: This is effectively an app-level keybind.  Move to a more appropriate location.
+	//NOTE: Care on the preventDefault() -- it currently blocks typing those letters into inputs.
 	useEffect(() => {
 		const onKeyDown = e => {
 			if(e.code === "F5" || (e.ctrlKey && e.code === "F5") || e.code === "F12") {
@@ -44,32 +46,32 @@ export function Editor() {
 			}
 
 			if(e.code === "Space" || e.code === "KeyM") {
-				e.preventDefault();
+				//e.preventDefault();
 				brushesDispatch({
 					type: "pan",
 				});
 			} else if(e.code === "KeyP") {
-				e.preventDefault();
+				//e.preventDefault();
 				brushesDispatch({
 					type: "point",
 				});
 			} else if(e.code === "KeyL") {
-				e.preventDefault();
+				//e.preventDefault();
 				brushesDispatch({
 					type: "plus",
 				});
 			} else if(e.code === "KeyR") {
-				e.preventDefault();
+				//e.preventDefault();
 				brushesDispatch({
 					type: "rectangle",
 				});
 			} else if(e.code === "KeyZ" && e.ctrlKey) {
-				e.preventDefault();
+				//e.preventDefault();
 				historyDispatch({
 					type: "undo",
 				});
 			} else if(e.code === "KeyY" && e.ctrlKey) {
-				e.preventDefault();
+				//e.preventDefault();
 				historyDispatch({
 					type: "redo",
 				});
@@ -77,18 +79,18 @@ export function Editor() {
 		};
 		const onKeyUp = e => {
 			if(e.code === "Space" && e.ctrlKey) {
-				e.preventDefault();
+				//e.preventDefault();
 				mapDispatch({
 					type: "offset",
 					data: [ 0, 0 ],
 				});
 			} else if(e.code === "Backspace" && e.ctrlKey && e.shiftKey) {
-				e.preventDefault();
+				//e.preventDefault();
 				historyDispatch({
 					type: "cull",
 				});
 			} else if(e.code === "Enter" && e.ctrlKey && e.shiftKey && e.altKey) {
-				e.preventDefault();
+				//e.preventDefault();
 				historyDispatch({
 					type: "rebase",
 				});
@@ -106,21 +108,36 @@ export function Editor() {
 
 	//TODO: FileMenu should use events when command patterns are desired.  Build out/refine Node event paradigm.
 	// Once established, move these into events and create an appropriate "emitter" or similar for `useNode`.
-	const saveMap = () => {
+	const saveMap = async () => {
 		console.log("Saving map...");
-		const data = {
+		const data = clone({
 			map,
 			terrain,
-		};
+		});
+
+		for(const [ key, obj ] of Object.entries(data.terrain.terrains)) {
+			if(obj.texture instanceof HTMLCanvasElement) {
+				data.terrain.terrains[ key ].texture = await Base64.Encode(obj.texture);
+			}
+		}
 
 		FileIO.save(data)
 			.then((message) => console.log(message))
 			.catch((error) => console.error(error));
 	};
-	const loadMap = () => {
+	const loadMap = async () => {
 		console.log("Loading map...");
 
 		FileIO.load()
+			.then(async (data) => {
+				for(const [ key, obj ] of Object.entries(data.terrain.terrains)) {
+					if(Base64.test(obj.texture)) {
+						data.terrain.terrains[ key ].texture = await Base64.Decode(obj.texture);
+					}
+				};
+
+				return data;
+			})
 			.then((data) => {
 				mapDispatch({ type: "set", data: data.map });
 				terrainDispatch({ type: "set", data: data.terrain });
@@ -138,6 +155,7 @@ export function Editor() {
 
 	return (
 		<div className="flex flex-col gap-2">
+		<button onClick={ e => menubarDispatch("test")}>Click 2</button>
 			<div className="flex flex-row items-center justify-center w-full gap-2">
 				<FileMenu
 					data={ menubar.menu }

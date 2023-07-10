@@ -13,33 +13,6 @@ import alea from "alea";
 import { clone } from "../../util/clone";
 
 import { debounce } from "../../util/debounce";
-let debouncedHistoryUpdate = debounce((state, previous, action) => {
-	if(action !== "reversion") {
-		if(JSON.stringify(state.tiles) !== JSON.stringify(previous.tiles)) {
-			let currentHistoryIndex = State.history?.state?.index || 0;
-			let currentHistory = State.history?.state?.history || [];
-
-			if(currentHistoryIndex !== currentHistory.length - 1) {
-				currentHistory = currentHistory.slice(0, currentHistoryIndex + 1);
-				IMM("history", {
-					type: "set",
-					data: {
-						history: currentHistory,
-						index: currentHistoryIndex,
-					},
-				});
-			}
-
-			IMM("history", {
-				type: "push",
-				data: {
-					type: "map",
-					state: clone(state),
-				},
-			});
-		}
-	}
-}, 650);
 
 export const Reducers = {
 	menubar: {},
@@ -215,7 +188,6 @@ export const Reducers = {
 						...currentObject,
 						...resultObject
 					};
-
 					// Set the merged object as the new value in tileMap
 					tileMap.set(`${ x },${ y }`, mergedObject);
 				}
@@ -224,7 +196,7 @@ export const Reducers = {
 			const tiles = [];
 			for(const [ key, value ] of tileMap.entries()) {
 				const [ x, y ] = key.split(",").map(Number);
-				tiles[ y ] = tiles[ y ] || {};
+				tiles[ y ] = tiles[ y ] || [];
 				tiles[ y ][ x ] = value;
 			}
 
@@ -681,7 +653,7 @@ export const State = Node.CreateMany({
 							});
 						}
 					}
-				}, 350),
+				}, 650),
 			],
 		},
 	},

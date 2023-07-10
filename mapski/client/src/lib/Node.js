@@ -57,6 +57,9 @@ export class Node extends IdentityClass {
 		if(this.events.reducers[ action ]) {
 			state = this.events.reducers[ action ].call(this, state, ...args);
 		}
+		if(this.events.reducers.default) {
+			state = this.events.reducers.default.call(this, state, ...args);
+		}
 
 		if(JSON.stringify(state) === JSON.stringify(previous)) {
 			return state;

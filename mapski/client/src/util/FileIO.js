@@ -3,6 +3,7 @@ import { v4 as uuid } from "uuid";
 export class FileIO {
 	static save(data, name, ext) {
 		return new Promise((resolve, reject) => {
+			console.log(data)
 			let jsonStr;
 			try {
 				jsonStr = JSON.stringify(data);
