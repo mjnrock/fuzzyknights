@@ -78,10 +78,10 @@ export const Reducers = {
 					sprite.width = State?.map?.state?.tw * State?.viewport?.state?.zoom;
 					sprite.height = State?.map?.state?.th * State?.viewport?.state?.zoom;
 
-					
+
 					// Store the sprite in the sprites object with the x, y as the key
 					next.sprites[ `${ x },${ y }` ] = sprite;
-					
+
 					// Add the sprite to the stage
 					next.stage.addChild(sprite);
 				}
@@ -122,7 +122,6 @@ export const Reducers = {
 	},
 	viewport: {
 		merge: (state, data) => {
-			console.log(data)
 			return {
 				...state,
 				...data,
@@ -130,7 +129,7 @@ export const Reducers = {
 		},
 		move: (state, data) => {
 			const { x, y } = data;
-			
+
 			let nx = state.x + x;
 			let ny = state.y + y;
 
@@ -150,7 +149,7 @@ export const Reducers = {
 
 			return {
 				...state,
-				zoom: state.zoom * zoom,
+				zoom: Math.min(Math.max(state.zoom + zoom, 0.1), 5),
 			};
 		},
 		tick(state, data) {

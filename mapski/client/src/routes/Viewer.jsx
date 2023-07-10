@@ -46,9 +46,9 @@ export function Viewer() {
 
 		const onWheel = (e) => {
 			if(e.deltaY > 0) {
-				State.viewport.dispatch("zoom", { zoom: 0.5 });
+				State.viewport.dispatch("zoom", { zoom: -0.01 });
 			} else if(e.deltaY < 0) {
-				State.viewport.dispatch("zoom", { zoom: 2.0 });
+				State.viewport.dispatch("zoom", { zoom: 0.01 });
 			}
 		};
 
@@ -84,9 +84,11 @@ export function ViewportConfig({ data, update }) {
 	const { viewportDispatch } = update;
 
 	const onChange = (e) => {
-		console.log(e.target.name, +e.target.value)
-		viewportDispatch("merge", {
-			[ e.target.name ]: +e.target.value,
+		viewportDispatch({
+			type: "merge",
+			data: {
+				[ e.target.name ]: +e.target.value,
+			},
 		});
 	};
 
@@ -120,6 +122,8 @@ export function ViewportConfig({ data, update }) {
 					className="w-24 ml-2 border border-solid rounded shadow border-neutral-200"
 					type="number"
 					name="zoom"
+					min={ 0 }
+					max={ 5 }
 					value={ viewportData.zoom }
 					onChange={ onChange }
 				/>
