@@ -4,14 +4,52 @@ import { Reducers, State } from "../apps/viewer/main";
 
 import { PixiView } from "../modules/pixi/components/PixiView";
 
+import FileMenu from "../modules/menubar/components/FileMenu";
+import { FileIO } from "../util/FileIO";
+import Base64 from "../util/Base64";
+
 export function Viewer() {
+	const { state: menubarData, dispatch: menubarDispatch } = useNode(State.menubar, Reducers.menubar);
 	const { state: mapData, dispatch: mapDispatch } = useNode(State.map, Reducers.map);
 	const { state: terrainData, dispatch: terrainDispatch } = useNode(State.terrain, Reducers.terrain);
 	const { state: viewportData, dispatch: viewportDispatch } = useNode(State.viewport, Reducers.viewport);
 	const { state: pixiData, dispatch: pixiDispatch } = useNode(State.pixi, Reducers.pixi);
 
-	//FIXME: viewportDispatch does not appear to be working, but State.viewport.dispatch does (possibly the other dispatches as well)
-	//NOTE: This is currently preventing the Viewer config form to work
+	const loadMap = async () => {
+		console.log("Loading map...");
+
+		FileIO.load()
+			.then(async (data) => {
+				for(const [ key, obj ] of Object.entries(data.terrain.terrains)) {
+					if(Base64.test(obj.texture)) {
+						data.terrain.terrains[ key ].texture = await Base64.Decode(obj.texture);
+					}
+				};
+
+				return data;
+			})
+			.then((data) => {
+				const { rows, columns: cols, tw, th, tiles } = data.map;
+				mapDispatch({
+					type: "set",
+					data: {
+						rows,
+						cols,
+						tw,
+						th,
+						tiles,
+					},
+				});
+				terrainDispatch({ type: "set", data: data.terrain });
+			})
+			.catch((error) => console.error(error));
+	};
+
+	const exec = (command) => {
+		if(command.type === "file/load") {
+			loadMap();
+		}
+	};
 
 	useEffect(() => {
 
@@ -63,6 +101,13 @@ export function Viewer() {
 
 	return (
 		<div className="flex flex-col items-center justify-center">
+			<div className="flex flex-row items-center justify-center w-full gap-2">
+				<FileMenu
+					data={ menubarData.menu }
+					onSelect={ (command) => exec({ type: command }) }
+				/>
+			</div>
+
 			<PixiView
 				app={ pixiData.app }
 			/>

@@ -155,7 +155,6 @@ export function Editor() {
 
 	return (
 		<div className="flex flex-col gap-2">
-		<button onClick={ e => menubarDispatch("test")}>Click 2</button>
 			<div className="flex flex-row items-center justify-center w-full gap-2">
 				<FileMenu
 					data={ menubar.menu }

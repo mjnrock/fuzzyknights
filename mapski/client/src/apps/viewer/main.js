@@ -5,9 +5,16 @@ import Base64 from "../../util/Base64";
 import { TerrainDict } from "./data/TerrainMap.js";
 
 import FS_SavedMap from "./data/maps/TEST.json";
+import { BsFolder2Open } from "react-icons/bs";
 
 export const Reducers = {
+	menubar: {},
 	terrain: {
+		set: (state, data) => {
+			return {
+				...data
+			};
+		},
 		/**
 		 * Load the terrain map enum data
 		 */
@@ -30,6 +37,11 @@ export const Reducers = {
 		},
 	},
 	map: {
+		set: (state, data) => {
+			return {
+				...data
+			};
+		},
 		/**
 		 * Load the map schema data and convert it into terrain data
 		 */
@@ -44,7 +56,7 @@ export const Reducers = {
 		load: async (state, data) => {
 			// take the terrain data and create the baseTextures and sprites
 			const terrain = State?.terrain?.state;
-			const next = {
+			const next = data || {
 				...state,
 			};
 
@@ -197,6 +209,25 @@ export const Reducers = {
 };
 
 export const State = Node.CreateMany({
+	menubar: {
+		state: {
+			menu: [
+				{
+					name: "File",
+					command: "File",
+					submenu: [
+						{
+							name: "Load",
+							command: "file/load",
+							icon: BsFolder2Open,
+							// shortcut: "Ctrl+O",
+						},
+					],
+				},
+			],
+		},
+		reducers: Reducers.menubar,
+	},
 	terrain: {
 		state: {
 			...TerrainDict,
@@ -218,6 +249,14 @@ export const State = Node.CreateMany({
 		},
 		reducers: Reducers.map,
 		effects: {
+			set: (state, data) => {
+				State.pixi.dispatchAsync("load", {
+					app: State.pixi.state.app,
+					stage: new PIXI.Container(),
+					assets: {},
+					sprites: {},
+				});
+			},
 			load: (state, data) => {
 				State.pixi.dispatchAsync("load");
 			},
