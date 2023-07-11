@@ -113,9 +113,10 @@ export function Viewer() {
 			/>
 
 			<div className="flex flex-col items-center justify-center w-1/2 p-2 mb-2 border border-solid rounded border-neutral-200 bg-neutral-50">
-				<p className="flex text-sm text-neutral-500">Use the arrow keys or WASD to move, and scroll to zoom.</p>
+				<p className="flex text-sm text-neutral-500">Use the arrow keys or <kbd className="px-1 mx-1 border border-solid rounded border-neutral-200">WASD</kbd> to move, scroll to zoom, and <kbd className="px-1 mx-1 border border-solid rounded border-neutral-200">Ctrl+Space</kbd> to center.</p>
 				<p className="flex text-sm text-neutral-500">Width, Height, X, and Y are in tiles.</p>
 			</div>
+
 
 			<ViewportConfig
 				data={ { viewportData, mapData } }
