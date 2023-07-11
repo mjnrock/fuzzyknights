@@ -318,11 +318,11 @@ export const State = Node.CreateMany({
 	viewport: {
 		state: {
 			canvas: {
-				width: 640,		//px
-				height: 640,	//px
+				width: 800,		//px
+				height: 800,	//px
 			},
-			w: 20,	// px
-			h: 20,	// px
+			w: 25,	// px
+			h: 25,	// px
 			x: 0,	// px
 			y: 0,	// px
 			zoom: 1.00,	// 1 = 100%
