@@ -1,18 +1,18 @@
 import { useEffect, useRef } from "react";
 import { useNode } from "../lib/react/useNode";
 
-import TileMapJSX from "../modules/map/components/TileMap";
-import TileMapSizing from "../modules/map/components/TileMapSizing";
-import TerrainMap from "../modules/terrain/components/TerrainMap";
+import TileMapJSX from "../apps/mapski/editor/modules/map/components/TileMap";
+import TileMapSizing from "../apps/mapski/editor/modules/map/components/TileMapSizing";
+import TerrainMap from "../apps/mapski/editor/modules/terrain/components/TerrainMap";
 
-import ViewPalette from "../modules/brushes/components/ViewPalette";
+import ViewPalette from "../apps/mapski/editor/modules/brushes/components/ViewPalette";
 
-import { Reducers, State } from "../apps/editor/main";
+import { Reducers, State } from "../apps/mapski/editor/main";
 
-import FileMenu from "../modules/menubar/components/FileMenu";
+import FileMenu from "../apps/mapski/editor/modules/menubar/components/FileMenu";
 import { FileIO } from "../util/FileIO";
 import { clone } from "../util/clone";
-import StateHistory from "../modules/history/components/StateHistory";
+import StateHistory from "../apps/mapski/editor/modules/history/components/StateHistory";
 import Base64 from "../util/Base64";
 
 //TODO: Because of the feedback loop, `map` has been given a "reversion" reducer, but it's identical to the "set" reducer.

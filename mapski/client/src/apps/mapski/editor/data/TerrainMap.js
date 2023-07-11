@@ -1,4 +1,4 @@
-import { Terrain } from "../../../modules/terrain/Terrain.js";
+import { Terrain } from "../modules/terrain/Terrain.js";
 
 export const TerrainDict = {
 	VOID: { type: "VOID", cost: Infinity, mask: 0, texture: `#000000` },

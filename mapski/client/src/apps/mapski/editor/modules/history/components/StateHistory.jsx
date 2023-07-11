@@ -3,7 +3,7 @@ import { useEffect, useRef, useCallback, useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import JsonViewer from "../../../components/JsonViewer";
 import { TileMapPreview } from "../../map/components/TileMap";
-import { clone } from "../../../util/clone";
+import { clone } from "../../../../../../util/clone";
 
 export function StateHistory({ data, update, direction = "horizontal" }) {
 	const { map: mapData, history: historyData, terrain: terrainData } = data;

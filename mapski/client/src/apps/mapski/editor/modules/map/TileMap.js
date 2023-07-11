@@ -1,7 +1,7 @@
 import { Tile } from "./Tile";
 
 // STUB: This is using example data
-import { TerrainDict } from "../../apps/editor/data/TerrainMap";
+import { TerrainDict } from "../../data/TerrainMap";
 
 export const TileMap = {
 	Next({ rows, columns, tw, th, tiles, tileData, ...target } = {}) {

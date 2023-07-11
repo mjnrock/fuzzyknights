@@ -1,18 +1,18 @@
-import TileMapData from "../../modules/map/TileMap";
-import Terrain from "../../modules/terrain/Terrain";
+import TileMapData from "./modules/map/TileMap";
+import Terrain from "./modules/terrain/Terrain";
 
-import { Node } from "../../lib/Node";
+import { Node } from "../../../lib/Node";
 
 import { TerrainDict, TerrainMapData } from "./data/TerrainMap";
 
 import { BsFolder2Open, BsSave } from "react-icons/bs";
 
-import { CellularAutomata } from "../../util/algorithms/CellularAutomata";
+import { CellularAutomata } from "../../../util/algorithms/CellularAutomata";
 import { createNoise2D } from "simplex-noise";
 import alea from "alea";
-import { clone } from "../../util/clone";
+import { clone } from "../../../util/clone";
 
-import { debounce } from "../../util/debounce";
+import { debounce } from "../../../util/debounce";
 
 export const Reducers = {
 	menubar: {},

@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useNode } from "../lib/react/useNode";
-import { Reducers, State } from "../apps/viewer/main";
+import { Reducers, State } from "../apps/mapski/viewer/main";
 
-import { PixiView } from "../modules/pixi/components/PixiView";
+import { PixiView } from "../apps/mapski/viewer/modules/pixi/components/PixiView";
 
-import FileMenu from "../modules/menubar/components/FileMenu";
+import FileMenu from "../apps/mapski/viewer/modules/menubar/components/FileMenu";
 import { FileIO } from "../util/FileIO";
 import Base64 from "../util/Base64";
 

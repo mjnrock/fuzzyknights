@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
-import { Node } from "../../lib/Node";
-import Base64 from "../../util/Base64";
+import { Node } from "../../../lib/Node";
+import Base64 from "../../../util/Base64";
 
 import { TerrainDict } from "./data/TerrainMap.js";
 
