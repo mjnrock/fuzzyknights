@@ -112,8 +112,10 @@ export function Viewer() {
 				app={ pixiData.app }
 			/>
 
-			<div className="flex flex-row items-center justify-center">
-				<p className="text-sm text-neutral-500">Use the arrow keys or WASD to move, and scroll to zoom.</p>
+			<div className="flex flex-col items-center justify-center w-1/2 p-2 mb-2 border border-solid rounded border-neutral-200 bg-neutral-50">
+				<p className="flex text-sm text-neutral-500">Use the arrow keys or WASD to move, and scroll to zoom.</p>
+				<p className="flex text-sm text-neutral-500">Width and height are in tiles.</p>
+				<p className="flex text-sm text-neutral-500">X and Y are in tiles.</p>
 			</div>
 
 			<ViewportConfig
@@ -138,7 +140,7 @@ export function ViewportConfig({ data, update }) {
 	};
 
 	return (
-		<div className="grid w-1/2 grid-cols-2 gap-4">
+		<div className="grid w-1/2 grid-cols-2 gap-4 mb-2">
 			<div className="grid grid-rows-5 gap-2">
 				<div className="flex items-center">
 					<label className="w-1/5 text-sm text-center text-neutral-500">Width</label>
