@@ -296,6 +296,7 @@ export function ViewportConfig({ data, update }) {
 							type: "merge",
 							data: {
 								zoom: 1,
+								zoomStep: 0.03,
 							}
 						}) }
 					>
