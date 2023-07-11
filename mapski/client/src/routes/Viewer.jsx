@@ -114,7 +114,7 @@ export function Viewer() {
 
 			<div className="flex flex-col items-center justify-center w-1/2 p-2 mb-2 border border-solid rounded border-neutral-200 bg-neutral-50">
 				<p className="flex text-sm text-neutral-500">Use the arrow keys or <kbd className="px-1 mx-1 border border-solid rounded border-neutral-200">WASD</kbd> to move, scroll to zoom, and <kbd className="px-1 mx-1 border border-solid rounded border-neutral-200">Ctrl+Space</kbd> to center.</p>
-				<p className="flex text-sm text-neutral-500">Width, Height, X, and Y are in tiles.</p>
+				<p className="flex text-sm text-neutral-500">Sight, X, and Y are in tiles.</p>
 			</div>
 
 
@@ -143,7 +143,7 @@ export function ViewportConfig({ data, update }) {
 		<div className="grid w-1/2 grid-cols-2 gap-4 mb-2">
 			<div className="grid grid-rows-5 gap-2">
 				<div className="flex items-center">
-					<label className="w-1/5 text-sm text-center text-neutral-500">Width</label>
+					<label className="w-1/5 text-sm text-center text-neutral-500">Sight X</label>
 					<input
 						className="w-4/5 h-8 px-2 ml-2 border border-solid rounded shadow border-neutral-200"
 						type="number"
@@ -155,7 +155,7 @@ export function ViewportConfig({ data, update }) {
 				</div>
 
 				<div className="flex items-center">
-					<label className="w-1/5 text-sm text-center text-neutral-500">Height</label>
+					<label className="w-1/5 text-sm text-center text-neutral-500">Sight Y</label>
 					<input
 						className="w-4/5 h-8 px-2 ml-2 border border-solid rounded shadow border-neutral-200"
 						type="number"
@@ -172,7 +172,7 @@ export function ViewportConfig({ data, update }) {
 						className="w-4/5 h-8 px-2 ml-2 border border-solid rounded shadow border-neutral-200"
 						type="number"
 						name="zoom"
-						min={ 0 }
+						min={ 0.01 }
 						max={ 5 }
 						value={ viewportData.zoom }
 						onChange={ onChange }

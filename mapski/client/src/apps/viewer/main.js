@@ -134,9 +134,26 @@ export const Reducers = {
 	},
 	viewport: {
 		merge: (state, data) => {
+			const next = {
+				...data,
+			};
+
+			if(next.w < 1) next.w = 0;
+			if(next.h < 1) next.h = 0;
+			if(next.w > State.map.state.cols) next.w = State.map.state.cols;
+			if(next.h > State.map.state.rows) next.h = State.map.state.rows;
+
+			if(next.x < 0) next.x = 0;
+			if(next.y < 0) next.y = 0;
+			if(next.x > State.map.state.cols) next.x = State.map.state.cols;
+			if(next.y > State.map.state.rows) next.y = State.map.state.rows;
+
+			if(next.zoom < 0.1) next.zoom = 0.1;
+			if(next.zoom > 5) next.zoom = 5;
+
 			return {
 				...state,
-				...data,
+				...next,
 			};
 		},
 		center: (state, data) => {
