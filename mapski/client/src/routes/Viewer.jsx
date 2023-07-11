@@ -114,8 +114,7 @@ export function Viewer() {
 
 			<div className="flex flex-col items-center justify-center w-1/2 p-2 mb-2 border border-solid rounded border-neutral-200 bg-neutral-50">
 				<p className="flex text-sm text-neutral-500">Use the arrow keys or WASD to move, and scroll to zoom.</p>
-				<p className="flex text-sm text-neutral-500">Width and height are in tiles.</p>
-				<p className="flex text-sm text-neutral-500">X and Y are in tiles.</p>
+				<p className="flex text-sm text-neutral-500">Width, Height, X, and Y are in tiles.</p>
 			</div>
 
 			<ViewportConfig
