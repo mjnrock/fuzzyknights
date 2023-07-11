@@ -23,6 +23,14 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
+# Run yarn start
+Write-Host "Running `yarn start`..."
+Invoke-Expression "yarn start"
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to run `yarn start` command"
+    exit $LASTEXITCODE
+}
+
 Write-Host "Script completed successfully."
 
 # Wait for the user to press Enter before exiting

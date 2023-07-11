@@ -7,7 +7,7 @@ import { Viewer as ViewerRoute } from "./routes/Viewer.jsx";
 export function App() {
 	return (
 		<Routes>
-			<Route index element={ <EditorRoute /> } />
+			<Route index element={ <DefaultRoute /> } />
 			<Route path="/editor" element={ <EditorRoute /> } />
 			<Route path="/viewer" element={ <ViewerRoute /> } />
 		</Routes>
