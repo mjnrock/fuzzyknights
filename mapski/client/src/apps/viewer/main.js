@@ -159,8 +159,8 @@ export const Reducers = {
 		center: (state, data) => {
 			return {
 				...state,
-				x: State?.map?.state?.rows / 2 || 0,
-				y: State?.map?.state?.cols / 2 || 0,
+				x: State?.map?.state?.cols / 2 || 0,
+				y: State?.map?.state?.rows / 2 || 0,
 			};
 		},
 		move: (state, data) => {

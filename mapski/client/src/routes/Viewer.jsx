@@ -209,8 +209,8 @@ export function ViewportConfig({ data, update }) {
 						onClick={ () => viewportDispatch({
 							type: "merge",
 							data: {
-								w: ~~(mapData.rows / 4),
-								x: ~~((mapData.rows / 4) / 2),
+								w: ~~(mapData.cols / 4),
+								x: ~~((mapData.cols / 4) / 2),
 							}
 						}) }
 					>
@@ -221,8 +221,8 @@ export function ViewportConfig({ data, update }) {
 						onClick={ () => viewportDispatch({
 							type: "merge",
 							data: {
-								w: ~~(mapData.rows / 2),
-								x: ~~((mapData.rows / 2) / 2),
+								w: ~~(mapData.cols / 2),
+								x: ~~((mapData.cols / 2) / 2),
 							}
 						}) }
 					>
@@ -233,8 +233,8 @@ export function ViewportConfig({ data, update }) {
 						onClick={ () => viewportDispatch({
 							type: "merge",
 							data: {
-								w: mapData.rows,
-								x: ~~(mapData.rows / 2),
+								w: mapData.cols,
+								x: ~~(mapData.cols / 2),
 							}
 						}) }
 					>
@@ -247,8 +247,8 @@ export function ViewportConfig({ data, update }) {
 						onClick={ () => viewportDispatch({
 							type: "merge",
 							data: {
-								h: ~~(mapData.cols / 4),
-								y: ~~((mapData.cols / 4) / 2),
+								h: ~~(mapData.rows / 4),
+								y: ~~((mapData.rows / 4) / 2),
 							}
 						}) }
 					>
@@ -259,8 +259,8 @@ export function ViewportConfig({ data, update }) {
 						onClick={ () => viewportDispatch({
 							type: "merge",
 							data: {
-								h: ~~(mapData.cols / 2),
-								y: ~~((mapData.cols / 2) / 2),
+								h: ~~(mapData.rows / 2),
+								y: ~~((mapData.rows / 2) / 2),
 							}
 						}) }
 					>
@@ -271,8 +271,8 @@ export function ViewportConfig({ data, update }) {
 						onClick={ () => viewportDispatch({
 							type: "merge",
 							data: {
-								h: mapData.cols,
-								y: ~~(mapData.cols / 2),
+								h: mapData.rows,
+								y: ~~(mapData.rows / 2),
 							}
 						}) }
 					>
