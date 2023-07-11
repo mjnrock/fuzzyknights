@@ -1,10 +1,21 @@
 # Get the directory of the current script
 $scriptPath = Split-Path -Parent $PSCommandPath
 
-# Define the relative directory path
-$directoryPath = Join-Path -Path $scriptPath -ChildPath ".\mapski\client"
+# Define the relative directory paths
+$mapskiPath = Join-Path -Path $scriptPath -ChildPath ".\mapski\client"
+$studioPath = Join-Path -Path $scriptPath -ChildPath ".\studio\client"
 
-# Change to the directory
+# Check if directories exist and select the correct one
+if (Test-Path $mapskiPath) {
+    $directoryPath = $mapskiPath
+} elseif (Test-Path $studioPath) {
+    $directoryPath = $studioPath
+} else {
+    Write-Error "Neither the 'mapski' nor the 'studio' directories exist"
+    exit 1
+}
+
+# Change to the selected directory
 Set-Location -Path $directoryPath
 
 # Update the git repository
