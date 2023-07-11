@@ -30,6 +30,7 @@ export function Viewer() {
 			})
 			.then((data) => {
 				const { rows, columns: cols, tw, th, tiles } = data.map;
+				terrainDispatch({ type: "set", data: data.terrain.terrains });
 				mapDispatch({
 					type: "set",
 					data: {
@@ -40,7 +41,6 @@ export function Viewer() {
 						tiles,
 					},
 				});
-				terrainDispatch({ type: "set", data: data.terrain });
 			})
 			.catch((error) => console.error(error));
 	};

@@ -4,7 +4,7 @@ import Base64 from "../../util/Base64";
 
 import { TerrainDict } from "./data/TerrainMap.js";
 
-import FS_SavedMap from "./data/maps/TEST.json";
+import FS_SavedMap from "./data/maps/cave.json";
 import { BsFolder2Open } from "react-icons/bs";
 
 export const Reducers = {
