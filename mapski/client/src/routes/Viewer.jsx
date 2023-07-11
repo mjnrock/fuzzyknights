@@ -55,7 +55,7 @@ export function Viewer() {
 
 		// bind the viewport's .tick method to the pixi app's ticker
 		const tick = delta => {
-			State.viewport.dispatch("tick", { dt: delta });
+			viewportDispatch({ type: "tick", data: { dt: delta } });
 		};
 		pixiData.app.ticker.add(tick);
 		pixiData.app.start();
@@ -70,32 +70,32 @@ export function Viewer() {
 	useEffect(() => {
 		const onKeyDown = (e) => {
 			if(e.code === "KeyW" || e.code === "ArrowUp") {
-				State.viewport.dispatch("move", { x: 0, y: -1 });
+				viewportDispatch({ type: "move", data: { x: 0, y: -1 } });
 			} else if(e.code === "KeyS" || e.code === "ArrowDown") {
-				State.viewport.dispatch("move", { x: 0, y: 1 });
+				viewportDispatch({ type: "move", data: { x: 0, y: 1 } });
 			} else if(e.code === "KeyA" || e.code === "ArrowLeft") {
-				State.viewport.dispatch("move", { x: -1, y: 0 });
+				viewportDispatch({ type: "move", data: { x: -1, y: 0 } });
 			} else if(e.code === "KeyD" || e.code === "ArrowRight") {
-				State.viewport.dispatch("move", { x: 1, y: 0 });
+				viewportDispatch({ type: "move", data: { x: 1, y: 0 } });
 			} else if(e.code === "Space" && e.ctrlKey) {
-				State.viewport.dispatch("center");
+				viewportDispatch({ type: "center" });
 			}
 		};
 
 		const onWheel = (e) => {
 			if(e.deltaY > 0) {
-				State.viewport.dispatch("zoom", { zoom: -0.01 });
+				viewportDispatch({ type: "zoom", data: { zoom: -1 } });
 			} else if(e.deltaY < 0) {
-				State.viewport.dispatch("zoom", { zoom: 0.01 });
+				viewportDispatch({ type: "zoom", data: { zoom: 1 } });
 			}
 		};
 
 		window.addEventListener("keydown", onKeyDown);
-		window.addEventListener("wheel", onWheel);
+		State.pixi.state.app.view.addEventListener("wheel", onWheel);
 
 		return () => {
 			window.removeEventListener("keydown", onKeyDown);
-			window.removeEventListener("wheel", onWheel);
+			State.pixi.state.app.view.removeEventListener("wheel", onWheel);
 		}
 	}, [ viewportDispatch ]);
 
@@ -117,7 +117,7 @@ export function Viewer() {
 			</div>
 
 			<ViewportConfig
-				data={ { viewportData } }
+				data={ { viewportData, mapData } }
 				update={ { viewportDispatch } }
 			/>
 		</div>
@@ -125,7 +125,7 @@ export function Viewer() {
 };
 
 export function ViewportConfig({ data, update }) {
-	const { viewportData } = data;
+	const { viewportData, mapData } = data;
 	const { viewportDispatch } = update;
 
 	const onChange = (e) => {
@@ -138,66 +138,223 @@ export function ViewportConfig({ data, update }) {
 	};
 
 	return (
-		<div className="flex flex-col items-center justify-center">
-			<div className="flex flex-row items-center justify-center">
-				<label className="text-sm text-neutral-500">Width</label>
-				<input
-					className="w-24 ml-2 border border-solid rounded shadow border-neutral-200"
-					type="number"
-					name="w"
-					value={ viewportData.w }
-					onChange={ onChange }
-				/>
+		<div className="grid w-1/2 grid-cols-2 gap-4">
+			<div className="grid grid-rows-5 gap-2">
+				<div className="flex items-center">
+					<label className="w-1/5 text-sm text-center text-neutral-500">Width</label>
+					<input
+						className="w-4/5 h-8 px-2 ml-2 border border-solid rounded shadow border-neutral-200"
+						type="number"
+						name="w"
+						step={ 2 }
+						value={ viewportData.w }
+						onChange={ onChange }
+					/>
+				</div>
+
+				<div className="flex items-center">
+					<label className="w-1/5 text-sm text-center text-neutral-500">Height</label>
+					<input
+						className="w-4/5 h-8 px-2 ml-2 border border-solid rounded shadow border-neutral-200"
+						type="number"
+						name="h"
+						step={ 2 }
+						value={ viewportData.h }
+						onChange={ onChange }
+					/>
+				</div>
+
+				<div className="flex items-center">
+					<label className="w-1/5 text-sm text-center text-neutral-500">Zoom</label>
+					<input
+						className="w-4/5 h-8 px-2 ml-2 border border-solid rounded shadow border-neutral-200"
+						type="number"
+						name="zoom"
+						min={ 0 }
+						max={ 5 }
+						value={ viewportData.zoom }
+						onChange={ onChange }
+					/>
+				</div>
+
+				<div className="flex items-center">
+					<label className="w-1/5 text-sm text-center text-neutral-500">X</label>
+					<input
+						className="w-4/5 h-8 px-2 ml-2 border border-solid rounded shadow border-neutral-200"
+						type="number"
+						name="x"
+						value={ viewportData.x }
+						onChange={ onChange }
+					/>
+				</div>
+
+				<div className="flex items-center">
+					<label className="w-1/5 text-sm text-center text-neutral-500">Y</label>
+					<input
+						className="w-4/5 h-8 px-2 ml-2 border border-solid rounded shadow border-neutral-200"
+						type="number"
+						name="y"
+						value={ viewportData.y }
+						onChange={ onChange }
+					/>
+				</div>
 			</div>
 
-			<div className="flex flex-row items-center justify-center">
-				<label className="text-sm text-neutral-500">Height</label>
-				<input
-					className="w-24 ml-2 border border-solid rounded shadow border-neutral-200"
-					type="number"
-					name="h"
-					value={ viewportData.h }
-					onChange={ onChange }
-				/>
-			</div>
+			<div className="grid grid-rows-5 gap-2">
+				<div className="flex gap-1">
+					<button
+						className="w-1/3 border border-solid rounded shadow border-neutral-200 bg-neutral-50 hover:bg-neutral-200 active:bg-neutral-300"
+						onClick={ () => viewportDispatch({
+							type: "merge",
+							data: {
+								w: ~~(mapData.rows / 4),
+								x: ~~((mapData.rows / 4) / 2),
+							}
+						}) }
+					>
+						25%
+					</button>
+					<button
+						className="w-1/3 border border-solid rounded shadow border-neutral-200 bg-neutral-50 hover:bg-neutral-200 active:bg-neutral-300"
+						onClick={ () => viewportDispatch({
+							type: "merge",
+							data: {
+								w: ~~(mapData.rows / 2),
+								x: ~~((mapData.rows / 2) / 2),
+							}
+						}) }
+					>
+						50%
+					</button>
+					<button
+						className="w-1/3 border border-solid rounded shadow border-neutral-200 bg-neutral-50 hover:bg-neutral-200 active:bg-neutral-300"
+						onClick={ () => viewportDispatch({
+							type: "merge",
+							data: {
+								w: mapData.rows,
+								x: ~~(mapData.rows / 2),
+							}
+						}) }
+					>
+						100%
+					</button>
+				</div>
+				<div className="flex gap-1">
+					<button
+						className="w-1/3 border border-solid rounded shadow border-neutral-200 bg-neutral-50 hover:bg-neutral-200 active:bg-neutral-300"
+						onClick={ () => viewportDispatch({
+							type: "merge",
+							data: {
+								h: ~~(mapData.cols / 4),
+								y: ~~((mapData.cols / 4) / 2),
+							}
+						}) }
+					>
+						25%
+					</button>
+					<button
+						className="w-1/3 border border-solid rounded shadow border-neutral-200 bg-neutral-50 hover:bg-neutral-200 active:bg-neutral-300"
+						onClick={ () => viewportDispatch({
+							type: "merge",
+							data: {
+								h: ~~(mapData.cols / 2),
+								y: ~~((mapData.cols / 2) / 2),
+							}
+						}) }
+					>
+						50%
+					</button>
+					<button
+						className="w-1/3 border border-solid rounded shadow border-neutral-200 bg-neutral-50 hover:bg-neutral-200 active:bg-neutral-300"
+						onClick={ () => viewportDispatch({
+							type: "merge",
+							data: {
+								h: mapData.cols,
+								y: ~~(mapData.cols / 2),
+							}
+						}) }
+					>
+						100%
+					</button>
+				</div>
 
-			<div className="flex flex-row items-center justify-center">
-				<label className="text-sm text-neutral-500">Zoom</label>
-				<input
-					className="w-24 ml-2 border border-solid rounded shadow border-neutral-200"
-					type="number"
-					name="zoom"
-					min={ 0 }
-					max={ 5 }
-					value={ viewportData.zoom }
-					onChange={ onChange }
-				/>
-			</div>
+				<div className="flex items-center gap-1">
+					<label className="w-1/5 text-sm text-center text-neutral-500">+/-</label>
+					<input
+						className="w-3/5 h-8 px-2 ml-2 border border-solid rounded shadow border-neutral-200"
+						type="number"
+						name="zoomStep"
+						min={ 0.01 }
+						max={ 1 }
+						step={ 0.01 }
+						value={ viewportData.zoomStep }
+						onChange={ onChange }
+					/>
+					<button
+						className="w-1/5 border border-solid rounded shadow border-neutral-200 bg-neutral-50 hover:bg-neutral-200 active:bg-neutral-300"
+						onClick={ () => viewportDispatch({
+							type: "merge",
+							data: {
+								zoom: 1,
+							}
+						}) }
+					>
+						Reset
+					</button>
+				</div>
 
-			<div className="flex flex-row items-center justify-center">
-				<label className="text-sm text-neutral-500">X</label>
-				<input
-					className="w-24 ml-2 border border-solid rounded shadow border-neutral-200"
-					type="number"
-					name="x"
-					value={ viewportData.x }
-					onChange={ onChange }
-				/>
-			</div>
+				<div className="flex items-center gap-1">
+					<label className="w-1/5 text-sm text-center text-neutral-500">+/-</label>
+					<input
+						className="w-3/5 h-8 px-2 ml-2 border border-solid rounded shadow border-neutral-200"
+						type="number"
+						name="xStep"
+						min={ 1 }
+						max={ 10 }
+						step={ 1 }
+						value={ viewportData.xStep }
+						onChange={ onChange }
+					/>
+					<button
+						className="w-1/5 border border-solid rounded shadow border-neutral-200 bg-neutral-50 hover:bg-neutral-200 active:bg-neutral-300"
+						onClick={ () => viewportDispatch({
+							type: "merge",
+							data: {
+								xStep: 1,
+							}
+						}) }
+					>
+						Reset
+					</button>
+				</div>
 
-			<div className="flex flex-row items-center justify-center">
-				<label className="text-sm text-neutral-500">Y</label>
-				<input
-					className="w-24 ml-2 border border-solid rounded shadow border-neutral-200"
-					type="number"
-					name="y"
-					value={ viewportData.y }
-					onChange={ onChange }
-				/>
+				<div className="flex items-center gap-1">
+					<label className="w-1/5 text-sm text-center text-neutral-500">+/-</label>
+					<input
+						className="w-3/5 h-8 px-2 ml-2 border border-solid rounded shadow border-neutral-200"
+						type="number"
+						name="yStep"
+						min={ 1 }
+						max={ 10 }
+						step={ 1 }
+						value={ viewportData.yStep }
+						onChange={ onChange }
+					/>
+					<button
+						className="w-1/5 border border-solid rounded shadow border-neutral-200 bg-neutral-50 hover:bg-neutral-200 active:bg-neutral-300"
+						onClick={ () => viewportDispatch({
+							type: "merge",
+							data: {
+								yStep: 1,
+							}
+						}) }
+					>
+						Reset
+					</button>
+				</div>
 			</div>
 		</div>
 	);
 }
-
 
 export default Viewer;

@@ -139,11 +139,18 @@ export const Reducers = {
 				...data,
 			};
 		},
+		center: (state, data) => {
+			return {
+				...state,
+				x: State?.map?.state?.rows / 2 || 0,
+				y: State?.map?.state?.cols / 2 || 0,
+			};
+		},
 		move: (state, data) => {
 			const { x, y } = data;
 
-			let nx = state.x + x;
-			let ny = state.y + y;
+			let nx = ~~(state.x + (x * state.xStep));
+			let ny = ~~(state.y + (y * state.yStep));
 
 			if(nx < 0) nx = 0;
 			if(ny < 0) ny = 0;
@@ -157,11 +164,18 @@ export const Reducers = {
 			};
 		},
 		zoom: (state, data) => {
-			const { zoom } = data;
+			let delta = Math.sign(data.zoom) * state.zoomStep;
+
+			// scale the zoom step by the current zoom if state.zoom is >= 1.5
+			if(state.zoom >= 1) {
+				delta *= 2 * state.zoom;
+			}
+
+			let nextZoom = Math.min(Math.max(Math.round((state.zoom + delta) * 100) / 100, 0.1), 5);
 
 			return {
 				...state,
-				zoom: Math.min(Math.max(state.zoom + zoom, 0.1), 5),
+				zoom: nextZoom,
 			};
 		},
 		tick(state, data) {
@@ -290,11 +304,14 @@ export const State = Node.CreateMany({
 				width: 640,		//px
 				height: 640,	//px
 			},
+			w: 20,	// px
+			h: 20,	// px
 			x: 0,	// px
 			y: 0,	// px
-			w: 200,	// px
-			h: 200,	// px
 			zoom: 1.00,	// 1 = 100%
+			xStep: 1,	// tile
+			yStep: 1,	// tile
+			zoomStep: 0.03,	// 0.03 = 3%
 			subject: (state) => {
 				return {
 					...state,
