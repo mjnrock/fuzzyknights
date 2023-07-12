@@ -25,6 +25,7 @@ export const Reducers = {
 
 			next.viewport.scale += direction * 0.1;
 			next.viewport.scale = Math.min(Math.max(0.1, next.viewport.scale), 5);
+			next.stage.scale.set(next.viewport.scale);
 
 			return next;
 		},

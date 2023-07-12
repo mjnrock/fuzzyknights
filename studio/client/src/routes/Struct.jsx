@@ -11,8 +11,6 @@ export function Struct() {
 	useEffect(() => {
 		// if a wheel event happens on the pixi canvas, prevent the default behavior and dispatch the event
 		const handler = (e) => {
-			e.preventDefault();
-
 			let data;
 			if(e.deltaY < 0) {
 				data = 1;
@@ -25,19 +23,25 @@ export function Struct() {
 				data,
 			});
 		};
-		pixiData.app.view.addEventListener("wheel", handler);
-		return () => pixiData.app.view.removeEventListener("wheel", handler);
-	}, [ pixiData.app.view ]);
+
+		window.addEventListener("wheel", handler);
+
+		return () => window.removeEventListener("wheel", handler);
+	}, []);
 
 	const handleMouseMove = (e) => {
 		const { offsetX, offsetY } = e.nativeEvent;
 		const { render } = contextData;
+		const { x: scaleX, y: scaleY } = pixiData.app.stage.scale;
+
+		const transformedOffsetX = offsetX / scaleX;
+		const transformedOffsetY = offsetY / scaleY;
 
 		for(const key in render) {
 			const node = render[ key ];
 			const { x, y, r } = node;
-			const dx = x - offsetX;
-			const dy = y - offsetY;
+			const dx = x - transformedOffsetX;
+			const dy = y - transformedOffsetY;
 			const distance = Math.sqrt(dx * dx + dy * dy);
 			if(distance < r) {
 				if(e.buttons === 1) {
@@ -46,8 +50,8 @@ export function Struct() {
 						type: "move",
 						data: {
 							key,
-							x: offsetX,
-							y: offsetY,
+							x: transformedOffsetX,
+							y: transformedOffsetY,
 						},
 					});
 				}
@@ -60,12 +64,16 @@ export function Struct() {
 	const handleDoubleClick = (e) => {
 		const { offsetX, offsetY } = e.nativeEvent;
 		const { render } = contextData;
+		const { x: scaleX, y: scaleY } = pixiData.app.stage.scale;
+
+		const transformedOffsetX = offsetX / scaleX;
+		const transformedOffsetY = offsetY / scaleY;
 
 		for(const key in render) {
 			const node = render[ key ];
 			const { x, y, r } = node;
-			const dx = x - offsetX;
-			const dy = y - offsetY;
+			const dx = x - transformedOffsetX;
+			const dy = y - transformedOffsetY;
 			const distance = Math.sqrt(dx * dx + dy * dy);
 			if(distance < r) {
 				console.log(contextData.data[ key ]);
@@ -74,6 +82,7 @@ export function Struct() {
 			}
 		}
 	};
+
 
 	return (
 		<div className="w-full h-full">
