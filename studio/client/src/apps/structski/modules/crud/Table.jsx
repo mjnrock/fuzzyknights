@@ -4,7 +4,7 @@ import { BsGearWideConnected, BsTrash, BsSearch, BsXCircle } from "react-icons/b
 
 const defaultRecord = { type: "", cost: "", mask: "", texture: "" };
 
-export function CRUDTable() {
+export function Table() {
 	const [ records, setRecords ] = useState([
 		{ type: "VOID", cost: Infinity, mask: 0, texture: `#000000` },
 		{ type: "WATER", cost: 4, mask: 1, texture: `#3e91af` },
@@ -214,4 +214,4 @@ const DynamicField = ({ mode, field, value, handleEdit, handleKeyPress }) => {
 };
 
 
-export default CRUDTable;
+export default Table;

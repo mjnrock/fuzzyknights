@@ -1,5 +1,5 @@
-import { CRUDTable } from "../apps/structski/modules/relational/CRUDTable";
-import Record from "../apps/structski/modules/relational/Record";
+import { Table } from "../apps/structski/modules/crud/Table";
+import Record from "../apps/structski/modules/crud/Record";
 
 export function Struct() {
 	return (
@@ -27,7 +27,7 @@ export function Struct() {
 			</div>
 
 			<div className="flex flex-col items-center justify-center m-2 overflow-hidden border border-solid rounded shadow-md select-none border-neutral-200">
-				<CRUDTable />
+				<Table />
 			</div>
 		</>
 	);
