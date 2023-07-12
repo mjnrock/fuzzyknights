@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BsPencilSquare, BsTrash, BsPlusCircleDotted, BsPlusSquareDotted, BsCheck, BsX } from "react-icons/bs";
+import { BsGearWideConnected, BsTrash, BsPlusCircleDotted, BsCheck, BsX } from "react-icons/bs";
 
 export const Record = ({ data, localName = "", fullName = "", selectedRows = [], setSelectedRows }) => {
 	const isSelected = selectedRows.includes(fullName);
@@ -161,7 +161,7 @@ const RecursiveComponent = ({ data }) => {
 		<div className="w-1/2 p-4">
 			<div className="flex flex-row items-center justify-center w-full h-full gap-2 p-2 overflow-hidden">
 				<button className="p-2 text-center border border-b-2 border-solid rounded shadow cursor-pointer bg-sky-50 hover:bg-sky-100 active:bg-sky-200 border-sky-300 text-sky-500 hover:border-sky-400" onClick={ toggleModify }>
-					<BsPencilSquare className={ isModifying ? "text-sky-400" : "text-sky-300" } />
+					<BsGearWideConnected className={ isModifying ? "text-sky-400" : "text-sky-300" } />
 				</button>
 				{ isModifying &&
 					<div className="flex items-center gap-2">

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { PhotoshopPicker } from "react-color";
-import { BsPencilSquare, BsTrash, BsSearch, BsXCircle } from "react-icons/bs"; // Importing required icons
+import { BsGearWideConnected, BsTrash, BsSearch, BsXCircle } from "react-icons/bs"; // Importing required icons
 
 const defaultRecord = { type: "", cost: "", mask: "", texture: "" };
 
@@ -111,7 +111,7 @@ export function CRUDTable() {
 						<div className="flex items-center gap-2">
 							<button className="p-2 text-center border border-b-2 border-solid rounded shadow cursor-pointer bg-sky-50 hover:bg-sky-100 active:bg-sky-200 border-sky-300 text-sky-500 hover:border-sky-400" onClick={ toggleModify }>
 								
-								<BsPencilSquare className={ isModifying ? "text-sky-400" : "text-sky-300" } />
+								<BsGearWideConnected className={ isModifying ? "text-sky-400" : "text-sky-300" } />
 							</button>
 							{ isModifying &&
 								<div className="flex items-center gap-2">

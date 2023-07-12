@@ -11,6 +11,11 @@ export function Struct() {
 						"baz": {
 							"qux": "quux",
 							"corge": "grault",
+							"array": [
+								"one",
+								"two",
+								"three"
+							],
 							"garply": {
 								"waldo": "fred",
 								"plugh": "xyzzy",
