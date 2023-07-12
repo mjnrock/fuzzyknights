@@ -9,7 +9,6 @@ export function Struct() {
 	const { state: contextData, dispatch: contextDispatch } = useNode(State.context, Reducers.context);
 
 	useEffect(() => {
-		// if a wheel event happens on the pixi canvas, prevent the default behavior and dispatch the event
 		const handler = (e) => {
 			let data;
 			if(e.deltaY < 0) {
@@ -45,7 +44,6 @@ export function Struct() {
 			const distance = Math.sqrt(dx * dx + dy * dy);
 			if(distance < r) {
 				if(e.buttons === 1) {
-					// dispatch a "move" event to the context dispatcher
 					contextDispatch({
 						type: "move",
 						data: {
@@ -83,7 +81,6 @@ export function Struct() {
 		}
 	};
 
-
 	return (
 		<div className="w-full h-full">
 			<PixiView
@@ -100,4 +97,6 @@ export function Struct() {
 			</div>
 		</div>
 	);
-}
+};
+
+export default Struct;
