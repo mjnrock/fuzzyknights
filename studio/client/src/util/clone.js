@@ -1,3 +1,5 @@
+import { isClassInstance } from "./copy.js";
+
 export function clone(obj) {
 	if(obj === null) return null;
 
@@ -14,6 +16,8 @@ export function clone(obj) {
 				ctx.drawImage(obj[ i ], 0, 0);
 
 				cloned[ i ] = tempCanvas;
+			} else if(isClassInstance(obj[ i ])) {
+				cloned[ i ] = obj[ i ];
 			} else {
 				cloned[ i ] = clone(obj[ i ]);
 			}

@@ -157,7 +157,7 @@ export function Table() {
 						onClick={ handleAddRecord }
 						className="flex flex-row items-center justify-center w-full h-full mx-2 mt-2 overflow-hidden text-center border border-b-4 border-solid rounded shadow-md cursor-pointer bg-sky-50 border-sky-300 hover:border-sky-400"
 					>
-						<div className="flex-1 w-full p-2 hover:bg-sky-300 text-sky-600">+</div>
+						<div className="flex-1 w-full p-2 hover:bg-sky-100 active:bg-sky-200 text-sky-600">+</div>
 					</div>
 				</div>
 			</div>

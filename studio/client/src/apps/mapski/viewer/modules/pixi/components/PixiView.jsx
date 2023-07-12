@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 
-export function PixiView({ app } = {}) {
+export function PixiView({ app, resizer = false, ...props }) {
 	const canvasRef = useRef(null);
 
 	useEffect(() => {
@@ -12,8 +12,26 @@ export function PixiView({ app } = {}) {
 		}
 	}, []);
 
+	useEffect(() => {
+		const ref = canvasRef.current;
+		const resize = () => {
+			app.renderer.resize(ref.clientWidth, ref.clientHeight);
+		};
+
+		if(resizer) {
+			resize();
+			window.addEventListener("resize", resize);
+		} else {
+			window.removeEventListener("resize", resize);
+		}
+
+		return () => {
+			window.removeEventListener("resize", resize);
+		}
+	}, [ resizer ]);
+
 	return (
-		<div ref={ canvasRef } className="m-2 border border-solid rounded shadow border-neutral-200"/>
+		<div ref={ canvasRef } {...props} />
 	);
 };
 

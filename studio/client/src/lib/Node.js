@@ -1,6 +1,23 @@
 import clone from "../util/clone";
 import { IdentityClass } from "./Identity";
 
+function safeStringify(obj) {
+	const cache = new Set();
+
+	function replacer(key, value) {
+		if(typeof value === "object" && value !== null) {
+			if(cache.has(value)) {
+				return {}; // Replace circular reference with an empty object
+			}
+			cache.add(value);
+		}
+		return value;
+	}
+
+	return JSON.stringify(obj, replacer);
+}
+
+
 export class Node extends IdentityClass {
 	static MergeReducer = (current, next) => {
 		return {
@@ -61,7 +78,7 @@ export class Node extends IdentityClass {
 			state = this.events.reducers.default.call(this, state, ...args);
 		}
 
-		if(JSON.stringify(state) === JSON.stringify(previous)) {
+		if(safeStringify(state) === safeStringify(previous)) {
 			return state;
 		}
 
@@ -78,11 +95,15 @@ export class Node extends IdentityClass {
 	}
 
 	async dispatchAsync(action, ...args) {
-		let previous = { ...this.state };
+		let previous = clone(this.state);
 		let state = this.state;
 
 		if(this.events.reducers[ action ]) {
 			state = await this.events.reducers[ action ].call(this, state, ...args);
+		}
+
+		if(safeStringify(state) === safeStringify(previous)) {
+			return state;
 		}
 
 		this.state = { ...state };
@@ -194,7 +215,7 @@ export class Node extends IdentityClass {
 	static CreateSimple(state = {}) {
 		return new Node({
 			state,
-			reducers: { 'default': Node.MergeReducer },
+			reducers: { "default": Node.MergeReducer },
 
 			// STUB: Remove this
 			// effects: [ Node.LogEffect ],

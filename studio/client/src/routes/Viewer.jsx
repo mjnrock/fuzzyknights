@@ -84,8 +84,10 @@ export function Viewer() {
 
 		const onWheel = (e) => {
 			if(e.deltaY > 0) {
+				e.preventDefault();
 				viewportDispatch({ type: "zoom", data: { zoom: -1 } });
 			} else if(e.deltaY < 0) {
+				e.preventDefault();
 				viewportDispatch({ type: "zoom", data: { zoom: 1 } });
 			}
 		};
