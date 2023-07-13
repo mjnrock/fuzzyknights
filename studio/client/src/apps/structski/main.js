@@ -2,6 +2,21 @@ import { v4 as uuid } from "uuid";
 import { Node } from "../../lib/Node";
 import * as PIXI from "pixi.js";
 
+export const flattenGroup = (node, keyPath = "") => {
+	const results = [];
+	if(node.type === "group") {
+		results.push([ keyPath, node ]);
+		Object.keys(node.value).forEach(key => {
+			results.push(...flattenGroup(node.value[ key ], keyPath + "." + key));
+		});
+	} else {
+		results.push([ keyPath, node ]);
+	}
+
+	return results;
+};
+
+
 export const Reducers = {
 	context: {
 		move: (state, data) => {
@@ -17,6 +32,18 @@ export const Reducers = {
 		}
 	},
 	pixi: {
+		pan: (state, { dx, dy }) => {
+			const next = {
+				...state,
+				viewport: {
+					...state.viewport,
+					x: state.viewport.x - dx / state.viewport.scale,
+					y: state.viewport.y - dy / state.viewport.scale,
+				},
+			};
+
+			return next;
+		},
 		zoom: (state, data) => {
 			const direction = Math.sign(data);
 			const next = {
@@ -34,20 +61,28 @@ export const Reducers = {
 				...state,
 			};
 
-			for(let key in State?.context?.state?.render) {
-				const entry = State?.context?.state?.render[ key ];
-				const { x, y, r, color } = entry;
+			const drawNode = (node, key) => {
+				const { x, y, r, color } = node;
 				const circle = new PIXI.Graphics();
 				circle.beginFill(color);
 				circle.drawCircle(x, y, r);
 				circle.endFill();
 
-				circle.beginFill(color === 0xff0000 ? 0xffaaaa : 0xaaaaff);
+				circle.beginFill(color === 0xff0000 ? 0xffaaaa : (color === 0x0000ff ? 0xaaaaff : 0xAAAAAA));
 				circle.drawCircle(x, y, r - 5);
 				circle.endFill();
 
 				next.stage.addChild(circle);
 				next.sprites[ key ] = circle;
+			}
+
+			for(let key in State?.context?.state?.data) {
+				const nodes = flattenGroup(State?.context?.state?.data[ key ], key);
+
+				nodes.forEach(([ keyPath, node ]) => {
+					const lastKey = keyPath.split(".").pop();
+					drawNode(State?.context?.state?.render[ lastKey ], lastKey);
+				});
 			}
 
 			next.app.stage = next.stage;
@@ -86,22 +121,27 @@ export const Reducers = {
 				...state,
 			};
 
-			// iterate over the context.state.data and update the pixi.state.sprites position, color, etc
-			for(let key in State?.context?.state?.render) {
-				const render = State?.context?.state?.render[ key ];
-				const data = State?.context?.state?.data[ key ];
+			const drawNode = (node, key) => {
 				const sprite = next.sprites[ key ];
 
 				sprite.clear();
-				sprite.beginFill(render.color);
-				sprite.drawCircle(render.x, render.y, render.r);
+				sprite.beginFill(node.color);
+				sprite.drawCircle(node.x, node.y, node.r);
 				sprite.endFill();
 
-				sprite.beginFill(render.color === 0xff0000 ? 0xffaaaa : 0xaaaaff);
-				sprite.drawCircle(render.x, render.y, render.r - 5);
+				sprite.beginFill(node.color === 0xff0000 ? 0xffaaaa : (node.color === 0x0000ff ? 0xaaaaff : 0xAAAAAA));
+				sprite.drawCircle(node.x, node.y, node.r - 5);
 				sprite.endFill();
 			}
 
+			for(let key in State?.context?.state?.data) {
+				const nodes = flattenGroup(State?.context?.state?.data[ key ], key);
+
+				nodes.forEach(([ keyPath, node ]) => {
+					const lastKey = keyPath.split(".").pop();
+					drawNode(State?.context?.state?.render[ lastKey ], lastKey);
+				});
+			}
 			return next;
 		},
 	},
@@ -126,6 +166,27 @@ export const State = Node.CreateMany({
 					type: "int32",
 					value: 420,
 				},
+				D: {
+					id: uuid(),
+					type: "group",
+					value: {
+						E: {
+							id: uuid(),
+							type: "str",
+							value: "meow",
+						},
+						F: {
+							id: uuid(),
+							type: "int32",
+							value: 510510,
+						},
+						G: {
+							id: uuid(),
+							type: "int8",
+							value: 5,
+						},
+					},
+				},
 			},
 			render: {
 				A: {
@@ -145,6 +206,30 @@ export const State = Node.CreateMany({
 					y: 585,
 					r: 50,
 					color: 0x0000ff,
+				},
+				D: {
+					x: 550,
+					y: 530,
+					r: 110,
+					color: 0x111111,
+				},
+				E: {
+					x: 700,
+					y: 500,
+					r: 50,
+					color: 0xff0000,
+				},
+				F: {
+					x: 400,
+					y: 500,
+					r: 50,
+					color: 0x0000ff,
+				},
+				G: {
+					x: 350,
+					y: 585,
+					r: 50,
+					color: 0x0000bb,
 				},
 			}
 		},
