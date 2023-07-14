@@ -8,7 +8,7 @@ export function Sandbox() {
 	useEffect(() => {
 		if(!gameContainer.current) return;
 
-		const app = new PIXI.Application({ backgroundColor: 0x1099bb, autoResize: true, resolution: window.devicePixelRatio });
+		const app = new PIXI.Application({ backgroundColor: 0x000000, autoResize: true, resolution: window.devicePixelRatio });
 		gameContainer.current.appendChild(app.view);
 		app.view.addEventListener('contextmenu', (e) => e.preventDefault());
 		app.renderer.resize(window.innerWidth, window.innerHeight);
@@ -49,7 +49,7 @@ export function Sandbox() {
 				const spring = Matter.Constraint.create({
 					bodyA: ballA,
 					bodyB: ballB,
-					stiffness: 0.02, // even more 'springy'
+					stiffness: 0.2, // even more 'springy'
 					damping: 0.1, // some damping
 					render: { visible: true }
 				});
@@ -154,7 +154,7 @@ export function Sandbox() {
 				// Add new graphics
 				for(let ball of state.balls) {
 					const ballGraphic = new PIXI.Graphics();
-					ballGraphic.beginFill(0xff3300);
+					ballGraphic.beginFill(0xcccccc);
 					ballGraphic.drawCircle(ball.position.x, ball.position.y, ball.circleRadius);
 					ballGraphic.endFill();
 					app.stage.addChild(ballGraphic);
