@@ -8,7 +8,7 @@ export function Sandbox() {
 	useEffect(() => {
 		if(!gameContainer.current) return;
 
-		const app = new PIXI.Application({ backgroundColor: 0x000000, autoResize: true, resolution: window.devicePixelRatio });
+		const app = new PIXI.Application({ backgroundColor: 0x555555, autoResize: true, resolution: window.devicePixelRatio });
 		gameContainer.current.appendChild(app.view);
 		app.view.addEventListener('contextmenu', (e) => e.preventDefault());
 		app.renderer.resize(window.innerWidth, window.innerHeight);
@@ -154,7 +154,7 @@ export function Sandbox() {
 				// Add new graphics
 				for(let ball of state.balls) {
 					const ballGraphic = new PIXI.Graphics();
-					ballGraphic.beginFill(0xcccccc);
+					ballGraphic.beginFill(0xBBBBBB);
 					ballGraphic.drawCircle(ball.position.x, ball.position.y, ball.circleRadius);
 					ballGraphic.endFill();
 					app.stage.addChild(ballGraphic);
