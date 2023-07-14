@@ -11,6 +11,12 @@ export function Default() {
 			<Link to="/viewer" className="px-4 py-2 font-semibold text-white transition duration-200 bg-blue-500 rounded hover:bg-blue-700" target="_blank" rel="noopener noreferrer">
 				Go to Viewer
 			</Link>
+			<Link to="/data" className="px-4 py-2 mt-2 font-semibold text-white transition duration-200 bg-blue-500 rounded hover:bg-blue-700" target="_blank" rel="noopener noreferrer">
+				Go to Data
+			</Link>
+			<Link to="/sandbox" className="px-4 py-2 mt-2 font-semibold text-white transition duration-200 bg-green-500 rounded hover:bg-green-700" target="_blank" rel="noopener noreferrer">
+				Go to Sandbox
+			</Link>
 		</div>
 	);
 };
