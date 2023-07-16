@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNode } from "../lib/react/useNode";
 import { PixiView } from "../apps/mapski/viewer/modules/pixi/components/PixiView";
 
-import { Reducers, State, flattenGroup } from "../apps/structski/main";
+import { Reducers, State, flattenGroup, findBall, flattenNodes } from "../apps/structski/main";
 
 export function Struct() {
 	const { state: pixiData, dispatch: pixiDispatch } = useNode(State.pixi, Reducers.pixi);
@@ -63,13 +63,6 @@ export function Struct() {
 							},
 						});
 					} else {
-						// If no ball is currently selected, select the closest one.
-						// contextDispatch({
-						// 	type: "select",
-						// 	data: {
-						// 		key: lastKey
-						// 	}
-						// });
 						contextDispatch({
 							type: "pick",
 							data: {
@@ -78,6 +71,7 @@ export function Struct() {
 							}
 						});
 					}
+
 					return;
 				}
 			}
@@ -86,35 +80,18 @@ export function Struct() {
 
 	const handleDoubleClick = (e) => {
 		const { offsetX, offsetY } = e.nativeEvent;
-		const { data, render } = contextData;
 		const { x: scaleX, y: scaleY } = pixiData.app.stage.scale;
 
 		const transformedOffsetX = offsetX / scaleX;
 		const transformedOffsetY = offsetY / scaleY;
 
-		const nodes = [];
-		for(let key in data) {
-			const newNodes = flattenGroup(data[ key ], key);
+		const ballLabel = findBall(transformedOffsetX, transformedOffsetY, contextData);
+		const balls = flattenNodes(contextData.data);
+		const ball = balls.find(([ key, value, type, parent, node ]) => key === ballLabel)[ 4 ];
 
-			nodes.push(...newNodes);
-		}
+		console.log(ball);
 
-		for(const [ keyPath, node ] of nodes) {
-			const lastKey = keyPath.split(".").pop();
-			const { x, y, r } = contextData.render[ lastKey ];
-			const dx = x - transformedOffsetX;
-			const dy = y - transformedOffsetY;
-			const distance = Math.sqrt(dx * dx + dy * dy);
-			if(distance < r) {
-				console.log(node);
-
-				contextDispatch({ type: "deselect" });
-
-				// "open the modal"
-
-				return;
-			}
-		}
+		// Do something with the ball.
 	};
 
 	return (

@@ -15,23 +15,24 @@ export const flattenGroup = (node, keyPath = "") => {
 
 	return results;
 };
-const recurse = (node, keyPath, parent = null) => {
+export const flattenNodes = (node, keyPath, parent = null) => {
 	const nodes = [];
 
 	if([ "id", "type", "value" ].every(key => key in node)) {
 		if(node.type === "group") {
-			nodes.push([ keyPath, null, "group" ]);
+			nodes.push([ keyPath, null, "group", parent, node ]);
+
 			for(let key in node.value) {
-				const newNodes = recurse(node.value[ key ], key, keyPath);
+				const newNodes = flattenNodes(node.value[ key ], key, keyPath);
 
 				nodes.push(...newNodes);
 			}
 		} else {
-			nodes.push([ keyPath, node.value, node.type, parent ]);
+			nodes.push([ keyPath, node.value, node.type, parent, node ]);
 		}
 	} else {
 		for(let key in node) {
-			const newNodes = recurse(node[ key ], key);
+			const newNodes = flattenNodes(node[ key ], key);
 
 			nodes.push(...newNodes);
 		}
@@ -40,54 +41,65 @@ const recurse = (node, keyPath, parent = null) => {
 	return nodes;
 };
 
+export const findBall = (x, y, state) => {
+	// Function to check if a point is inside a ball
+	const isInside = (point, ball) => {
+		const dx = ball.x - point.x;
+		const dy = ball.y - point.y;
+		return dx * dx + dy * dy <= ball.r * ball.r;
+	};
+
+	const balls = flattenNodes(state.data);
+
+	// We want to check child balls first, so we ignore groups
+	balls.sort(([ key1, val1, type1 ], [ key2, val2, type2 ]) => type1 === "group" ? 1 : -1);
+
+	// Function to find the selected ball
+	const findSelectedBall = (nodeList, parentNode = null) => {
+		for(const [ key, type, value, parent ] of nodeList) {
+			if(type === "group") continue;
+			const ball = { ...state.render[ key ] };
+
+			// if a parent exists, we need to offset the ball"s position by the parent"s position
+			if(parent || parentNode) {
+				const parentRender = state.render[ parent || parentNode ];
+				ball.x += parentRender.x;
+				ball.y += parentRender.y;
+			}
+
+			if(isInside({ x, y }, ball)) {
+				return key;
+			}
+		}
+
+		// No child balls were clicked, check for the parent
+		for(const [ key, type, value, parent ] of nodeList) {
+			if(type !== "group") continue;
+			const ball = { ...state.render[ key ] };
+
+			if(isInside({ x, y }, ball)) {
+				return key;
+			}
+
+			const selected = findSelectedBall(Object.values(value), key);
+			if(selected) return selected;
+		}
+
+		return null;
+	};
+
+	return findSelectedBall(balls);
+};
+
 
 
 export const Reducers = {
 	context: {
 		pick: (state, data) => {
-			const { x, y } = data; // Mouse coordinates
+			const selectedBall = findBall(data.x, data.y, state);
 
-			// Function to check if a point is inside a ball
-			const isInside = (point, ball) => {
-				const dx = ball.x - point.x;
-				const dy = ball.y - point.y;
-				return dx * dx + dy * dy <= ball.r * ball.r;
-			};
-
-			const balls = recurse(state.data);
-
-			// We want to check child balls first, so we ignore groups
-			balls.sort(([ key1, val1, type1 ], [ key2, val2, type2 ]) => type1 === "group" ? 1 : -1);
-
-			// Check if any child balls were clicked
-			for(const [ key, type, value, parent ] of balls) {
-				if(type === "group") continue;
-				const ball = { ...state.render[ key ] };
-
-				// if a parent exists, we need to offset the ball"s position by the parent"s position
-				if(parent) {
-					const parentRender = state.render[ parent ];
-					ball.x += parentRender.x;
-					ball.y += parentRender.y;
-				}
-
-				if(isInside({ x, y }, ball)) {
-					return { ...state, selectedBall: key };
-				}
-			}
-
-			// No child balls were clicked, check for the parent
-			for(const [ key, type, value, parent ] of balls) {
-				if(type !== "group") continue;
-				const ball = { ...state.render[ key ] };
-
-				if(isInside({ x, y }, ball)) {
-					return { ...state, selectedBall: key };
-				}
-			}
-
-			// Nothing was clicked
-			return { ...state, selectedBall: null };
+			// Return the new state
+			return { ...state, selectedBall };
 		},
 		select: (state, data) => {
 			return {
@@ -107,7 +119,7 @@ export const Reducers = {
 				const { x, y } = data;
 
 				let parentKey;
-				for(const [ key, type, value, parent ] of recurse(next.data)) {
+				for(const [ key, type, value, parent ] of flattenNodes(next.data)) {
 					if(key === next.selectedBall) {
 						parentKey = parent;
 						break;
@@ -196,7 +208,7 @@ export const Reducers = {
 				next.sprites[ key ] = circle;
 			}
 
-			const nodes = recurse(State?.context?.state?.data);
+			const nodes = flattenNodes(State?.context?.state?.data);
 			nodes.sort(([ key1, val1, type1 ], [ key2, val2, type2 ]) => type1 === "group" ? -1 : 1);
 
 			nodes.forEach(([ keyPath, value, type, parent ]) => {
@@ -270,7 +282,7 @@ export const Reducers = {
 				sprite.endFill();
 			}
 
-			const nodes = recurse(State?.context?.state?.data);
+			const nodes = flattenNodes(State?.context?.state?.data);
 			nodes.sort(([ key1, val1, type1 ], [ key2, val2, type2 ]) => type1 === "group" ? -1 : 1);
 
 			nodes.forEach(([ keyPath, value, type, parent ]) => {
