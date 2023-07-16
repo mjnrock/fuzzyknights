@@ -43,7 +43,7 @@ export function Struct() {
 			nodes.push(...newNodes);
 		}
 
-		for(const [ keyPath, node ] of nodes) {
+		for(const [ keyPath, node ] of nodes.reverse()) {	// pull the "highest" node first
 			const lastKey = keyPath.split(".").pop();
 			const { x, y, r } = render[ lastKey ];
 			const dx = x - transformedOffsetX;
@@ -52,18 +52,34 @@ export function Struct() {
 
 			if(distance < r) {
 				if(e.buttons === 1) {
-					contextDispatch({
-						type: "move",
-						data: {
-							key: lastKey,
-							x: transformedOffsetX,
-							y: transformedOffsetY,
-						},
-					});
-
+					if(contextData.selectedBall !== null) {
+						// If there is a ball currently selected, move it.
+						contextDispatch({
+							type: "move",
+							data: {
+								key: contextData.selectedBall,
+								x: transformedOffsetX,
+								y: transformedOffsetY,
+							},
+						});
+					} else {
+						// If no ball is currently selected, select the closest one.
+						// contextDispatch({
+						// 	type: "select",
+						// 	data: {
+						// 		key: lastKey
+						// 	}
+						// });
+						contextDispatch({
+							type: "pick",
+							data: {
+								x: transformedOffsetX,
+								y: transformedOffsetY,
+							}
+						});
+					}
 					return;
 				}
-
 			}
 		}
 	};
@@ -92,6 +108,10 @@ export function Struct() {
 			if(distance < r) {
 				console.log(node);
 
+				contextDispatch({ type: "deselect" });
+
+				// "open the modal"
+
 				return;
 			}
 		}
@@ -99,20 +119,17 @@ export function Struct() {
 
 	return (
 		<div className="w-full h-full">
-			<PixiView
-				className="absolute top-0 left-0 z-0 w-full h-full"
-				app={ pixiData.app }
-				resizer={ true }
-			/>
+			<PixiView className="absolute top-0 left-0 z-0 w-full h-full" app={ pixiData.app } resizer={ true } />
 			<div
 				className="absolute top-0 left-0 z-10 flex flex-col items-center justify-center w-full h-full select-none"
 				onMouseMove={ handleMouseMove }
 				onDoubleClick={ handleDoubleClick }
+				onMouseUp={ () => contextDispatch({ type: "deselect" }) }
 			>
 				{/* This is the UI layer -- it is middle-center, full screen */ }
 			</div>
 		</div>
 	);
-};
+}
 
 export default Struct;

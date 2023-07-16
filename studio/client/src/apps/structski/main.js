@@ -7,7 +7,7 @@ export const flattenGroup = (node, keyPath = "") => {
 	if(node.type === "group") {
 		results.push([ keyPath, node ]);
 		Object.keys(node.value).forEach(key => {
-			results.push(...flattenGroup(node.value[ key ], keyPath + "." + key));
+			results.push(...flattenGroup(node.value[ key ], key));
 		});
 	} else {
 		results.push([ keyPath, node ]);
@@ -15,21 +15,133 @@ export const flattenGroup = (node, keyPath = "") => {
 
 	return results;
 };
+const recurse = (node, keyPath, parent = null) => {
+	const nodes = [];
+
+	if([ "id", "type", "value" ].every(key => key in node)) {
+		if(node.type === "group") {
+			nodes.push([ keyPath, null, "group" ]);
+			for(let key in node.value) {
+				const newNodes = recurse(node.value[ key ], key, keyPath);
+
+				nodes.push(...newNodes);
+			}
+		} else {
+			nodes.push([ keyPath, node.value, node.type, parent ]);
+		}
+	} else {
+		for(let key in node) {
+			const newNodes = recurse(node[ key ], key);
+
+			nodes.push(...newNodes);
+		}
+	}
+
+	return nodes;
+};
+
 
 
 export const Reducers = {
 	context: {
-		move: (state, data) => {
-			const next = {
-				...state,
+		pick: (state, data) => {
+			const { x, y } = data; // Mouse coordinates
+
+			// Function to check if a point is inside a ball
+			const isInside = (point, ball) => {
+				const dx = ball.x - point.x;
+				const dy = ball.y - point.y;
+				return dx * dx + dy * dy <= ball.r * ball.r;
 			};
 
-			const { key, x, y } = data;
-			next.render[ key ].x = x;
-			next.render[ key ].y = y;
+			const balls = recurse(state.data);
 
-			return next;
-		}
+			// We want to check child balls first, so we ignore groups
+			balls.sort(([ key1, val1, type1 ], [ key2, val2, type2 ]) => type1 === "group" ? 1 : -1);
+
+			// Check if any child balls were clicked
+			for(const [ key, type, value, parent ] of balls) {
+				if(type === "group") continue;
+				const ball = { ...state.render[ key ] };
+
+				// if a parent exists, we need to offset the ball"s position by the parent"s position
+				if(parent) {
+					const parentRender = state.render[ parent ];
+					ball.x += parentRender.x;
+					ball.y += parentRender.y;
+				}
+
+				if(isInside({ x, y }, ball)) {
+					return { ...state, selectedBall: key };
+				}
+			}
+
+			// No child balls were clicked, check for the parent
+			for(const [ key, type, value, parent ] of balls) {
+				if(type !== "group") continue;
+				const ball = { ...state.render[ key ] };
+
+				if(isInside({ x, y }, ball)) {
+					return { ...state, selectedBall: key };
+				}
+			}
+
+			// Nothing was clicked
+			return { ...state, selectedBall: null };
+		},
+		select: (state, data) => {
+			return {
+				...state,
+				selectedBall: data.key,
+			};
+		},
+		deselect: (state, data) => {
+			return {
+				...state,
+				selectedBall: null,
+			};
+		},
+		move: (state, data) => {
+			if(state.selectedBall !== null) {
+				const next = { ...state };
+				const { x, y } = data;
+
+				let parentKey;
+				for(const [ key, type, value, parent ] of recurse(next.data)) {
+					if(key === next.selectedBall) {
+						parentKey = parent;
+						break;
+					}
+				}
+
+				if(!parentKey) {
+					// if there"s no parent group or selectedBall is the group itself, perform move freely
+					next.render[ state.selectedBall ].x = x;
+					next.render[ state.selectedBall ].y = y;
+				} else {
+					// move relative to the parent group
+					const parentRender = next.render[ parentKey ];
+					const childRender = next.render[ state.selectedBall ];
+
+					const dx = x - (childRender.x + parentRender.x);
+					const dy = y - (childRender.y + parentRender.y);
+
+					const newChildX = next.render[ state.selectedBall ].x + dx;
+					const newChildY = next.render[ state.selectedBall ].y + dy;
+
+					let newChildRadius = Math.sqrt(newChildX * newChildX + newChildY * newChildY);
+					if(newChildRadius <= parentRender.r) {
+						next.render[ state.selectedBall ].x = newChildX;
+						next.render[ state.selectedBall ].y = newChildY;
+					}
+
+				}
+
+				return next;
+			}
+
+			return state;
+		},
 	},
 	pixi: {
 		pan: (state, { dx, dy }) => {
@@ -68,7 +180,15 @@ export const Reducers = {
 				circle.drawCircle(x, y, r);
 				circle.endFill();
 
-				circle.beginFill(color === 0xff0000 ? 0xffaaaa : (color === 0x0000ff ? 0xaaaaff : 0xAAAAAA));
+				if(node.color === 0x0000ff) {
+					circle.beginFill(0xaaaaff);
+				} else if(node.color === 0x0000bb) {
+					circle.beginFill(0x4444bb);
+				} else if(node.color === 0xff0000) {
+					circle.beginFill(0xffaaaa);
+				} else {
+					circle.beginFill(0xAAAAAA);
+				}
 				circle.drawCircle(x, y, r - 5);
 				circle.endFill();
 
@@ -76,14 +196,21 @@ export const Reducers = {
 				next.sprites[ key ] = circle;
 			}
 
-			for(let key in State?.context?.state?.data) {
-				const nodes = flattenGroup(State?.context?.state?.data[ key ], key);
+			const nodes = recurse(State?.context?.state?.data);
+			nodes.sort(([ key1, val1, type1 ], [ key2, val2, type2 ]) => type1 === "group" ? -1 : 1);
 
-				nodes.forEach(([ keyPath, node ]) => {
-					const lastKey = keyPath.split(".").pop();
-					drawNode(State?.context?.state?.render[ lastKey ], lastKey);
-				});
-			}
+			nodes.forEach(([ keyPath, value, type, parent ]) => {
+				const lastKey = keyPath.split(".").pop();
+				const lastNode = { ...State?.context?.state?.render[ lastKey ] };
+
+				if(parent) {
+					const parentRender = State?.context?.state?.render[ parent ];
+					lastNode.x += parentRender.x;
+					lastNode.y += parentRender.y;
+				}
+
+				drawNode(lastNode, lastKey);
+			});
 
 			next.app.stage = next.stage;
 
@@ -129,19 +256,36 @@ export const Reducers = {
 				sprite.drawCircle(node.x, node.y, node.r);
 				sprite.endFill();
 
-				sprite.beginFill(node.color === 0xff0000 ? 0xffaaaa : (node.color === 0x0000ff ? 0xaaaaff : 0xAAAAAA));
+				if(node.color === 0x0000ff) {
+					sprite.beginFill(0xaaaaff);
+				} else if(node.color === 0x0000bb) {
+					sprite.beginFill(0x4444bb);
+				} else if(node.color === 0xff0000) {
+					sprite.beginFill(0xffaaaa);
+				} else {
+					sprite.beginFill(0xAAAAAA);
+				}
+
 				sprite.drawCircle(node.x, node.y, node.r - 5);
 				sprite.endFill();
 			}
 
-			for(let key in State?.context?.state?.data) {
-				const nodes = flattenGroup(State?.context?.state?.data[ key ], key);
+			const nodes = recurse(State?.context?.state?.data);
+			nodes.sort(([ key1, val1, type1 ], [ key2, val2, type2 ]) => type1 === "group" ? -1 : 1);
 
-				nodes.forEach(([ keyPath, node ]) => {
-					const lastKey = keyPath.split(".").pop();
-					drawNode(State?.context?.state?.render[ lastKey ], lastKey);
-				});
-			}
+			nodes.forEach(([ keyPath, value, type, parent ]) => {
+				const lastKey = keyPath.split(".").pop();
+				const lastNode = { ...State?.context?.state?.render[ lastKey ] };
+
+				if(parent) {
+					const parentRender = State?.context?.state?.render[ parent ];
+					lastNode.x += parentRender.x;
+					lastNode.y += parentRender.y;
+				}
+
+				drawNode(lastNode, lastKey);
+			});
+
 			return next;
 		},
 	},
@@ -150,6 +294,7 @@ export const Reducers = {
 export const State = Node.CreateMany({
 	context: {
 		state: {
+			selectedBall: null, // null means no ball is currently selected
 			data: {
 				A: {
 					id: uuid(),
@@ -190,20 +335,20 @@ export const State = Node.CreateMany({
 			},
 			render: {
 				A: {
-					x: 500,
-					y: 500,
+					x: 900,
+					y: 400,
 					r: 50,
 					color: 0xff0000,
 				},
 				B: {
 					x: 600,
-					y: 500,
+					y: 800,
 					r: 50,
 					color: 0x0000ff,
 				},
 				C: {
 					x: 550,
-					y: 585,
+					y: 300,
 					r: 50,
 					color: 0x0000ff,
 				},
@@ -214,20 +359,20 @@ export const State = Node.CreateMany({
 					color: 0x111111,
 				},
 				E: {
-					x: 700,
-					y: 500,
+					x: -25,
+					y: -25,
 					r: 50,
 					color: 0xff0000,
 				},
 				F: {
-					x: 400,
-					y: 500,
+					x: 25,
+					y: -25,
 					r: 50,
 					color: 0x0000ff,
 				},
 				G: {
-					x: 350,
-					y: 585,
+					x: 0,
+					y: 25,
 					r: 50,
 					color: 0x0000bb,
 				},
