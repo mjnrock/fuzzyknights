@@ -1,12 +1,12 @@
+import Chord from "@lespantsfancy/chord";
 import { useEffect } from "react";
-import { useNode } from "../lib/react/useNode";
 import { PixiView } from "../apps/mapski/viewer/modules/pixi/components/PixiView";
 
 import { Reducers, State, flattenGroup, findBall, flattenNodes } from "../apps/structski/main";
 
 export function Struct() {
-	const { state: pixiData, dispatch: pixiDispatch } = useNode(State.pixi, Reducers.pixi);
-	const { state: contextData, dispatch: contextDispatch } = useNode(State.context, Reducers.context);
+	const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(State.pixi, Reducers.pixi);
+	const { state: contextData, dispatch: contextDispatch } = Chord.Node.React.useNode(State.context, Reducers.context);
 
 	useEffect(() => {
 		const handler = (e) => {

@@ -1,5 +1,5 @@
+import Chord from "@lespantsfancy/chord";
 import { v4 as uuid } from "uuid";
-import { Node } from "../../lib/Node";
 import * as PIXI from "pixi.js";
 
 export const flattenGroup = (node, keyPath = "") => {
@@ -303,7 +303,7 @@ export const Reducers = {
 	},
 };
 
-export const State = Node.CreateMany({
+export const State = Chord.Node.Node.CreateMany({
 	context: {
 		state: {
 			selectedBall: null, // null means no ball is currently selected

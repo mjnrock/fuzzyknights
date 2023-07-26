@@ -1,5 +1,5 @@
+import Chord from "@lespantsfancy/chord";
 import * as PIXI from "pixi.js";
-import { Node } from "../../../lib/Node";
 import Base64 from "../../../util/Base64";
 
 import { TerrainDict } from "./data/TerrainMap.js";
@@ -239,7 +239,7 @@ export const Reducers = {
 	},
 };
 
-export const State = Node.CreateMany({
+export const State = Chord.Node.Node.CreateMany({
 	menubar: {
 		state: {
 			menu: [

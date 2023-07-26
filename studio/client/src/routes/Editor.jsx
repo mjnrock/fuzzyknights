@@ -1,5 +1,5 @@
+import Chord from "@lespantsfancy/chord";
 import { useEffect, useRef } from "react";
-import { useNode } from "../lib/react/useNode";
 
 import TileMapJSX from "../apps/mapski/editor/modules/map/components/TileMap";
 import TileMapSizing from "../apps/mapski/editor/modules/map/components/TileMapSizing";
@@ -18,11 +18,11 @@ import Base64 from "../util/Base64";
 //TODO: Because of the feedback loop, `map` has been given a "reversion" reducer, but it's identical to the "set" reducer.
 
 export function Editor() {
-	const { state: menubar, dispatch: menubarDispatch } = useNode(State.menubar, Reducers.menubar);
-	const { state: map, dispatch: mapDispatch } = useNode(State.map, Reducers.map);
-	const { state: history, dispatch: historyDispatch } = useNode(State.history, Reducers.history);
-	const { state: terrain, dispatch: terrainDispatch } = useNode(State.terrain, Reducers.terrain);
-	const { state: brushes, dispatch: brushesDispatch } = useNode(State.brushes, Reducers.brushes);
+	const { state: menubar, dispatch: menubarDispatch } = Chord.Node.React.useNode(State.menubar, Reducers.menubar);
+	const { state: map, dispatch: mapDispatch } = Chord.Node.React.useNode(State.map, Reducers.map);
+	const { state: history, dispatch: historyDispatch } = Chord.Node.React.useNode(State.history, Reducers.history);
+	const { state: terrain, dispatch: terrainDispatch } = Chord.Node.React.useNode(State.terrain, Reducers.terrain);
+	const { state: brushes, dispatch: brushesDispatch } = Chord.Node.React.useNode(State.brushes, Reducers.brushes);
 
 	useEffect(() => {
 		// Load the state into history as the first point of reversion.
@@ -35,7 +35,7 @@ export function Editor() {
 		});
 	}, []);
 
-	// const { emit } = useNodeEvent(State.map, "update", (...args) => console.log("Map update:", ...args));
+	// const { emit } = Chord.Node.React.useNodeEvent(State.map, "update", (...args) => console.log("Map update:", ...args));
 
 	//TODO: This is effectively an app-level keybind.  Move to a more appropriate location.
 	//NOTE: Care on the preventDefault() -- it currently blocks typing those letters into inputs.
