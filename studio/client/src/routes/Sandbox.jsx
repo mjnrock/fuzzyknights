@@ -1,8 +1,8 @@
+import Chord from "@lespantsfancy/chord";
 import Matter from "matter-js";
 import * as PIXI from "pixi.js";
 import React, { useEffect, useRef } from "react";
 
-import { useNode } from "../lib/react/useNode";
 import { Reducers, State } from "../apps/structski/main";
 
 /* Recurse id,type,value objects ("node")*/
@@ -32,8 +32,8 @@ const recurse = (node, keyPath) => {
 };
 
 export function Sandbox() {
-	const { state: pixiData, dispatch: pixiDispatch } = useNode(State.pixi, Reducers.pixi);
-	const { state: contextData, dispatch: contextDispatch } = useNode(State.context, Reducers.context);
+	const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(State.pixi, Reducers.pixi);
+	const { state: contextData, dispatch: contextDispatch } = Chord.Node.React.useNode(State.context, Reducers.context);
 	const gameContainer = useRef(null);
 
 	useEffect(() => {
