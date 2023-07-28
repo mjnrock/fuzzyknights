@@ -1,7 +1,7 @@
+import Chord from "@lespantsfancy/chord";
+
 import TileMapData from "./modules/map/TileMap";
 import Terrain from "./modules/terrain/Terrain";
-
-import { Node } from "../../../lib/Node";
 
 import { TerrainDict, TerrainMapData } from "./data/TerrainMap";
 
@@ -522,7 +522,7 @@ export const Reducers = {
 	},
 };
 
-export const State = Node.CreateMany({
+export const State = Chord.Node.Node.CreateMany({
 	menubar: {
 		state: {
 			menu: [

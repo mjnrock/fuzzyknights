@@ -1,5 +1,5 @@
+import Chord from "@lespantsfancy/chord";
 import { useEffect } from "react";
-import { useNode } from "../lib/react/useNode";
 import { Reducers, State } from "../apps/mapski/viewer/main";
 
 import { PixiView } from "../apps/mapski/viewer/modules/pixi/components/PixiView";
@@ -9,11 +9,11 @@ import { FileIO } from "../util/FileIO";
 import Base64 from "../util/Base64";
 
 export function Viewer() {
-	const { state: menubarData, dispatch: menubarDispatch } = useNode(State.menubar, Reducers.menubar);
-	const { state: mapData, dispatch: mapDispatch } = useNode(State.map, Reducers.map);
-	const { state: terrainData, dispatch: terrainDispatch } = useNode(State.terrain, Reducers.terrain);
-	const { state: viewportData, dispatch: viewportDispatch } = useNode(State.viewport, Reducers.viewport);
-	const { state: pixiData, dispatch: pixiDispatch } = useNode(State.pixi, Reducers.pixi);
+	const { state: menubarData, dispatch: menubarDispatch } = Chord.Node.React.useNode(State.menubar, Reducers.menubar);
+	const { state: mapData, dispatch: mapDispatch } = Chord.Node.React.useNode(State.map, Reducers.map);
+	const { state: terrainData, dispatch: terrainDispatch } = Chord.Node.React.useNode(State.terrain, Reducers.terrain);
+	const { state: viewportData, dispatch: viewportDispatch } = Chord.Node.React.useNode(State.viewport, Reducers.viewport);
+	const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(State.pixi, Reducers.pixi);
 
 	const loadMap = async () => {
 		console.log("Loading map...");
@@ -84,8 +84,10 @@ export function Viewer() {
 
 		const onWheel = (e) => {
 			if(e.deltaY > 0) {
+				e.preventDefault();
 				viewportDispatch({ type: "zoom", data: { zoom: -1 } });
 			} else if(e.deltaY < 0) {
+				e.preventDefault();
 				viewportDispatch({ type: "zoom", data: { zoom: 1 } });
 			}
 		};
