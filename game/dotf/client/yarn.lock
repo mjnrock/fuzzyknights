@@ -1658,6 +1658,14 @@
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
+"@lespantsfancy/chord@^0.1.27":
+  version "0.1.27"
+  resolved "https://registry.yarnpkg.com/@lespantsfancy/chord/-/chord-0.1.27.tgz#2df2d8bcd58d95510295be8edcc4705d88da62fe"
+  integrity sha512-fYVJ0dAOj3ulkp8LQstWH/jsqpF+JKyypCC8McscyOW3doRmNwJbDvGQ5IFiwlz5HJ/3MeyHpKooyW0EpFEByQ==
+  dependencies:
+    is-base64 "^1.1.0"
+    uuid "^9.0.0"
+
 "@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1":
   version "5.1.1-v1"
   resolved "https://registry.yarnpkg.com/@nicolo-ribaudo/eslint-scope-5-internals/-/eslint-scope-5-internals-5.1.1-v1.tgz#dbf733a965ca47b1973177dc0bb6c889edcfb129"
