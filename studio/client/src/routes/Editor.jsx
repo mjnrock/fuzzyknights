@@ -15,7 +15,7 @@ import { clone } from "../util/clone";
 import StateHistory from "../apps/mapski/editor/modules/history/components/StateHistory";
 import Base64 from "../util/Base64";
 
-//TODO: Because of the feedback loop, `map` has been given a "reversion" reducer, but it's identical to the "set" reducer.
+//FIXME: Because of the feedback loop, `map` has been given a "reversion" (action) reducer, but it's identical to the "set" (action) reducer.
 
 export function Editor() {
 	const { state: menubar, dispatch: menubarDispatch } = Chord.Node.React.useNode(State.menubar, Reducers.menubar);
