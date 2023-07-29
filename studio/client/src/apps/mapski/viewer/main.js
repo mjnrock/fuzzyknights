@@ -55,7 +55,7 @@ export const Reducers = {
 	pixi: {
 		load: async (state, data) => {
 			// take the terrain data and create the baseTextures and sprites
-			const terrain = State?.terrain?.state;
+			const terrain = Nodes?.terrain?.state;
 			const next = data || {
 				...state,
 			};
@@ -76,8 +76,8 @@ export const Reducers = {
 			}
 
 			// Populating stage and sprites
-			for(let y = 0; y < State?.map?.state?.tiles.length; y++) {
-				const row = State?.map?.state?.tiles[ y ];
+			for(let y = 0; y < Nodes?.map?.state?.tiles.length; y++) {
+				const row = Nodes?.map?.state?.tiles[ y ];
 				for(let x = 0; x < row.length; x++) {
 					const currentTile = row[ x ];
 
@@ -85,10 +85,10 @@ export const Reducers = {
 					let sprite = new PIXI.Sprite(next.assets[ currentTile.data ]);
 
 					// Set the sprite's position
-					sprite.x = x * State?.map?.state?.tw * State?.viewport?.state?.zoom;
-					sprite.y = y * State?.map?.state?.th * State?.viewport?.state?.zoom;
-					sprite.width = State?.map?.state?.tw * State?.viewport?.state?.zoom;
-					sprite.height = State?.map?.state?.th * State?.viewport?.state?.zoom;
+					sprite.x = x * Nodes?.map?.state?.tw * Nodes?.viewport?.state?.zoom;
+					sprite.y = y * Nodes?.map?.state?.th * Nodes?.viewport?.state?.zoom;
+					sprite.width = Nodes?.map?.state?.tw * Nodes?.viewport?.state?.zoom;
+					sprite.height = Nodes?.map?.state?.th * Nodes?.viewport?.state?.zoom;
 
 
 					// Store the sprite in the sprites object with the x, y as the key
@@ -99,7 +99,7 @@ export const Reducers = {
 				}
 			}
 
-			const { width, height } = State?.viewport?.state?.canvas;
+			const { width, height } = Nodes?.viewport?.state?.canvas;
 			next.app.renderer.resize(width, height);
 			next.app.stage = next.stage;
 
@@ -140,13 +140,13 @@ export const Reducers = {
 
 			if(next.w < 1) next.w = 0;
 			if(next.h < 1) next.h = 0;
-			if(next.w > State.map.state.cols) next.w = State.map.state.cols;
-			if(next.h > State.map.state.rows) next.h = State.map.state.rows;
+			if(next.w > Nodes.map.state.cols) next.w = Nodes.map.state.cols;
+			if(next.h > Nodes.map.state.rows) next.h = Nodes.map.state.rows;
 
 			if(next.x < 0) next.x = 0;
 			if(next.y < 0) next.y = 0;
-			if(next.x > State.map.state.cols) next.x = State.map.state.cols;
-			if(next.y > State.map.state.rows) next.y = State.map.state.rows;
+			if(next.x > Nodes.map.state.cols) next.x = Nodes.map.state.cols;
+			if(next.y > Nodes.map.state.rows) next.y = Nodes.map.state.rows;
 
 			if(next.zoom < 0.1) next.zoom = 0.1;
 			if(next.zoom > 5) next.zoom = 5;
@@ -159,8 +159,8 @@ export const Reducers = {
 		center: (state, data) => {
 			return {
 				...state,
-				x: State?.map?.state?.cols / 2 || 0,
-				y: State?.map?.state?.rows / 2 || 0,
+				x: Nodes?.map?.state?.cols / 2 || 0,
+				y: Nodes?.map?.state?.rows / 2 || 0,
 			};
 		},
 		move: (state, data) => {
@@ -171,8 +171,8 @@ export const Reducers = {
 
 			if(nx < 0) nx = 0;
 			if(ny < 0) ny = 0;
-			if(nx > State.map.state.cols) nx = State.map.state.cols;
-			if(ny > State.map.state.rows) ny = State.map.state.rows;
+			if(nx > Nodes.map.state.cols) nx = Nodes.map.state.cols;
+			if(ny > Nodes.map.state.rows) ny = Nodes.map.state.rows;
 
 			return {
 				...state,
@@ -204,11 +204,11 @@ export const Reducers = {
 			};
 
 			// iterate over the sprites and update their positions
-			for(let key in State?.pixi?.state?.sprites) {
+			for(let key in Nodes?.pixi?.state?.sprites) {
 				// based on the viewport's x, y, w, h, zoom, only render those sprites that are visible -- and scale them appropriately to the zoom
-				const sprite = State?.pixi?.state?.sprites[ key ];
+				const sprite = Nodes?.pixi?.state?.sprites[ key ];
 				const [ x, y ] = key.split(",").map((v) => parseInt(v));
-				const { tw, th } = State?.map?.state;
+				const { tw, th } = Nodes?.map?.state;
 				const { x: vx, y: vy, w, h, zoom } = next;
 
 				// if the sprite is within the viewport (+/- 1/2 of the .w and .h) then render it
@@ -218,11 +218,11 @@ export const Reducers = {
 					sprite.y = (y - vy + h / 2) * th * zoom;
 
 					//  if the viewport is smaller than the canvas, center the sprites
-					if(w < State?.viewport?.state?.canvas?.width) {
-						sprite.x += (State?.viewport?.state?.canvas?.width - w * tw * zoom) / 2;
+					if(w < Nodes?.viewport?.state?.canvas?.width) {
+						sprite.x += (Nodes?.viewport?.state?.canvas?.width - w * tw * zoom) / 2;
 					}
-					if(h < State?.viewport?.state?.canvas?.height) {
-						sprite.y += (State?.viewport?.state?.canvas?.height - h * th * zoom) / 2;
+					if(h < Nodes?.viewport?.state?.canvas?.height) {
+						sprite.y += (Nodes?.viewport?.state?.canvas?.height - h * th * zoom) / 2;
 					}
 
 					sprite.width = tw * zoom;
@@ -232,14 +232,14 @@ export const Reducers = {
 				}
 			}
 
-			State?.pixi?.state?.renderer?.render(State?.pixi?.state?.stage);
+			Nodes?.pixi?.state?.renderer?.render(Nodes?.pixi?.state?.stage);
 
 			return next;
 		},
 	},
 };
 
-export const State = Chord.Node.Node.CreateMany({
+export const Nodes = Chord.Node.Node.CreateMany({
 	menubar: {
 		state: {
 			menu: [
@@ -266,7 +266,7 @@ export const State = Chord.Node.Node.CreateMany({
 		reducers: Reducers.terrain,
 		effects: {
 			load: (state, data) => {
-				State.map.dispatch("load", FS_SavedMap.map);
+				Nodes.map.dispatch("load", FS_SavedMap.map);
 			},
 		},
 	},
@@ -281,15 +281,15 @@ export const State = Chord.Node.Node.CreateMany({
 		reducers: Reducers.map,
 		effects: {
 			set: (state, data) => {
-				State.pixi.dispatchAsync("load", {
-					app: State.pixi.state.app,
+				Nodes.pixi.dispatchAsync("load", {
+					app: Nodes.pixi.state.app,
 					stage: new PIXI.Container(),
 					assets: {},
 					sprites: {},
 				});
 			},
 			load: (state, data) => {
-				State.pixi.dispatchAsync("load");
+				Nodes.pixi.dispatchAsync("load");
 			},
 		},
 	},
@@ -311,7 +311,7 @@ export const State = Chord.Node.Node.CreateMany({
 		reducers: Reducers.pixi,
 		effects: {
 			load: (state, data) => {
-				State.viewport.dispatch("tick", { subject: State.viewport.state.subject, dt: 0 });
+				Nodes.viewport.dispatch("tick", { subject: Nodes.viewport.state.subject, dt: 0 });
 			},
 		},
 	},
@@ -339,16 +339,16 @@ export const State = Chord.Node.Node.CreateMany({
 	},
 });
 
-State.terrain.dispatchAsync("load", FS_SavedMap.terrain);
+Nodes.terrain.dispatchAsync("load", FS_SavedMap.terrain);
 
 export const IMM = (module, message, ...args) => {
-	const node = State[ module ];
+	const node = Nodes[ module ];
 	if(node) {
 		return node.dispatch(message.type, message.data, ...args);
 	}
 };
 export const IMS = (module) => {
-	const node = State[ module ];
+	const node = Nodes[ module ];
 	if(node) {
 		return node.state;
 	}

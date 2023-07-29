@@ -1,9 +1,21 @@
 import React from "react";
 
+import { main } from "../core/main.js";
+
+import { PixiView } from "../components/PixiView.jsx";
+
 export function Game() {
+	const [ pixi, setPixi ] = React.useState(null);
+
+	React.useEffect(() => {
+		main().then((app) => {
+			setPixi(app);
+		});
+	}, []);
+
 	return (
 		<>
-			Game
+			{ pixi && <PixiView app={ pixi } /> }
 		</>
 	);
 };

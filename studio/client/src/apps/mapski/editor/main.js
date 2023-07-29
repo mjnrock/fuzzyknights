@@ -14,6 +14,11 @@ import { clone } from "../../../util/clone";
 
 import { debounce } from "../../../util/debounce";
 
+//TODO: Implement a "MasterNode" that is responsible for the orchestration of all other nodes
+// export const MasterNode = Chord.Node.MasterNode.Create({
+
+// });
+
 export const Reducers = {
 	menubar: {},
 	map: {
@@ -112,7 +117,7 @@ export const Reducers = {
 				const next = { ...state };
 				for(const tile of data) {
 					const { x, y, data: tileData } = tile;
-					const current = State.map?.state?.tiles?.[ y ]?.[ x ];
+					const current = Nodes.map?.state?.tiles?.[ y ]?.[ x ];
 					if(current) {
 						next.tiles[ y ][ x ] = {
 							...current,
@@ -126,7 +131,7 @@ export const Reducers = {
 				};
 			} else if(typeof data === "object") {
 				const { x, y, data: tileData } = data;
-				const tile = State.map?.state?.tiles?.[ y ]?.[ x ];
+				const tile = Nodes.map?.state?.tiles?.[ y ]?.[ x ];
 				if(tile) {
 					if(tile.data === tileData) {
 						return state;
@@ -411,7 +416,7 @@ export const Reducers = {
 		},
 
 		down: (state) => {
-			const currentTerrain = State.terrain?.state?.selected || null;	// This assumes that 0 is the null terrain key (i.e. { 0: null }.
+			const currentTerrain = Nodes.terrain?.state?.selected || null;	// This assumes that 0 is the null terrain key (i.e. { 0: null }.
 
 			if(state.brush === "eraser") {
 				IMM("map", {
@@ -464,7 +469,7 @@ export const Reducers = {
 				const tileData = brushData(x, y, startX, startY).map(([ rx, ry ]) => ({
 					x: rx,
 					y: ry,
-					data: State.terrain?.state?.selected || null,
+					data: Nodes.terrain?.state?.selected || null,
 				}));
 
 				IMM("map", {
@@ -522,7 +527,7 @@ export const Reducers = {
 	},
 };
 
-export const State = Chord.Node.Node.CreateMany({
+export const Nodes = Chord.Node.Node.CreateMany({
 	menubar: {
 		state: {
 			menu: [
@@ -571,7 +576,7 @@ export const State = Chord.Node.Node.CreateMany({
 
 			algorithms: {
 				selectedFill: (x, y, key, tileMap, state, data) => ({
-					data: State.terrain?.state?.selected || null,
+					data: Nodes.terrain?.state?.selected || null,
 				}),
 				randomize: (x, y, key, tileMap, state, data) => {
 					const seed = data?.seed != null ? data.seed : Date.now();
@@ -603,7 +608,7 @@ export const State = Chord.Node.Node.CreateMany({
 				},
 				cellularAutomata: (x, y, key, tileMap, state, data, algorithmState) => {
 					if(!algorithmState.map) {
-						const generator = new CellularAutomata(State.map?.state?.columns, State.map?.state?.rows, ...(data?.args || []));
+						const generator = new CellularAutomata(Nodes.map?.state?.columns, Nodes.map?.state?.rows, ...(data?.args || []));
 						const map = generator.generate();
 
 						algorithmState.map = map;
@@ -630,8 +635,8 @@ export const State = Chord.Node.Node.CreateMany({
 				debounce((state, previous, action) => {
 					if(action !== "reversion") {
 						if(JSON.stringify(state.tiles) !== JSON.stringify(previous.tiles)) {
-							let currentHistoryIndex = State.history?.state?.index || 0;
-							let currentHistory = State.history?.state?.history || [];
+							let currentHistoryIndex = Nodes.history?.state?.index || 0;
+							let currentHistory = Nodes.history?.state?.history || [];
 
 							if(currentHistoryIndex !== currentHistory.length - 1) {
 								currentHistory = currentHistory.slice(0, currentHistoryIndex + 1);
@@ -732,13 +737,13 @@ export const State = Chord.Node.Node.CreateMany({
 });
 
 export const IMM = (module, message, ...args) => {
-	const node = State[ module ];
+	const node = Nodes[ module ];
 	if(node) {
 		return node.dispatch(message.type, message.data, ...args);
 	}
 };
 export const IMS = (module) => {
-	const node = State[ module ];
+	const node = Nodes[ module ];
 	if(node) {
 		return node.state;
 	}
