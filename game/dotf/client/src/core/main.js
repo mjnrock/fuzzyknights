@@ -58,6 +58,8 @@ export const Map = {
 };
 
 export async function main() {
+	const scale = 3.0;
+
 	function gameLoop(app, delta) {
 		// update the entities
 		for(const id in Map.entities) {
@@ -93,10 +95,10 @@ export async function main() {
 			graphics.beginFill(0xff0000);
 			switch(entity.model.type) {
 				case EnumModelType.CIRCLE:
-					graphics.drawCircle(0, 0, entity.model.radius);
+					graphics.drawCircle(0, 0, entity.model.radius * scale);
 					break;
 				case EnumModelType.RECTANGLE:
-					graphics.drawRect(entity.model.ox, entity.model.oy, entity.model.width, entity.model.height);
+					graphics.drawRect(entity.model.ox * scale, entity.model.oy * scale, entity.model.width * scale, entity.model.height * scale);
 					break;
 				default:
 					break;
@@ -107,8 +109,8 @@ export async function main() {
 			graphics.lineStyle(2, 0x0000FF, 1);
 			graphics.moveTo(0, 0);
 			graphics.lineTo(
-				Math.cos(entity.physics.theta) * 20,
-				Math.sin(entity.physics.theta) * 20
+				Math.cos(entity.physics.theta) * 20 * scale,
+				Math.sin(entity.physics.theta) * 20 * scale
 			);
 		}
 
@@ -121,6 +123,7 @@ export async function main() {
 		resolution: window.devicePixelRatio,
 	});
 
+	// get the mouse position on the stage
 	app.stage.on("mousemove", e => {
 		// update entity's theta position so that it faces the mouse
 		const entity = Map.entities[ "1" ];
@@ -131,7 +134,7 @@ export async function main() {
 		const dy = e.y - graphics.y;
 		entity.physics.theta = Math.atan2(dy, dx);
 	});
-    app.stage.eventMode = "dynamic";
+	app.stage.eventMode = "dynamic";
 
 	// add the canvas that pixi automatically created for you to the HTML document
 	document.body.appendChild(app.view);
@@ -144,10 +147,10 @@ export async function main() {
 			const terrain = Map.terrain[ tile.data ];
 			const graphics = new PIXI.Graphics();
 			graphics.beginFill(terrain.color);
-			graphics.drawRect(0, 0, Map.tw, Map.th);
+			graphics.drawRect(0, 0, Map.tw * scale, Map.th * scale); // Scale the dimensions
 			graphics.endFill();
-			graphics.x = tile.x * Map.tw;
-			graphics.y = tile.y * Map.th;
+			graphics.x = tile.x * Map.tw * scale; // Scale the position
+			graphics.y = tile.y * Map.th * scale; // Scale the position
 			map.addChild(graphics);
 		}
 	}
@@ -161,18 +164,18 @@ export async function main() {
 		graphics.beginFill(0xff0000);
 		switch(entity.model.type) {
 			case EnumModelType.CIRCLE:
-				graphics.drawCircle((entity.physics.x + entity.model.ox) * Map.tw, (entity.physics.y + entity.model.oy) * Map.th, entity.model.radius);
+				graphics.drawCircle((entity.physics.x + entity.model.ox) * Map.tw * scale, (entity.physics.y + entity.model.oy) * Map.th * scale, entity.model.radius * scale);
 				break;
 			case EnumModelType.RECTANGLE:
-				graphics.drawRect((entity.physics.x + entity.model.ox) * Map.tw, (entity.physics.y + entity.model.oy) * Map.th, entity.model.width, entity.model.height);
+				graphics.drawRect((entity.physics.x + entity.model.ox) * Map.tw * scale, (entity.physics.y + entity.model.oy) * Map.th * scale, entity.model.width * scale, entity.model.height * scale);
 				break;
 			default:
 				break;
 		}
 		graphics.endFill();
 
-		graphics.x = (entity.physics.x + entity.model.ox) * Map.tw;
-		graphics.y = (entity.physics.y + entity.model.oy) * Map.th;
+		graphics.x = (entity.physics.x + entity.model.ox) * Map.tw * scale;
+		graphics.y = (entity.physics.y + entity.model.oy) * Map.th * scale;
 
 		entities.addChild(graphics);
 	}
@@ -189,7 +192,7 @@ export async function main() {
 
 	// Create an object to store the state of the pressed keys
 	const keysPressed = {};
-	const speed = 0.05;
+	const speed = 0.1;
 
 	// Function to update the entity physics based on the keys pressed
 	function updateEntityPhysics() {
