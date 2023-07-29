@@ -16,7 +16,7 @@ export const EnumEntityState = {
 export const Reducers = {
 	input: {
 		handleKeyDown: (state, { code }) => {
-			let updatedKeyMask = state.keyMask;
+			let updatedKeyMask = state.input.keyMask;
 			switch(code) {
 				case "KeyW":
 					updatedKeyMask |= 0x01;
@@ -33,13 +33,10 @@ export const Reducers = {
 				default:
 					break;
 			}
-			return {
-				...state,
-				keyMask: updatedKeyMask,
-			};
+			return { ...state, input: { ...state.input, keyMask: updatedKeyMask } };
 		},
 		handleKeyUp: (state, { code }) => {
-			let updatedKeyMask = state.keyMask;
+			let updatedKeyMask = state.input.keyMask;
 			switch(code) {
 				case "KeyW":
 					updatedKeyMask &= ~0x01;
@@ -56,16 +53,55 @@ export const Reducers = {
 				default:
 					break;
 			}
-			return {
-				...state,
-				keyMask: updatedKeyMask,
-			};
+			return { ...state, input: { ...state.input, keyMask: updatedKeyMask } };
 		},
+	},
+};
+export const Actions = {
+	handleKeyDown: (state, { code }) => {
+		let updatedKeyMask = state.input.keyMask;
+		switch(code) {
+			case "KeyW":
+				updatedKeyMask |= 0x01;
+				break;
+			case "KeyA":
+				updatedKeyMask |= 0x02;
+				break;
+			case "KeyS":
+				updatedKeyMask |= 0x04;
+				break;
+			case "KeyD":
+				updatedKeyMask |= 0x08;
+				break;
+			default:
+				break;
+		}
+		return { ...state, input: { ...state.input, keyMask: updatedKeyMask } };
+	},
+	handleKeyUp: (state, { code }) => {
+		let updatedKeyMask = state.input.keyMask;
+		switch(code) {
+			case "KeyW":
+				updatedKeyMask &= ~0x01;
+				break;
+			case "KeyA":
+				updatedKeyMask &= ~0x02;
+				break;
+			case "KeyS":
+				updatedKeyMask &= ~0x04;
+				break;
+			case "KeyD":
+				updatedKeyMask &= ~0x08;
+				break;
+			default:
+				break;
+		}
+		return { ...state, input: { ...state.input, keyMask: updatedKeyMask } };
 	},
 };
 
 export let State = {
-	entities: (entities = {}) => ({
+	entities: {
 		"1": {
 			$id: uuid(),
 			$tags: [],
@@ -93,13 +129,11 @@ export let State = {
 				oy: 0,	//px
 			},
 		},
-		...entities,
-	}),
-	terrain: (terrain = {}) => ({
+	},
+	terrain: {
 		GRASS: { type: "GRASS", color: "#00ff00" },
-		...terrain,
-	}),
-	map: (map = {}) => ({
+	},
+	map: {
 		rows: 5,
 		cols: 5,
 		tw: 32,
@@ -111,37 +145,35 @@ export let State = {
 			[ { x: 0, y: 3, data: "GRASS" }, { x: 1, y: 3, data: "GRASS" }, { x: 2, y: 3, data: "GRASS" }, { x: 3, y: 3, data: "GRASS" }, { x: 4, y: 3, data: "GRASS" } ],
 			[ { x: 0, y: 4, data: "GRASS" }, { x: 1, y: 4, data: "GRASS" }, { x: 2, y: 4, data: "GRASS" }, { x: 3, y: 4, data: "GRASS" }, { x: 4, y: 4, data: "GRASS" } ],
 		],
-		...map,
-	}),
-	input: (input = {}) => ({
+	},
+	input: {
 		keyMask: 0,
-		...input,
-	}),
+	},
 };
 
 export const Nodes = Chord.Node.Node.CreateMany({
 	entities: {
-		state: State.entities(),
+		state: State.entities,
 	},
 	terrain: {
-		state: State.terrain(),
+		state: State.terrain,
 	},
 	map: {
-		state: State.map(),
+		state: State.map,
 	},
 	input: {
-		state: State.input(),
+		state: State.input,
 		reducers: Reducers.input,
 	},
-	pixi: {
-		state: {
-			app: new PIXI.Application({
-				resizeTo: window,
-				resolution: window.devicePixelRatio,
-			}),
-		},
-	},
 });
+
+function reducer(state, action) {
+	if(Actions[ action.type ]) {
+		return Actions[ action.type ](state, action.payload);
+	}
+
+	return state;
+};
 
 export async function main() {
 	const scale = 3.0;
@@ -149,26 +181,26 @@ export async function main() {
 
 	function gameLoop(app, delta) {
 		// update the entities
-		for(const id in Nodes.entities.state) {
-			const entity = Nodes.entities.state[ id ];
+		for(const id in State.entities) {
+			const entity = State.entities[ id ];
 			const graphics = entities.getChildAt(parseInt(id) - 1);
 
 			// calculate the new position of the entity and set it
 			entity.physics.x += entity.physics.vx * delta;
 			entity.physics.y += entity.physics.vy * delta;
-			graphics.x = entity.physics.x * Nodes.map.state.tw;
-			graphics.y = entity.physics.y * Nodes.map.state.th;
+			graphics.x = entity.physics.x * State.map.tw;
+			graphics.y = entity.physics.y * State.map.th;
 		}
 
 		// update player
-		const player = Nodes.entities.state[ "1" ];
+		const player = State.entities[ "1" ];
 
-		if(Nodes.input.state.keyMask & 0x01) player.physics.vy = -speed;
-		else if(Nodes.input.state.keyMask & 0x04) player.physics.vy = speed;
+		if(State.input.keyMask & 0x01) player.physics.vy = -speed;
+		else if(State.input.keyMask & 0x04) player.physics.vy = speed;
 		else player.physics.vy = 0;
 
-		if(Nodes.input.state.keyMask & 0x02) player.physics.vx = -speed;
-		else if(Nodes.input.state.keyMask & 0x08) player.physics.vx = speed;
+		if(State.input.keyMask & 0x02) player.physics.vx = -speed;
+		else if(State.input.keyMask & 0x08) player.physics.vx = speed;
 		else player.physics.vx = 0;
 
 		player.physics.x += player.physics.vx * delta;
@@ -177,8 +209,8 @@ export async function main() {
 
 	function renderLoop(app) {
 		// iterate through entities and draw the line towards the mouse
-		for(const id in Nodes.entities.state) {
-			const entity = Nodes.entities.state[ id ];
+		for(const id in State.entities) {
+			const entity = State.entities[ id ];
 			const graphics = entities.getChildAt(parseInt(id) - 1);
 
 			// clear previous line
@@ -211,14 +243,18 @@ export async function main() {
 	}
 
 	// create a fullscreen pixi application that resizes automatically
-	const pixi = Nodes.pixi.state.app;
+	const app = new PIXI.Application({
+		resizeTo: window,
+		resolution: window.devicePixelRatio,
+	});
+
 	// add the canvas that pixi automatically created for you to the HTML document
-	document.body.appendChild(pixi.view);
+	document.body.appendChild(app.view);
 
 	// get the mouse position on the stage
-	pixi.stage.on("mousemove", e => {
+	app.stage.on("mousemove", e => {
 		// update entity's theta position so that it faces the mouse
-		const entity = Nodes.entities.state[ "1" ];
+		const entity = State.entities[ "1" ];
 		const graphics = entities.getChildAt(0);
 
 		// Calculate angle to mouse and set it
@@ -226,54 +262,54 @@ export async function main() {
 		const dy = e.y - graphics.y;
 		entity.physics.theta = Math.atan2(dy, dx);
 	});
-	pixi.stage.eventMode = "dynamic";
+	app.stage.eventMode = "dynamic";
 
 
 	// draw the map, using green Pixi Graphics objects of .tw and .th size at tx and ty positions
 	const map = new PIXI.Container();
-	for(let row = 0; row < Nodes.map.state.rows; row++) {
-		for(let col = 0; col < Nodes.map.state.cols; col++) {
-			const tile = Nodes.map.state.tiles[ row ][ col ];
-			const terrain = Nodes.terrain.state[ tile.data ];
+	for(let row = 0; row < State.map.rows; row++) {
+		for(let col = 0; col < State.map.cols; col++) {
+			const tile = State.map.tiles[ row ][ col ];
+			const terrain = State.terrain[ tile.data ];
 			const graphics = new PIXI.Graphics();
 			graphics.beginFill(terrain.color);
-			graphics.drawRect(0, 0, Nodes.map.state.tw * scale, Nodes.map.state.th * scale); // Scale the dimensions
+			graphics.drawRect(0, 0, State.map.tw * scale, State.map.th * scale); // Scale the dimensions
 			graphics.endFill();
-			graphics.x = tile.x * Nodes.map.state.tw * scale; // Scale the position
-			graphics.y = tile.y * Nodes.map.state.th * scale; // Scale the position
+			graphics.x = tile.x * State.map.tw * scale; // Scale the position
+			graphics.y = tile.y * State.map.th * scale; // Scale the position
 			map.addChild(graphics);
 		}
 	}
 
 	// seed the entities container with graphics objects
 	const entities = new PIXI.Container();
-	for(const id in Nodes.entities.state) {
+	for(const id in State.entities) {
 		const graphics = new PIXI.Graphics();
 		entities.addChild(graphics);
 	}
 
 	// add the map and entities to the stage
-	pixi.stage.addChild(map);
-	pixi.stage.addChild(entities);
+	app.stage.addChild(map);
+	app.stage.addChild(entities);
 
 	// start the game loop
-	pixi.ticker.add(delta => gameLoop(pixi, delta));
+	app.ticker.add(delta => gameLoop(app, delta));
 
 	// start the render loop
-	renderLoop(pixi);
+	renderLoop(app);
 
 	// Event listener for keydown event
 	window.addEventListener("keydown", e => {
-		Nodes.input.dispatch("handleKeyDown", { code: e.code });
+		State = reducer(State, { type: "handleKeyDown", payload: { code: e.code } });
 	});
 
 	// Event listener for keyup event
 	window.addEventListener("keyup", e => {
-		Nodes.input.dispatch("handleKeyUp", { code: e.code });
+		State = reducer(State, { type: "handleKeyUp", payload: { code: e.code } });
 	});
 
 	// return the pixi application
-	return pixi;
+	return app;
 };
 
 export default main;
