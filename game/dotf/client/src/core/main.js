@@ -78,6 +78,8 @@ export let State = {
 				vx: 0,
 				vy: 0,
 				vtheta: 0,
+
+				speed: 0.1,
 			},
 			render: {
 				sprite: new PIXI.Sprite(),
@@ -117,6 +119,14 @@ export let State = {
 		keyMask: 0,
 		...input,
 	}),
+	pixi: (pixi = {}) => ({
+		scale: 3.0,
+		app: new PIXI.Application({
+			resizeTo: window,
+			resolution: window.devicePixelRatio,
+		}),
+		stage: new PIXI.Container(),
+	}),
 };
 
 export const Nodes = Chord.Node.Node.CreateMany({
@@ -134,19 +144,11 @@ export const Nodes = Chord.Node.Node.CreateMany({
 		reducers: Reducers.input,
 	},
 	pixi: {
-		state: {
-			app: new PIXI.Application({
-				resizeTo: window,
-				resolution: window.devicePixelRatio,
-			}),
-		},
+		state: State.pixi(),
 	},
 });
 
 export async function main() {
-	const scale = 3.0;
-	const speed = 0.1;
-
 	function gameLoop(app, delta) {
 		// update the entities
 		for(const id in Nodes.entities.state) {
@@ -163,12 +165,12 @@ export async function main() {
 		// update player
 		const player = Nodes.entities.state[ "1" ];
 
-		if(Nodes.input.state.keyMask & 0x01) player.physics.vy = -speed;
-		else if(Nodes.input.state.keyMask & 0x04) player.physics.vy = speed;
+		if(Nodes.input.state.keyMask & 0x01) player.physics.vy = -player.physics.speed;
+		else if(Nodes.input.state.keyMask & 0x04) player.physics.vy = player.physics.speed;
 		else player.physics.vy = 0;
 
-		if(Nodes.input.state.keyMask & 0x02) player.physics.vx = -speed;
-		else if(Nodes.input.state.keyMask & 0x08) player.physics.vx = speed;
+		if(Nodes.input.state.keyMask & 0x02) player.physics.vx = -player.physics.speed;
+		else if(Nodes.input.state.keyMask & 0x08) player.physics.vx = player.physics.speed;
 		else player.physics.vx = 0;
 
 		player.physics.x += player.physics.vx * delta;
@@ -188,10 +190,10 @@ export async function main() {
 			graphics.beginFill(0xff0000);
 			switch(entity.model.type) {
 				case EnumModelType.CIRCLE:
-					graphics.drawCircle(0, 0, entity.model.radius * scale);
+					graphics.drawCircle(0, 0, entity.model.radius * Nodes.pixi.state.scale);
 					break;
 				case EnumModelType.RECTANGLE:
-					graphics.drawRect(entity.model.ox * scale, entity.model.oy * scale, entity.model.width * scale, entity.model.height * scale);
+					graphics.drawRect(entity.model.ox * Nodes.pixi.state.scale, entity.model.oy * Nodes.pixi.state.scale, entity.model.width * Nodes.pixi.state.scale, entity.model.height * Nodes.pixi.state.scale);
 					break;
 				default:
 					break;
@@ -202,8 +204,8 @@ export async function main() {
 			graphics.lineStyle(2, 0x0000FF, 1);
 			graphics.moveTo(0, 0);
 			graphics.lineTo(
-				Math.cos(entity.physics.theta) * 20 * scale,
-				Math.sin(entity.physics.theta) * 20 * scale
+				Math.cos(entity.physics.theta) * 20 * Nodes.pixi.state.scale,
+				Math.sin(entity.physics.theta) * 20 * Nodes.pixi.state.scale
 			);
 		}
 
@@ -237,10 +239,10 @@ export async function main() {
 			const terrain = Nodes.terrain.state[ tile.data ];
 			const graphics = new PIXI.Graphics();
 			graphics.beginFill(terrain.color);
-			graphics.drawRect(0, 0, Nodes.map.state.tw * scale, Nodes.map.state.th * scale); // Scale the dimensions
+			graphics.drawRect(0, 0, Nodes.map.state.tw * Nodes.pixi.state.scale, Nodes.map.state.th * Nodes.pixi.state.scale); // Nodes.pixi.state.scale the dimensions
 			graphics.endFill();
-			graphics.x = tile.x * Nodes.map.state.tw * scale; // Scale the position
-			graphics.y = tile.y * Nodes.map.state.th * scale; // Scale the position
+			graphics.x = tile.x * Nodes.map.state.tw * Nodes.pixi.state.scale; // Nodes.pixi.state.scale the position
+			graphics.y = tile.y * Nodes.map.state.th * Nodes.pixi.state.scale; // Nodes.pixi.state.scale the position
 			map.addChild(graphics);
 		}
 	}
