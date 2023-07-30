@@ -1,0 +1,54 @@
+{
+	"name": "fk-dotf-client",
+	"version": "0.1.0",
+	"private": true,
+	"dependencies": {
+		"@craco/craco": "^7.1.0",
+		"@lespantsfancy/chord": "^0.1.27",
+		"@testing-library/jest-dom": "^5.14.1",
+		"@testing-library/react": "^13.0.0",
+		"@testing-library/user-event": "^13.2.1",
+		"chance": "^1.1.11",
+		"is-base64": "^1.1.0",
+		"mainloop.js": "^1.0.4",
+		"matter-js": "^0.19.0",
+		"pixi.js": "^7.2.4",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"react-router-dom": "^6.11.2",
+		"react-scripts": "5.0.1",
+		"tailwindcss": "^3.3.2",
+		"uuid": "^9.0.0",
+		"web-vitals": "^2.1.0"
+	},
+	"scripts": {
+		"start": "craco start",
+		"build": "craco build",
+		"test": "craco test"
+	},
+	"eslintConfig": {
+		"extends": [
+			"react-app",
+			"react-app/jest"
+		],
+		"rules": {
+			"react-hooks/exhaustive-deps": "off",
+			"import/no-anonymous-default-export": "off",
+			"no-unused-vars": "off",
+			"no-eval": "off",
+			"array-callback-return": "off"
+		}
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	}
+}

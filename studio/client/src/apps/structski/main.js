@@ -208,15 +208,15 @@ export const Reducers = {
 				next.sprites[ key ] = circle;
 			}
 
-			const nodes = flattenNodes(State?.context?.state?.data);
+			const nodes = flattenNodes(Nodes?.context?.state?.data);
 			nodes.sort(([ key1, val1, type1 ], [ key2, val2, type2 ]) => type1 === "group" ? -1 : 1);
 
 			nodes.forEach(([ keyPath, value, type, parent ]) => {
 				const lastKey = keyPath.split(".").pop();
-				const lastNode = { ...State?.context?.state?.render[ lastKey ] };
+				const lastNode = { ...Nodes?.context?.state?.render[ lastKey ] };
 
 				if(parent) {
-					const parentRender = State?.context?.state?.render[ parent ];
+					const parentRender = Nodes?.context?.state?.render[ parent ];
 					lastNode.x += parentRender.x;
 					lastNode.y += parentRender.y;
 				}
@@ -282,15 +282,15 @@ export const Reducers = {
 				sprite.endFill();
 			}
 
-			const nodes = flattenNodes(State?.context?.state?.data);
+			const nodes = flattenNodes(Nodes?.context?.state?.data);
 			nodes.sort(([ key1, val1, type1 ], [ key2, val2, type2 ]) => type1 === "group" ? -1 : 1);
 
 			nodes.forEach(([ keyPath, value, type, parent ]) => {
 				const lastKey = keyPath.split(".").pop();
-				const lastNode = { ...State?.context?.state?.render[ lastKey ] };
+				const lastNode = { ...Nodes?.context?.state?.render[ lastKey ] };
 
 				if(parent) {
-					const parentRender = State?.context?.state?.render[ parent ];
+					const parentRender = Nodes?.context?.state?.render[ parent ];
 					lastNode.x += parentRender.x;
 					lastNode.y += parentRender.y;
 				}
@@ -303,7 +303,7 @@ export const Reducers = {
 	},
 };
 
-export const State = Chord.Node.Node.CreateMany({
+export const Nodes = Chord.Node.Node.CreateMany({
 	context: {
 		state: {
 			selectedBall: null, // null means no ball is currently selected
@@ -415,17 +415,17 @@ export const State = Chord.Node.Node.CreateMany({
 	},
 });
 
-State.pixi.dispatch("load");
-State.pixi.state.app.ticker.add((delta) => State?.pixi?.dispatch("tick"));
+Nodes.pixi.dispatch("load");
+Nodes.pixi.state.app.ticker.add((delta) => Nodes?.pixi?.dispatch("tick"));
 
 export const IMM = (module, message, ...args) => {
-	const node = State[ module ];
+	const node = Nodes[ module ];
 	if(node) {
 		return node.dispatch(message.type, message.data, ...args);
 	}
 };
 export const IMS = (module) => {
-	const node = State[ module ];
+	const node = Nodes[ module ];
 	if(node) {
 		return node.state;
 	}

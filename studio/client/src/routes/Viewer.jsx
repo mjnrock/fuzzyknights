@@ -1,6 +1,6 @@
 import Chord from "@lespantsfancy/chord";
 import { useEffect } from "react";
-import { Reducers, State } from "../apps/mapski/viewer/main";
+import { Reducers, Nodes } from "../apps/mapski/viewer/main";
 
 import { PixiView } from "../apps/mapski/viewer/modules/pixi/components/PixiView";
 
@@ -9,11 +9,11 @@ import { FileIO } from "../util/FileIO";
 import Base64 from "../util/Base64";
 
 export function Viewer() {
-	const { state: menubarData, dispatch: menubarDispatch } = Chord.Node.React.useNode(State.menubar, Reducers.menubar);
-	const { state: mapData, dispatch: mapDispatch } = Chord.Node.React.useNode(State.map, Reducers.map);
-	const { state: terrainData, dispatch: terrainDispatch } = Chord.Node.React.useNode(State.terrain, Reducers.terrain);
-	const { state: viewportData, dispatch: viewportDispatch } = Chord.Node.React.useNode(State.viewport, Reducers.viewport);
-	const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(State.pixi, Reducers.pixi);
+	const { state: menubarData, dispatch: menubarDispatch } = Chord.Node.React.useNode(Nodes.menubar, Reducers.menubar);
+	const { state: mapData, dispatch: mapDispatch } = Chord.Node.React.useNode(Nodes.map, Reducers.map);
+	const { state: terrainData, dispatch: terrainDispatch } = Chord.Node.React.useNode(Nodes.terrain, Reducers.terrain);
+	const { state: viewportData, dispatch: viewportDispatch } = Chord.Node.React.useNode(Nodes.viewport, Reducers.viewport);
+	const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(Nodes.pixi, Reducers.pixi);
 
 	const loadMap = async () => {
 		console.log("Loading map...");
@@ -93,11 +93,11 @@ export function Viewer() {
 		};
 
 		window.addEventListener("keydown", onKeyDown);
-		State.pixi.state.app.view.addEventListener("wheel", onWheel);
+		Nodes.pixi.state.app.view.addEventListener("wheel", onWheel);
 
 		return () => {
 			window.removeEventListener("keydown", onKeyDown);
-			State.pixi.state.app.view.removeEventListener("wheel", onWheel);
+			Nodes.pixi.state.app.view.removeEventListener("wheel", onWheel);
 		}
 	}, [ viewportDispatch ]);
 

@@ -7,7 +7,7 @@ import TerrainMap from "../apps/mapski/editor/modules/terrain/components/Terrain
 
 import ViewPalette from "../apps/mapski/editor/modules/brushes/components/ViewPalette";
 
-import { Reducers, State } from "../apps/mapski/editor/main";
+import { Reducers, Nodes } from "../apps/mapski/editor/main";
 
 import FileMenu from "../apps/mapski/editor/modules/menubar/components/FileMenu";
 import { FileIO } from "../util/FileIO";
@@ -18,11 +18,11 @@ import Base64 from "../util/Base64";
 //FIXME: Because of the feedback loop, `map` has been given a "reversion" (action) reducer, but it's identical to the "set" (action) reducer.
 
 export function Editor() {
-	const { state: menubar, dispatch: menubarDispatch } = Chord.Node.React.useNode(State.menubar, Reducers.menubar);
-	const { state: map, dispatch: mapDispatch } = Chord.Node.React.useNode(State.map, Reducers.map);
-	const { state: history, dispatch: historyDispatch } = Chord.Node.React.useNode(State.history, Reducers.history);
-	const { state: terrain, dispatch: terrainDispatch } = Chord.Node.React.useNode(State.terrain, Reducers.terrain);
-	const { state: brushes, dispatch: brushesDispatch } = Chord.Node.React.useNode(State.brushes, Reducers.brushes);
+	const { state: menubar, dispatch: menubarDispatch } = Chord.Node.React.useNode(Nodes.menubar, Reducers.menubar);
+	const { state: map, dispatch: mapDispatch } = Chord.Node.React.useNode(Nodes.map, Reducers.map);
+	const { state: history, dispatch: historyDispatch } = Chord.Node.React.useNode(Nodes.history, Reducers.history);
+	const { state: terrain, dispatch: terrainDispatch } = Chord.Node.React.useNode(Nodes.terrain, Reducers.terrain);
+	const { state: brushes, dispatch: brushesDispatch } = Chord.Node.React.useNode(Nodes.brushes, Reducers.brushes);
 
 	useEffect(() => {
 		// Load the state into history as the first point of reversion.
@@ -35,7 +35,7 @@ export function Editor() {
 		});
 	}, []);
 
-	// const { emit } = Chord.Node.React.useNodeEvent(State.map, "update", (...args) => console.log("Map update:", ...args));
+	// const { emit } = Chord.Node.React.useNodeEvent(Nodes.map, "update", (...args) => console.log("Map update:", ...args));
 
 	//TODO: This is effectively an app-level keybind.  Move to a more appropriate location.
 	//NOTE: Care on the preventDefault() -- it currently blocks typing those letters into inputs.
