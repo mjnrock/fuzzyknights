@@ -101,20 +101,15 @@ export let State = {
 	}),
 	terrain: (terrain = {}) => ({
 		GRASS: { type: "GRASS", color: "#00ff00" },
+		WATER: { type: "WATER", color: "#00ffff" },
 		...terrain,
 	}),
 	map: (map = {}) => ({
-		rows: 5,
-		cols: 5,
+		rows: 15,
+		cols: 15,
 		tw: 32,
 		th: 32,
-		tiles: [
-			[ { x: 0, y: 0, data: "GRASS" }, { x: 1, y: 0, data: "GRASS" }, { x: 2, y: 0, data: "GRASS" }, { x: 3, y: 0, data: "GRASS" }, { x: 4, y: 0, data: "GRASS" } ],
-			[ { x: 0, y: 1, data: "GRASS" }, { x: 1, y: 1, data: "GRASS" }, { x: 2, y: 1, data: "GRASS" }, { x: 3, y: 1, data: "GRASS" }, { x: 4, y: 1, data: "GRASS" } ],
-			[ { x: 0, y: 2, data: "GRASS" }, { x: 1, y: 2, data: "GRASS" }, { x: 2, y: 2, data: "GRASS" }, { x: 3, y: 2, data: "GRASS" }, { x: 4, y: 2, data: "GRASS" } ],
-			[ { x: 0, y: 3, data: "GRASS" }, { x: 1, y: 3, data: "GRASS" }, { x: 2, y: 3, data: "GRASS" }, { x: 3, y: 3, data: "GRASS" }, { x: 4, y: 3, data: "GRASS" } ],
-			[ { x: 0, y: 4, data: "GRASS" }, { x: 1, y: 4, data: "GRASS" }, { x: 2, y: 4, data: "GRASS" }, { x: 3, y: 4, data: "GRASS" }, { x: 4, y: 4, data: "GRASS" } ],
-		],
+		tiles: [],
 		...map,
 	}),
 	input: (input = {}) => ({
@@ -140,6 +135,34 @@ export const Nodes = Node.CreateMany({
 	},
 	map: {
 		state: State.map(),
+
+		events: {
+			init: [
+				(node) => {
+					const dropDice = (sides = 2) => {
+						const roll = ~~(Math.random() * sides);
+
+						if(roll === 0) {
+							return "GRASS";
+						} else if(roll === 1) {
+							return "WATER";
+						}
+					};
+
+					// generate the map
+					for(let row = 0; row < node.state.rows; row++) {
+						node.state.tiles[ row ] = [];
+						for(let col = 0; col < node.state.cols; col++) {
+							node.state.tiles[ row ][ col ] = {
+								x: col,
+								y: row,
+								data: dropDice(),
+							};
+						}
+					}
+				},
+			],
+		},
 	},
 	input: {
 		state: State.input(),
@@ -302,6 +325,7 @@ export const Nodes = Node.CreateMany({
 });
 
 export async function main() {
+	Nodes.map.init();
 	Nodes.pixi.init();
 	Nodes.game.init();
 	Nodes.input.init();
