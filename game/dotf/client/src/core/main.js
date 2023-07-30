@@ -72,6 +72,24 @@ export let State = {
 			resolution: window.devicePixelRatio,
 		}),
 		stage: new PIXI.Container(),
+		...pixi,
+	}),
+
+	// WIP: This is a work-in-progress
+	viewport: (viewport = {}) => ({
+		layers: [],
+		w: 25,	// tiles
+		h: 25,	// tiles
+		x: 0,	// tiles
+		y: 0,	// tiles
+		zoom: 1.00,	// 1 = 100%
+		zoomStep: 0.03,	// 0.03 = 3%
+		subject: (state) => {
+			return {
+				...state,
+			};
+		},	// (state, dt)=> [x,y,w,h,zoom]
+		...viewport,
 	}),
 };
 
@@ -121,6 +139,23 @@ export const Reducers = {
 			return {
 				...state,
 				keyMask: updatedKeyMask,
+			};
+		},
+	},
+	viewport: {
+		zoom: (state, data) => {
+			let delta = Math.sign(data.zoom) * state.zoomStep;
+
+			// scale the zoom step by the current zoom if state.zoom is >= 1.5
+			if(state.zoom >= 1) {
+				delta *= 2 * state.zoom;
+			}
+
+			let nextZoom = Math.min(Math.max(Math.round((state.zoom + delta) * 100) / 100, 0.1), 5);
+
+			return {
+				...state,
+				zoom: nextZoom,
 			};
 		},
 	},
@@ -321,7 +356,10 @@ export const Nodes = Node.CreateMany({
 				);
 			}
 		},
-	}
+	},
+	viewport: {
+		state: State.viewport(),
+	},
 });
 
 export async function main() {

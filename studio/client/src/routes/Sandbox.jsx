@@ -32,8 +32,8 @@ const recurse = (node, keyPath) => {
 };
 
 export function Sandbox() {
-	const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(Nodes.pixi, Reducers.pixi);
-	const { state: contextData, dispatch: contextDispatch } = Chord.Node.React.useNode(Nodes.context, Reducers.context);
+	const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(Nodes.pixi);
+	const { state: contextData, dispatch: contextDispatch } = Chord.Node.React.useNode(Nodes.context);
 	const gameContainer = useRef(null);
 
 	useEffect(() => {
