@@ -9,11 +9,11 @@ import { FileIO } from "../util/FileIO";
 import Base64 from "../util/Base64";
 
 export function Viewer() {
-	const { state: menubarData, dispatch: menubarDispatch } = Chord.Node.React.useNode(Nodes.menubar, Reducers.menubar);
-	const { state: mapData, dispatch: mapDispatch } = Chord.Node.React.useNode(Nodes.map, Reducers.map);
-	const { state: terrainData, dispatch: terrainDispatch } = Chord.Node.React.useNode(Nodes.terrain, Reducers.terrain);
-	const { state: viewportData, dispatch: viewportDispatch } = Chord.Node.React.useNode(Nodes.viewport, Reducers.viewport);
-	const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(Nodes.pixi, Reducers.pixi);
+	const { state: menubarData, dispatch: menubarDispatch } = Chord.Node.React.useNode(Nodes.menubar);
+	const { state: mapData, dispatch: mapDispatch } = Chord.Node.React.useNode(Nodes.map);
+	const { state: terrainData, dispatch: terrainDispatch } = Chord.Node.React.useNode(Nodes.terrain);
+	const { state: viewportData, dispatch: viewportDispatch } = Chord.Node.React.useNode(Nodes.viewport);
+	const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(Nodes.pixi);
 
 	const loadMap = async () => {
 		console.log("Loading map...");

@@ -5,8 +5,8 @@ import { PixiView } from "../apps/mapski/viewer/modules/pixi/components/PixiView
 import { Reducers, Nodes, flattenGroup, findBall, flattenNodes } from "../apps/structski/main";
 
 export function Struct() {
-	const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(Nodes.pixi, Reducers.pixi);
-	const { state: contextData, dispatch: contextDispatch } = Chord.Node.React.useNode(Nodes.context, Reducers.context);
+	const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(Nodes.pixi);
+	const { state: contextData, dispatch: contextDispatch } = Chord.Node.React.useNode(Nodes.context);
 
 	useEffect(() => {
 		const handler = (e) => {

@@ -18,11 +18,11 @@ import Base64 from "../util/Base64";
 //FIXME: Because of the feedback loop, `map` has been given a "reversion" (action) reducer, but it's identical to the "set" (action) reducer.
 
 export function Editor() {
-	const { state: menubar, dispatch: menubarDispatch } = Chord.Node.React.useNode(Nodes.menubar, Reducers.menubar);
-	const { state: map, dispatch: mapDispatch } = Chord.Node.React.useNode(Nodes.map, Reducers.map);
-	const { state: history, dispatch: historyDispatch } = Chord.Node.React.useNode(Nodes.history, Reducers.history);
-	const { state: terrain, dispatch: terrainDispatch } = Chord.Node.React.useNode(Nodes.terrain, Reducers.terrain);
-	const { state: brushes, dispatch: brushesDispatch } = Chord.Node.React.useNode(Nodes.brushes, Reducers.brushes);
+	const { state: menubar, dispatch: menubarDispatch } = Chord.Node.React.useNode(Nodes.menubar);
+	const { state: map, dispatch: mapDispatch } = Chord.Node.React.useNode(Nodes.map);
+	const { state: history, dispatch: historyDispatch } = Chord.Node.React.useNode(Nodes.history);
+	const { state: terrain, dispatch: terrainDispatch } = Chord.Node.React.useNode(Nodes.terrain);
+	const { state: brushes, dispatch: brushesDispatch } = Chord.Node.React.useNode(Nodes.brushes);
 
 	useEffect(() => {
 		// Load the state into history as the first point of reversion.
