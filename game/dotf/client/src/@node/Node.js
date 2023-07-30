@@ -36,7 +36,7 @@ export class Node extends IdentityClass {
 		UPDATE: "update",
 	};
 
-	constructor ({ state = {}, events = {}, reducers = {}, effects = {}, registry, id, tags = [], ...rest } = {}) {
+	constructor ({ state = {}, events = {}, reducers = {}, effects = {}, registry, id, tags = [], $init, $pre, $post, $run = false, ...rest } = {}) {
 		super({ id, tags, ...rest });
 
 		this.state = state;
@@ -55,6 +55,23 @@ export class Node extends IdentityClass {
 		 */
 		for(const [ a, e ] of Object.entries(effects)) {
 			this.addEffect(a, ...(Array.isArray(e) ? e : [ e ]));
+		}
+
+
+		/* Strictly convenience arguments, since these are usually sort of important events */
+		if(typeof $pre === "function") {
+			this.addEventListeners(Node.EventTypes.PRE, $pre);
+		}
+		if(typeof $init === "function") {
+			this.addEventListeners(Node.EventTypes.INIT, $init);
+		}
+		if(typeof $post === "function") {
+			this.addEventListeners(Node.EventTypes.POST, $post);
+		}
+
+		/* A convenience argument to immediately invoke the initialization events, with optional arguments */
+		if($run?.length) {
+			this.init(...$run);
 		}
 	}
 

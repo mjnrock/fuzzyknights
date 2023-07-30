@@ -30,7 +30,7 @@ export let State = {
 				vy: 0,
 				vtheta: 0,
 
-				speed: 3.0,
+				speed: 4.20,
 			},
 			render: {
 				sprite: new PIXI.Sprite(),
@@ -94,6 +94,20 @@ export let State = {
 };
 
 export const Reducers = {
+	entities: {
+		add: (state, entity) => {
+			return {
+				...state,
+				[ entity.$id ]: entity,
+			};
+		},
+		remove: (state, entity) => {
+			let next = { ...state };
+			delete next[ entity.$id ];
+
+			return next;
+		},
+	},
 	input: {
 		handleKeyDown: (state, { code }) => {
 			let updatedKeyMask = state.keyMask;
@@ -142,6 +156,15 @@ export const Reducers = {
 			};
 		},
 	},
+	pixi: {
+		register: (state, container) => {
+			const next = { ...state };
+
+			next.app.stage.addChild(container);
+
+			return next;
+		},
+	},
 	viewport: {
 		zoom: (state, data) => {
 			let delta = Math.sign(data.zoom) * state.zoomStep;
@@ -161,9 +184,22 @@ export const Reducers = {
 	},
 };
 
+export const Effects = {
+	entities: {
+		add: (node, entity) => {
+			Nodes.pixi.dispatchAsync("register", entity.render.sprite);
+		},
+		remove: (node, entity) => {
+			Nodes.pixi.state.app.stage.removeChild(entity.render.sprite);
+		},
+	},
+};
+
 export const Nodes = Node.CreateMany({
 	entities: {
 		state: State.entities(),
+		reducers: Reducers.entities,
+		effects: Effects.entities,
 	},
 	terrain: {
 		state: State.terrain(),
@@ -214,21 +250,11 @@ export const Nodes = Node.CreateMany({
 					window.addEventListener("keyup", e => {
 						Nodes.input.dispatch("handleKeyUp", { code: e.code });
 					});
-				},
-			],
-		},
-	},
-	pixi: {
-		state: State.pixi(),
 
-		events: {
-			init: [
-				(node) => {
-					const pixi = node.state.app;
-					document.body.appendChild(pixi.view);
 
+					const pixi = Nodes.pixi.state.app;
 					// Make the player look at the mouse as it moves
-					window.addEventListener("mousemove", e => {
+					window.addEventListener("mousemove", async e => {
 						// Calculate the canvas offsets
 						const canvasOffsetX = pixi.view.offsetLeft;
 						const canvasOffsetY = pixi.view.offsetTop;
@@ -246,6 +272,77 @@ export const Nodes = Node.CreateMany({
 
 						player.physics.theta = Math.atan2(dy, dx);
 					});
+					window.addEventListener("mousedown", async e => {
+						// Calculate the canvas offsets
+						const canvasOffsetX = pixi.view.offsetLeft;
+						const canvasOffsetY = pixi.view.offsetTop;
+
+						// Calculate the mouse position relative to the canvas
+						const mouseX = (e.pageX - canvasOffsetX);
+						const mouseY = (e.pageY - canvasOffsetY);
+
+						// update entity's theta position so that it faces the mouse
+						const player = Nodes.entities.state[ "1" ];
+
+						// Calculate angle to mouse and set it
+						const dx = mouseX - (player.physics.x * Nodes.map.state.tw);
+						const dy = mouseY - (player.physics.y * Nodes.map.state.th);
+
+						const theta = Math.atan2(dy, dx);
+
+						// Use the mouse position to create a new entity projection
+						const entity = {
+							$id: uuid(),
+							$tags: [],
+							physics: {
+								x: player.physics.x,
+								y: player.physics.y,
+								theta,
+								vtheta: 0,
+								speed: 32,
+							},
+							render: {
+								sprite: new PIXI.Graphics(),
+							},
+							state: {
+								current: EnumEntityState.MOVING,
+								default: EnumEntityState.MOVING,
+							},
+							model: {
+								type: EnumModelType.CIRCLE,
+								radius: 5,	//px
+								ox: 0,	//px
+								oy: 0,	//px
+							},
+						};
+
+						// calculate the velocity of the entity
+						entity.physics.vx = Math.cos(theta) * entity.physics.speed;
+						entity.physics.vy = Math.sin(theta) * entity.physics.speed;
+
+						// Add the entity to the entities node
+						Nodes.entities.dispatchAsync("add", entity);
+
+						setTimeout(() => {
+							Nodes.entities.dispatchAsync("remove", entity);
+						}, 1000);
+					});
+					window.addEventListener("wheel", e => {
+						Nodes.viewport.dispatch("zoom", { zoom: e.deltaY });
+					});
+				},
+			],
+		},
+	},
+	pixi: {
+		state: State.pixi(),
+		reducers: Reducers.pixi,
+
+		events: {
+			init: [
+				(node) => {
+					const pixi = node.state.app;
+					document.body.appendChild(pixi.view);
 
 					// draw the map, using green Pixi Graphics objects of .tw and .th size at tx and ty positions
 					const map = new PIXI.Container();
@@ -334,7 +431,12 @@ export const Nodes = Node.CreateMany({
 				graphics.y = entity.physics.y * Nodes.map.state.th;
 
 				// redraw entity
-				graphics.beginFill(0xff0000);
+				if(entity.model.radius >= 10) {
+					graphics.beginFill(0xff0000);
+				} else {
+					graphics.beginFill(0x666);
+				}
+
 				switch(entity.model.type) {
 					case EnumModelType.CIRCLE:
 						graphics.drawCircle(0, 0, entity.model.radius * Nodes.pixi.state.scale);
@@ -348,12 +450,14 @@ export const Nodes = Node.CreateMany({
 				graphics.endFill();
 
 				// draw the line from entity to mouse
-				graphics.lineStyle(2, 0x0000FF, 1);
-				graphics.moveTo(0, 0);
-				graphics.lineTo(
-					Math.cos(entity.physics.theta) * 20 * Nodes.pixi.state.scale,
-					Math.sin(entity.physics.theta) * 20 * Nodes.pixi.state.scale
-				);
+				if(entity.model.radius >= 10) {
+					graphics.lineStyle(2, 0x0000FF, 1);
+					graphics.moveTo(0, 0);
+					graphics.lineTo(
+						Math.cos(entity.physics.theta) * 20 * Nodes.pixi.state.scale,
+						Math.sin(entity.physics.theta) * 20 * Nodes.pixi.state.scale
+					);
+				}
 			}
 		},
 	},
