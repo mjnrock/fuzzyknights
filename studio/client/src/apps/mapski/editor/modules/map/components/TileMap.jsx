@@ -232,10 +232,24 @@ export function TileMap({ data, update }) {
 		};
 	}, [ canvas.current, mapDispatch, mapData.sw, mapData.sh ]);
 
+	let brushCursor;
+	if(brushesData.brush === "pan") {
+		if(brushesData.isActive) {
+			brushCursor = "cursor-grabbing";
+		} else {
+			brushCursor = "cursor-grab";
+		}
+	} else if(brushesData.brush === "rectangle") {
+		brushCursor = "cursor-crosshair";
+	} else if(brushesData.brush === "plus") {
+		brushCursor = "cursor-crosshair";
+	} else {
+		brushCursor = "cursor-crosshair";
+	}
 
 	return (
 		<div
-			className={ `p-1 border border-solid rounded shadow border-neutral-200 bg-neutral-50 ` + (brushesData.brush === "pan" ? (brushesData.isActive ? "cursor-grabbing" : "cursor-grab") : "cursor-crosshair") }
+			className={ `p-1 border border-solid rounded shadow border-neutral-200 bg-neutral-50 ` + brushCursor }
 			title="Ctrl+Zoom: Double/Half scale"
 		>
 			<canvas

@@ -178,10 +178,8 @@ export function Editor() {
 							<TileMapSizing data={ map } update={ mapDispatch } />
 						</div>
 					</div>
-					<div className="flex flex-row gap-2">
-						<div className="cursor-crosshair">
-							<TileMapJSX data={ { map, terrain, brushes } } update={ { mapDispatch, brushesDispatch } } />
-						</div>
+					<div className="flex flex-row items-center justify-center gap-2 cursor-crosshair">
+						<TileMapJSX data={ { map, terrain, brushes } } update={ { mapDispatch, brushesDispatch } } />
 					</div>
 				</div>
 			</div>
