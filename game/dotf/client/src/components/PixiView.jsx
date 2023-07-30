@@ -5,6 +5,8 @@ export function PixiView({ app, resizer = false, ...props }) {
 
 	useEffect(() => {
 		const ref = canvasRef.current;
+
+		if(!app.view) return;
 		
 		ref.appendChild(app.view);
 
