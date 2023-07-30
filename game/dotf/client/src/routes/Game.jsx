@@ -1,25 +1,23 @@
 import React from "react";
 
-import { main } from "../core/main.js";
-import main2 from "../core/main2.js";
+import Chord from "@lespantsfancy/chord";
+
+import { Nodes, main } from "../core/main.js";
 
 import { PixiView } from "../components/PixiView.jsx";
 
 export function Game() {
-	const [ pixi, setPixi ] = React.useState(null);
+	const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(Nodes.pixi);
 
 	React.useEffect(() => {
 		main().then((nodes) => {
-			setPixi(nodes.pixi.state);
+			//TODO: This is a hack to get the PixiView to render
 		});
-		// main2().then((app) => {
-		// 	setPixi(app);
-		// });
 	}, []);
 
 	return (
 		<>
-			{ pixi && <PixiView app={ pixi } /> }
+			<PixiView app={ pixiData } />
 		</>
 	);
 };
