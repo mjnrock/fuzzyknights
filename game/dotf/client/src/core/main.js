@@ -15,57 +15,6 @@ export const EnumEntityState = {
 	MOVING: "MOVING",
 };
 
-export const Reducers = {
-	input: {
-		handleKeyDown: (state, { code }) => {
-			let updatedKeyMask = state.keyMask;
-			switch(code) {
-				case "KeyW":
-					updatedKeyMask |= 0x01;
-					break;
-				case "KeyA":
-					updatedKeyMask |= 0x02;
-					break;
-				case "KeyS":
-					updatedKeyMask |= 0x04;
-					break;
-				case "KeyD":
-					updatedKeyMask |= 0x08;
-					break;
-				default:
-					break;
-			}
-			return {
-				...state,
-				keyMask: updatedKeyMask,
-			};
-		},
-		handleKeyUp: (state, { code }) => {
-			let updatedKeyMask = state.keyMask;
-			switch(code) {
-				case "KeyW":
-					updatedKeyMask &= ~0x01;
-					break;
-				case "KeyA":
-					updatedKeyMask &= ~0x02;
-					break;
-				case "KeyS":
-					updatedKeyMask &= ~0x04;
-					break;
-				case "KeyD":
-					updatedKeyMask &= ~0x08;
-					break;
-				default:
-					break;
-			}
-			return {
-				...state,
-				keyMask: updatedKeyMask,
-			};
-		},
-	},
-};
-
 export let State = {
 	entities: (entities = {}) => ({
 		"1": {
@@ -124,6 +73,57 @@ export let State = {
 		}),
 		stage: new PIXI.Container(),
 	}),
+};
+
+export const Reducers = {
+	input: {
+		handleKeyDown: (state, { code }) => {
+			let updatedKeyMask = state.keyMask;
+			switch(code) {
+				case "KeyW":
+					updatedKeyMask |= 0x01;
+					break;
+				case "KeyA":
+					updatedKeyMask |= 0x02;
+					break;
+				case "KeyS":
+					updatedKeyMask |= 0x04;
+					break;
+				case "KeyD":
+					updatedKeyMask |= 0x08;
+					break;
+				default:
+					break;
+			}
+			return {
+				...state,
+				keyMask: updatedKeyMask,
+			};
+		},
+		handleKeyUp: (state, { code }) => {
+			let updatedKeyMask = state.keyMask;
+			switch(code) {
+				case "KeyW":
+					updatedKeyMask &= ~0x01;
+					break;
+				case "KeyA":
+					updatedKeyMask &= ~0x02;
+					break;
+				case "KeyS":
+					updatedKeyMask &= ~0x04;
+					break;
+				case "KeyD":
+					updatedKeyMask &= ~0x08;
+					break;
+				default:
+					break;
+			}
+			return {
+				...state,
+				keyMask: updatedKeyMask,
+			};
+		},
+	},
 };
 
 export const Nodes = Node.CreateMany({
