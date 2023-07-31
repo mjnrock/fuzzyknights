@@ -177,7 +177,7 @@ export const Reducers = {
 export const Effects = {
 	entities: {
 		add: (node, entity) => {
-			// Nodes.pixi.dispatchAsync("register", entity.render.sprite);
+			Nodes.pixi.dispatchAsync("register", entity.render.sprite);
 		},
 		remove: (node, entity) => {
 			Nodes.pixi.state.app.stage.removeChild(entity.render.sprite);
@@ -321,16 +321,16 @@ export const Nodes = Node.CreateMany({
 
 						//FIXME: This section proves the *gross* inefficiency of the Node dispatch system
 						// Add the entity to the entities node
-						// Nodes.entities.dispatchAsync("add", entity);
-						Nodes.entities.state[ entity.$id ] = entity;
-						Nodes.pixi.state.app.stage.addChild(entity.render.sprite);
+						Nodes.entities.dispatch("add", entity);
+						// Nodes.entities.state[ entity.$id ] = entity;
+						// Nodes.pixi.state.app.stage.addChild(entity.render.sprite);
 
 						if(++gpi >= graphicsPool.length) gpi = 0;
 
 						setTimeout(() => {
-							// Nodes.entities.dispatchAsync("remove", entity);
-							delete Nodes.entities.state[ entity.$id ];
-							Nodes.pixi.state.app.stage.removeChild(entity.render.sprite);
+							Nodes.entities.dispatch("remove", entity);
+							// delete Nodes.entities.state[ entity.$id ];
+							// Nodes.pixi.state.app.stage.removeChild(entity.render.sprite);
 						}, 1000);
 					});
 				},

@@ -36,7 +36,7 @@ export class Node extends IdentityClass {
 		UPDATE: "update",
 	};
 
-	constructor ({ state = {}, events = {}, reducers = {}, effects = {}, registry, id, tags = [], $init, $pre, $post, $run = false, ...rest } = {}) {
+	constructor ({ state = {}, events = {}, reducers = {}, effects = {}, registry, id, tags = [], $init, $pre, $post, $run = false, config = {}, ...rest } = {}) {
 		super({ id, tags, ...rest });
 
 		this.state = state;
@@ -44,6 +44,12 @@ export class Node extends IdentityClass {
 			reducers,
 			effects: {},
 			...events,
+		};
+
+		this.config = {
+			allowShallowPrevious: true,
+			allowTrivialUpdate: true,	// If the state is the same as the previous state, still emit the `update` event
+			...config,
 		};
 
 		/**
@@ -84,7 +90,7 @@ export class Node extends IdentityClass {
 	}
 
 	dispatch(action, ...args) {
-		let previous = clone(this.state);
+		let previous = this.config.allowShallowPrevious ? { ...this.state } : clone(this.state);
 		let state = this.state;
 
 		if(this.events.reducers[ action ]) {
@@ -94,7 +100,7 @@ export class Node extends IdentityClass {
 			state = this.events.reducers.default.call(this, state, ...args);
 		}
 
-		if(safeStringify(state) === safeStringify(previous)) {
+		if(!this.config.allowTrivialUpdate && safeStringify(state) === safeStringify(previous)) {
 			return state;
 		}
 
@@ -111,14 +117,14 @@ export class Node extends IdentityClass {
 	}
 
 	async dispatchAsync(action, ...args) {
-		let previous = clone(this.state);
+		let previous = this.config.allowShallowPrevious ? { ...this.state } : clone(this.state);
 		let state = this.state;
 
 		if(this.events.reducers[ action ]) {
 			state = await this.events.reducers[ action ].call(this, state, ...args);
 		}
 
-		if(safeStringify(state) === safeStringify(previous)) {
+		if(!this.config.allowTrivialUpdate && safeStringify(state) === safeStringify(previous)) {
 			return state;
 		}
 
