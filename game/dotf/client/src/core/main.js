@@ -289,7 +289,10 @@ export const Nodes = Node.CreateMany({
 
 						Nodes.game.state.mouse = [ mouseX, mouseY ];
 					});
-					window.addEventListener("click", async e => {
+					window.addEventListener("contextmenu", async e => {
+						e.preventDefault();
+						e.stopPropagation();
+
 						// Calculate the canvas offsets
 						const canvasOffsetX = pixi.view.offsetLeft;
 						const canvasOffsetY = pixi.view.offsetTop;
@@ -337,9 +340,12 @@ export const Nodes = Node.CreateMany({
 
 						entity.render.sprite.clear();
 
+						// calculate a random "margin of error" to apply to the arrow (theta : moe/variance : direction)
+						const thetaError = theta + (Math.random() * 0.10) * (Math.random() < 0.5 ? -1 : 1);
+
 						// calculate the velocity of the entity
-						entity.physics.vx = Math.cos(theta) * entity.physics.speed;
-						entity.physics.vy = Math.sin(theta) * entity.physics.speed;
+						entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
+						entity.physics.vy = Math.sin(thetaError) * entity.physics.speed;
 
 						// Add the entity to the entities node
 						Nodes.entities.dispatch("add", entity);
@@ -349,12 +355,9 @@ export const Nodes = Node.CreateMany({
 						// STUB: This will destroy the entities after 1 second, even if the Game is paused.
 						setTimeout(() => {
 							Nodes.entities.dispatch("remove", entity);
-						}, 1000);
+						}, 2500);
 					});
-					window.addEventListener("contextmenu", async e => {
-						e.preventDefault();
-						e.stopPropagation();
-
+					window.addEventListener("click", async e => {
 						// Calculate the canvas offsets
 						const canvasOffsetX = pixi.view.offsetLeft;
 						const canvasOffsetY = pixi.view.offsetTop;
@@ -393,8 +396,9 @@ export const Nodes = Node.CreateMany({
 								default: EnumEntityState.MOVING,
 							},
 							model: {
-								type: EnumModelType.CIRCLE,
-								radius: 2,	//px
+								type: EnumModelType.RECTANGLE,
+								width: 16,	//px
+								height: 1,	//px
 								ox: 0,	//px
 								oy: 0,	//px
 							},
@@ -402,9 +406,12 @@ export const Nodes = Node.CreateMany({
 
 						entity.render.sprite.clear();
 
+						// calculate a random "margin of error" to apply to the arrow (theta : moe/variance : direction)
+						const thetaError = theta + (Math.random() * 0.15) * (Math.random() < 0.5 ? -1 : 1);
+
 						// calculate the velocity of the entity
-						entity.physics.vx = Math.cos(theta) * entity.physics.speed;
-						entity.physics.vy = Math.sin(theta) * entity.physics.speed;
+						entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
+						entity.physics.vy = Math.sin(thetaError) * entity.physics.speed;
 
 						// Add the entity to the entities node
 						Nodes.entities.dispatch("add", entity);
@@ -574,16 +581,17 @@ export const Nodes = Node.CreateMany({
 					graphics.beginFill(0xff0000, 1.0);
 				} else if(entity.model.radius >= 5) {
 					graphics.beginFill("#ff9900", 1.0);
-				} else if(entity.model.radius >= 1) {
-					graphics.beginFill("#FFF", 1.0);
+				} else {
+					graphics.beginFill("#86592d", 1.0);
 				}
 
 				switch(entity.model.type) {
 					case EnumModelType.CIRCLE:
-						graphics.drawCircle(0, 0, entity.model.radius * Nodes.pixi.state.scale);
+						graphics.drawCircle(entity.model.ox * Nodes.pixi.state.scale, entity.model.oy * Nodes.pixi.state.scale, entity.model.radius * Nodes.pixi.state.scale);
 						break;
 					case EnumModelType.RECTANGLE:
 						graphics.drawRect(entity.model.ox * Nodes.pixi.state.scale, entity.model.oy * Nodes.pixi.state.scale, entity.model.width * Nodes.pixi.state.scale, entity.model.height * Nodes.pixi.state.scale);
+						graphics.rotation = entity.physics.theta;
 						break;
 					default:
 						break;
@@ -594,12 +602,18 @@ export const Nodes = Node.CreateMany({
 			const player = Nodes.entities.state.player;
 			const playerGraphics = player.render.sprite;
 
-			playerGraphics.lineStyle(2, 0x0000FF, 1);
-			playerGraphics.moveTo(0, 0);
-			playerGraphics.lineTo(
-				Math.cos(player.physics.theta) * 20 * Nodes.pixi.state.scale,
-				Math.sin(player.physics.theta) * 20 * Nodes.pixi.state.scale
-			);
+			// draw a triangle that follows the mouse and if "in front" of the player, draw it in front of the player
+			playerGraphics.x = player.physics.x * Nodes.map.state.tw;
+			playerGraphics.y = player.physics.y * Nodes.map.state.th;
+			playerGraphics.rotation = player.physics.theta;
+
+			playerGraphics.beginFill(0x00ff00, 1.0);
+			playerGraphics.drawPolygon([
+				3 + player.model.radius * Nodes.pixi.state.scale, -5 * Nodes.pixi.state.scale,
+				3 + player.model.radius * Nodes.pixi.state.scale, 5 * Nodes.pixi.state.scale,
+				3 + (player.model.radius * Nodes.pixi.state.scale) / 2 * Nodes.pixi.state.scale, 0,
+			]);
+			playerGraphics.endFill();
 		},
 	},
 	viewport: {
