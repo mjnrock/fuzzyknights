@@ -49,8 +49,8 @@ export let State = {
 		...entities,
 	}),
 	terrain: (terrain = {}) => ({
-		GRASS: { type: "GRASS", color: "#00ff00" },
-		WATER: { type: "WATER", color: "#00ffff" },
+		GRASS: { type: "GRASS", color: "#66cc66" },
+		WATER: { type: "WATER", color: "#33ccff" },
 		...terrain,
 	}),
 	map: (map = {}) => ({
@@ -573,7 +573,7 @@ export const Nodes = Node.CreateMany({
 				if(entity.model.radius >= 10) {
 					graphics.beginFill(0xff0000, 1.0);
 				} else if(entity.model.radius >= 5) {
-					graphics.beginFill("#dbb660", 1.0);
+					graphics.beginFill("#ff9900", 1.0);
 				} else if(entity.model.radius >= 1) {
 					graphics.beginFill("#FFF", 1.0);
 				}
