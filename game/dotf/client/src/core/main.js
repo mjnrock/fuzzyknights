@@ -346,6 +346,7 @@ export const Nodes = Node.CreateMany({
 						// calculate the velocity of the entity
 						entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
 						entity.physics.vy = Math.sin(thetaError) * entity.physics.speed;
+						entity.physics.theta = thetaError;
 
 						// Add the entity to the entities node
 						Nodes.entities.dispatch("add", entity);
@@ -412,6 +413,7 @@ export const Nodes = Node.CreateMany({
 						// calculate the velocity of the entity
 						entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
 						entity.physics.vy = Math.sin(thetaError) * entity.physics.speed;
+						entity.physics.theta = thetaError;
 
 						// Add the entity to the entities node
 						Nodes.entities.dispatch("add", entity);
