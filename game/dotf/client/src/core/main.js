@@ -17,7 +17,7 @@ export const EnumEntityState = {
 
 export let State = {
 	entities: (entities = {}) => ({
-		"1": {
+		player: {
 			$id: uuid(),
 			$tags: [],
 
@@ -66,10 +66,9 @@ export let State = {
 		...input,
 	}),
 	pixi: (pixi = {}) => ({
-		scale: 3.0,
+		scale: 2.5,
 		app: new PIXI.Application({
 			resizeTo: window,
-			resolution: window.devicePixelRatio,
 		}),
 		stage: new PIXI.Container(),
 		...pixi,
@@ -165,35 +164,33 @@ export const Reducers = {
 			return next;
 		},
 	},
-	viewport: {
-		zoom: (state, data) => {
-			let delta = Math.sign(data.zoom) * state.zoomStep;
-
-			// scale the zoom step by the current zoom if state.zoom is >= 1.5
-			if(state.zoom >= 1) {
-				delta *= 2 * state.zoom;
-			}
-
-			let nextZoom = Math.min(Math.max(Math.round((state.zoom + delta) * 100) / 100, 0.1), 5);
-
+	game: {
+		merge: (state, data) => {
 			return {
 				...state,
-				zoom: nextZoom,
+				...data,
 			};
 		},
-	},
+	}
 };
 
 export const Effects = {
 	entities: {
 		add: (node, entity) => {
-			Nodes.pixi.dispatchAsync("register", entity.render.sprite);
+			// Nodes.pixi.dispatchAsync("register", entity.render.sprite);
 		},
 		remove: (node, entity) => {
 			Nodes.pixi.state.app.stage.removeChild(entity.render.sprite);
 		},
 	},
 };
+
+//STUB: Graphics pool
+const graphicsPool = [];
+let gpi = 0;
+for(let i = 0; i < 100; i++) {
+	graphicsPool.push(new PIXI.Graphics());
+}
 
 export const Nodes = Node.CreateMany({
 	entities: {
@@ -264,7 +261,7 @@ export const Nodes = Node.CreateMany({
 						const mouseY = (e.pageY - canvasOffsetY);
 
 						// update entity's theta position so that it faces the mouse
-						const player = Nodes.entities.state[ "1" ];
+						const player = Nodes.entities.state.player;
 
 						// Calculate angle to mouse and set it
 						const dx = mouseX - (player.physics.x * Nodes.map.state.tw);
@@ -272,7 +269,7 @@ export const Nodes = Node.CreateMany({
 
 						player.physics.theta = Math.atan2(dy, dx);
 					});
-					window.addEventListener("mousedown", async e => {
+					window.addEventListener("click", async e => {
 						// Calculate the canvas offsets
 						const canvasOffsetX = pixi.view.offsetLeft;
 						const canvasOffsetY = pixi.view.offsetTop;
@@ -282,7 +279,7 @@ export const Nodes = Node.CreateMany({
 						const mouseY = (e.pageY - canvasOffsetY);
 
 						// update entity's theta position so that it faces the mouse
-						const player = Nodes.entities.state[ "1" ];
+						const player = Nodes.entities.state.player
 
 						// Calculate angle to mouse and set it
 						const dx = mouseX - (player.physics.x * Nodes.map.state.tw);
@@ -302,7 +299,7 @@ export const Nodes = Node.CreateMany({
 								speed: 32,
 							},
 							render: {
-								sprite: new PIXI.Graphics(),
+								sprite: graphicsPool[ gpi ]
 							},
 							state: {
 								current: EnumEntityState.MOVING,
@@ -316,19 +313,25 @@ export const Nodes = Node.CreateMany({
 							},
 						};
 
+						entity.render.sprite.clear();
+
 						// calculate the velocity of the entity
 						entity.physics.vx = Math.cos(theta) * entity.physics.speed;
 						entity.physics.vy = Math.sin(theta) * entity.physics.speed;
 
+						//FIXME: This section proves the *gross* inefficiency of the Node dispatch system
 						// Add the entity to the entities node
-						Nodes.entities.dispatchAsync("add", entity);
+						// Nodes.entities.dispatchAsync("add", entity);
+						Nodes.entities.state[ entity.$id ] = entity;
+						Nodes.pixi.state.app.stage.addChild(entity.render.sprite);
+
+						if(++gpi >= graphicsPool.length) gpi = 0;
 
 						setTimeout(() => {
-							Nodes.entities.dispatchAsync("remove", entity);
+							// Nodes.entities.dispatchAsync("remove", entity);
+							delete Nodes.entities.state[ entity.$id ];
+							Nodes.pixi.state.app.stage.removeChild(entity.render.sprite);
 						}, 1000);
-					});
-					window.addEventListener("wheel", e => {
-						Nodes.viewport.dispatch("zoom", { zoom: e.deltaY });
 					});
 				},
 			],
@@ -374,6 +377,28 @@ export const Nodes = Node.CreateMany({
 					// add the map and entities to the stage
 					pixi.stage.addChild(map);
 					pixi.stage.addChild(entities);
+
+
+
+					//STUB: START FPS COUNTER
+					const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
+					fpsText.x = 10;
+					fpsText.y = 10;
+					pixi.stage.addChild(fpsText);
+
+					let i = 0,
+						size = 500;
+					const fpsWindow = [];
+					pixi.ticker.add((delta) => {
+						fpsWindow[ i ] = delta;
+						++i;
+						if(i >= size) i = 0;
+
+						const avgDeltaInMilliseconds = fpsWindow.reduce((a, b) => a + b, 0) / size;
+						const avgFPS = 1000 / avgDeltaInMilliseconds;
+						fpsText.text = `FPS: ${ Math.round(avgFPS / 100) }`;
+					});
+					//STUB: END FPS COUNTER
 				},
 			],
 		},
@@ -381,31 +406,39 @@ export const Nodes = Node.CreateMany({
 	game: {
 		state: {
 			fps: 30,
+			renderHistory: [],
+			debugFPSText: null,
 		},
+		reducers: Reducers.game,
 		events: {
 			init: [
 				(node) => {
 					MainLoop
-						.setSimulationTimestep(1000 / node.state.fps)
+						.setSimulationTimestep(1000 / 24)
 						.setUpdate(delta => node.tick(delta / 1000))
-						.setDraw((ip) => node.render(ip))
+						// .setDraw((ip) => node.render(ip))
 						.start();
+
+					Nodes.pixi.state.app.ticker.add((delta) => {
+						node.render(delta / 1000);
+					});
 				},
 			],
 		},
 
-		tick(dt) {
+		tick(dts) {
 			// update the entities
 			for(const id in Nodes.entities.state) {
 				const entity = Nodes.entities.state[ id ];
 
 				// calculate the new position of the entity and set it
-				entity.physics.x += entity.physics.vx * dt;
-				entity.physics.y += entity.physics.vy * dt;
+				entity.physics.x += entity.physics.vx * dts;
+				entity.physics.y += entity.physics.vy * dts;
+
 			}
 
 			// update player
-			const player = Nodes.entities.state[ "1" ];
+			const player = Nodes.entities.state.player;
 
 			if(Nodes.input.state.keyMask & 0x01) player.physics.vy = -player.physics.speed;
 			else if(Nodes.input.state.keyMask & 0x04) player.physics.vy = player.physics.speed;
@@ -415,10 +448,11 @@ export const Nodes = Node.CreateMany({
 			else if(Nodes.input.state.keyMask & 0x08) player.physics.vx = player.physics.speed;
 			else player.physics.vx = 0;
 
-			player.physics.x += player.physics.vx * dt;
-			player.physics.y += player.physics.vy * dt;
+			player.physics.x += player.physics.vx * dts;
+			player.physics.y += player.physics.vy * dts;
 		},
-		render(dt) {
+		render(dts) {
+			//FIXME: Instead, this should manipulate the meta data on the Pixi objects, as it won't require a re-render every frame
 			// iterate through entities and draw the line towards the mouse
 			for(const id in Nodes.entities.state) {
 				const entity = Nodes.entities.state[ id ];
@@ -448,17 +482,17 @@ export const Nodes = Node.CreateMany({
 						break;
 				}
 				graphics.endFill();
-
-				// draw the line from entity to mouse
-				if(entity.model.radius >= 10) {
-					graphics.lineStyle(2, 0x0000FF, 1);
-					graphics.moveTo(0, 0);
-					graphics.lineTo(
-						Math.cos(entity.physics.theta) * 20 * Nodes.pixi.state.scale,
-						Math.sin(entity.physics.theta) * 20 * Nodes.pixi.state.scale
-					);
-				}
 			}
+
+			const player = Nodes.entities.state.player;
+			const playerGraphics = player.render.sprite;
+
+			playerGraphics.lineStyle(2, 0x0000FF, 1);
+			playerGraphics.moveTo(0, 0);
+			playerGraphics.lineTo(
+				Math.cos(player.physics.theta) * 20 * Nodes.pixi.state.scale,
+				Math.sin(player.physics.theta) * 20 * Nodes.pixi.state.scale
+			);
 		},
 	},
 	viewport: {
