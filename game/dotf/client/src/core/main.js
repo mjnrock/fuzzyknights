@@ -68,7 +68,12 @@ export let State = {
 	pixi: (pixi = {}) => ({
 		scale: 2.5,
 		app: new PIXI.Application({
+			hello: "world",
+
+			backgroundColor: 0x000000,
 			resizeTo: window,
+			antialias: true,
+			preserveDrawingBuffer: true,
 		}),
 		stage: new PIXI.Container(),
 		...pixi,
