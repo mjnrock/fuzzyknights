@@ -31,10 +31,36 @@ export function Game() {
 	const [ state, setState ] = React.useState();
 
 	React.useEffect(() => {
+		let fnBlur = null,
+			fnFocus = null;
+
 		main().then((nodes) => {
-			//TODO: This is a hack to get the PixiView to render
-			setState(nodes.pixi.state.app);
+			const app = nodes.pixi.state.app;
+
+			setState(app);
+
+			const onBlur = (e) => {
+				// "Pause" pixi so that it can resume properly upon refocus
+				// nodes.pixi.state.app.ticker.stop();
+				nodes.game.stop();
+			};
+			const onFocus = (e) => {
+				// "Resume" pixi
+				// nodes.pixi.state.app.ticker.start();
+				nodes.game.start();
+			};
+
+			window.addEventListener("blur", onBlur);
+			window.addEventListener("focus", onFocus);
+
+			fnBlur = onBlur;
+			fnFocus = onFocus;
 		});
+
+		return () => {
+			window.removeEventListener("blur", fnBlur);
+			window.removeEventListener("focus", fnFocus);
+		}
 	}, []);
 
 	if(!state) {

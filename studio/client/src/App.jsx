@@ -6,6 +6,14 @@ import { Viewer as ViewerRoute } from "./routes/Viewer.jsx";
 import { Struct as StructRoute } from "./routes/Struct.jsx";
 import { Sandbox as SandboxRoute } from "./routes/Sandbox.jsx";
 
+// FIXME: Once you integrate the Node changes from Game into Chord, you *must* set the `config` allowShallowPrevious to `false` AND allowTrivialUpdates to `false`; otherwise state history will be mutated
+// FIXME: Once you integrate the Node changes from Game into Chord, you *must* set the `config` allowShallowPrevious to `false` AND allowTrivialUpdates to `false`; otherwise state history will be mutated
+// FIXME: Once you integrate the Node changes from Game into Chord, you *must* set the `config` allowShallowPrevious to `false` AND allowTrivialUpdates to `false`; otherwise state history will be mutated
+// FIXME: Once you integrate the Node changes from Game into Chord, you *must* set the `config` allowShallowPrevious to `false` AND allowTrivialUpdates to `false`; otherwise state history will be mutated
+// FIXME: Once you integrate the Node changes from Game into Chord, you *must* set the `config` allowShallowPrevious to `false` AND allowTrivialUpdates to `false`; otherwise state history will be mutated
+// FIXME: Once you integrate the Node changes from Game into Chord, you *must* set the `config` allowShallowPrevious to `false` AND allowTrivialUpdates to `false`; otherwise state history will be mutated
+// NOTE: Editor won't work correctly until you do this.
+
 export function App() {
 	return (
 		<Routes>

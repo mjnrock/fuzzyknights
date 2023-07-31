@@ -111,15 +111,19 @@ export const Reducers = {
 		handleKeyDown: (state, { code }) => {
 			let updatedKeyMask = state.keyMask;
 			switch(code) {
+				case "ArrowUp":
 				case "KeyW":
 					updatedKeyMask |= 0x01;
 					break;
+				case "ArrowLeft":
 				case "KeyA":
 					updatedKeyMask |= 0x02;
 					break;
+				case "ArrowDown":
 				case "KeyS":
 					updatedKeyMask |= 0x04;
 					break;
+				case "ArrowRight":
 				case "KeyD":
 					updatedKeyMask |= 0x08;
 					break;
@@ -134,15 +138,19 @@ export const Reducers = {
 		handleKeyUp: (state, { code }) => {
 			let updatedKeyMask = state.keyMask;
 			switch(code) {
+				case "ArrowUp":
 				case "KeyW":
 					updatedKeyMask &= ~0x01;
 					break;
+				case "ArrowLeft":
 				case "KeyA":
 					updatedKeyMask &= ~0x02;
 					break;
+				case "ArrowDown":
 				case "KeyS":
 					updatedKeyMask &= ~0x04;
 					break;
+				case "ArrowRight":
 				case "KeyD":
 					updatedKeyMask &= ~0x08;
 					break;
@@ -240,11 +248,25 @@ export const Nodes = Node.CreateMany({
 				(node) => {
 					// Event listener for keydown event
 					window.addEventListener("keydown", e => {
+						if([ "F5", "F11", "F12" ].includes(e.code)) {
+							return;
+						}
+
+						e.preventDefault();
+						e.stopPropagation();
+
 						Nodes.input.dispatch("handleKeyDown", { code: e.code });
 					});
 
 					// Event listener for keyup event
 					window.addEventListener("keyup", e => {
+						if([ "F5", "F11", "F12" ].includes(e.code)) {
+							return;
+						}
+
+						e.preventDefault();
+						e.stopPropagation();
+
 						Nodes.input.dispatch("handleKeyUp", { code: e.code });
 					});
 
@@ -260,14 +282,7 @@ export const Nodes = Node.CreateMany({
 						const mouseX = (e.pageX - canvasOffsetX);
 						const mouseY = (e.pageY - canvasOffsetY);
 
-						// update entity's theta position so that it faces the mouse
-						const player = Nodes.entities.state.player;
-
-						// Calculate angle to mouse and set it
-						const dx = mouseX - (player.physics.x * Nodes.map.state.tw);
-						const dy = mouseY - (player.physics.y * Nodes.map.state.th);
-
-						player.physics.theta = Math.atan2(dy, dx);
+						Nodes.game.state.mouse = [ mouseX, mouseY ];
 					});
 					window.addEventListener("click", async e => {
 						// Calculate the canvas offsets
@@ -286,6 +301,8 @@ export const Nodes = Node.CreateMany({
 						const dy = mouseY - (player.physics.y * Nodes.map.state.th);
 
 						const theta = Math.atan2(dy, dx);
+
+						Nodes.game.state.mouse = [ mouseX, mouseY ];
 
 						// Use the mouse position to create a new entity projection
 						const entity = {
@@ -319,18 +336,14 @@ export const Nodes = Node.CreateMany({
 						entity.physics.vx = Math.cos(theta) * entity.physics.speed;
 						entity.physics.vy = Math.sin(theta) * entity.physics.speed;
 
-						//FIXME: This section proves the *gross* inefficiency of the Node dispatch system
 						// Add the entity to the entities node
 						Nodes.entities.dispatch("add", entity);
-						// Nodes.entities.state[ entity.$id ] = entity;
-						// Nodes.pixi.state.app.stage.addChild(entity.render.sprite);
 
 						if(++gpi >= graphicsPool.length) gpi = 0;
 
+						// STUB: This will destroy the entities after 1 second, even if the Game is paused.
 						setTimeout(() => {
 							Nodes.entities.dispatch("remove", entity);
-							// delete Nodes.entities.state[ entity.$id ];
-							// Nodes.pixi.state.app.stage.removeChild(entity.render.sprite);
 						}, 1000);
 					});
 				},
@@ -426,6 +439,19 @@ export const Nodes = Node.CreateMany({
 			],
 		},
 
+		start() {
+			MainLoop.start();
+			Nodes.pixi.state.app.start();
+
+			console.log(`[${ Date.now() }]: Game STARTED`);
+		},
+		stop() {
+			MainLoop.stop();
+			Nodes.pixi.state.app.stop();
+
+			console.log(`[${ Date.now() }]: Game STOPPED`);
+		},
+
 		tick(dts) {
 			// update the entities
 			for(const id in Nodes.entities.state) {
@@ -450,6 +476,15 @@ export const Nodes = Node.CreateMany({
 
 			player.physics.x += player.physics.vx * dts;
 			player.physics.y += player.physics.vy * dts;
+
+			let [ mouseX, mouseY ] = Nodes.game.state.mouse || [];
+
+			// Calculate angle to mouse and set it
+			const dx = mouseX - (player.physics.x * Nodes.map.state.tw);
+			const dy = mouseY - (player.physics.y * Nodes.map.state.th);
+
+			const theta = Math.atan2(dy, dx);
+			player.physics.theta = theta;
 		},
 		render(dts) {
 			//FIXME: Instead, this should manipulate the meta data on the Pixi objects, as it won't require a re-render every frame
