@@ -313,7 +313,7 @@ export const Nodes = Node.CreateMany({
 								y: player.physics.y,
 								theta,
 								vtheta: 0,
-								speed: 32,
+								speed: 24,
 							},
 							render: {
 								sprite: graphicsPool[ gpi ]
@@ -324,7 +324,72 @@ export const Nodes = Node.CreateMany({
 							},
 							model: {
 								type: EnumModelType.CIRCLE,
-								radius: 5,	//px
+								radius: 6,	//px
+								ox: 0,	//px
+								oy: 0,	//px
+							},
+						};
+
+						entity.render.sprite.clear();
+
+						// calculate the velocity of the entity
+						entity.physics.vx = Math.cos(theta) * entity.physics.speed;
+						entity.physics.vy = Math.sin(theta) * entity.physics.speed;
+
+						// Add the entity to the entities node
+						Nodes.entities.dispatch("add", entity);
+
+						if(++gpi >= graphicsPool.length) gpi = 0;
+
+						// STUB: This will destroy the entities after 1 second, even if the Game is paused.
+						setTimeout(() => {
+							Nodes.entities.dispatch("remove", entity);
+						}, 1000);
+					});
+					window.addEventListener("contextmenu", async e => {
+						e.preventDefault();
+						e.stopPropagation();
+
+						// Calculate the canvas offsets
+						const canvasOffsetX = pixi.view.offsetLeft;
+						const canvasOffsetY = pixi.view.offsetTop;
+
+						// Calculate the mouse position relative to the canvas
+						const mouseX = (e.pageX - canvasOffsetX);
+						const mouseY = (e.pageY - canvasOffsetY);
+
+						// update entity's theta position so that it faces the mouse
+						const player = Nodes.entities.state.player
+
+						// Calculate angle to mouse and set it
+						const dx = mouseX - (player.physics.x * Nodes.map.state.tw);
+						const dy = mouseY - (player.physics.y * Nodes.map.state.th);
+
+						const theta = Math.atan2(dy, dx);
+
+						Nodes.game.state.mouse = [ mouseX, mouseY ];
+
+						// Use the mouse position to create a new entity projection
+						const entity = {
+							$id: uuid(),
+							$tags: [],
+							physics: {
+								x: player.physics.x,
+								y: player.physics.y,
+								theta,
+								vtheta: 0,
+								speed: 48,
+							},
+							render: {
+								sprite: graphicsPool[ gpi ]
+							},
+							state: {
+								current: EnumEntityState.MOVING,
+								default: EnumEntityState.MOVING,
+							},
+							model: {
+								type: EnumModelType.CIRCLE,
+								radius: 2,	//px
 								ox: 0,	//px
 								oy: 0,	//px
 							},
@@ -368,7 +433,7 @@ export const Nodes = Node.CreateMany({
 							const terrain = Nodes.terrain.state[ tile.data ];
 							const graphics = new PIXI.Graphics();
 
-							graphics.beginFill(terrain.color);
+							graphics.beginFill(terrain.color, 1.0);
 							graphics.drawRect(0, 0, Nodes.map.state.tw * node.state.scale, Nodes.map.state.th * node.state.scale); // node.state.scale the dimensions
 							graphics.endFill();
 							graphics.x = tile.x * Nodes.map.state.tw * node.state.scale; // node.state.scale the position
@@ -501,9 +566,11 @@ export const Nodes = Node.CreateMany({
 
 				// redraw entity
 				if(entity.model.radius >= 10) {
-					graphics.beginFill(0xff0000);
-				} else {
-					graphics.beginFill(0x666);
+					graphics.beginFill(0xff0000, 1.0);
+				} else if(entity.model.radius >= 5) {
+					graphics.beginFill("#dbb660", 1.0);
+				} else if(entity.model.radius >= 1) {
+					graphics.beginFill("#FFF", 1.0);
 				}
 
 				switch(entity.model.type) {
