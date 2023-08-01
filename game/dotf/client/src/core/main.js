@@ -310,7 +310,7 @@ export const Nodes = Node.CreateMany({
 						entity.render.sprite.clear();
 
 						// calculate a random "margin of error" to apply to the arrow (theta (radians) : variance (radians) : direction (+/-))
-						const thetaError = theta + (Math.random() * 0.10) * (Math.random() < 0.5 ? -1 : 1);
+						const thetaError = theta + (Math.random() * 0.12) * (Math.random() < 0.5 ? -1 : 1);
 
 						// calculate the velocity of the entity
 						entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
@@ -375,7 +375,7 @@ export const Nodes = Node.CreateMany({
 						entity.render.sprite.clear();
 
 						// calculate a random "margin of error" to apply to the arrow (theta : moe/variance : direction)
-						const thetaError = theta + (Math.random() * 0.15) * (Math.random() < 0.5 ? -1 : 1);
+						const thetaError = theta + (Math.random() * 0.17) * (Math.random() < 0.5 ? -1 : 1);
 
 						// calculate the velocity of the entity
 						entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
