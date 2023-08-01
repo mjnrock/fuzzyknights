@@ -79,23 +79,6 @@ export let State = {
 		stage: new PIXI.Container(),
 		...pixi,
 	}),
-
-	// WIP: This is a work-in-progress
-	viewport: (viewport = {}) => ({
-		layers: [],
-		w: 25,	// tiles
-		h: 25,	// tiles
-		x: 0,	// tiles
-		y: 0,	// tiles
-		zoom: 1.00,	// 1 = 100%
-		zoomStep: 0.03,	// 0.03 = 3%
-		subject: (state) => {
-			return {
-				...state,
-			};
-		},	// (state, dt)=> [x,y,w,h,zoom]
-		...viewport,
-	}),
 };
 
 export const Reducers = {
@@ -190,13 +173,6 @@ export const Effects = {
 		},
 	},
 };
-
-//STUB: Graphics pool
-const graphicsPool = [];
-let gpi = 0;
-for(let i = 0; i < 100; i++) {
-	graphicsPool.push(new PIXI.Graphics());
-}
 
 export const Nodes = Node.CreateMany({
 	entities: {
@@ -317,7 +293,7 @@ export const Nodes = Node.CreateMany({
 								speed: 24,
 							},
 							render: {
-								sprite: graphicsPool[ gpi ]
+								sprite: new PIXI.Graphics(),
 							},
 							state: {
 								current: EnumEntityState.MOVING,
@@ -343,8 +319,6 @@ export const Nodes = Node.CreateMany({
 
 						// Add the entity to the entities node
 						Nodes.entities.dispatch("add", entity);
-
-						if(++gpi >= graphicsPool.length) gpi = 0;
 
 						// STUB: This will destroy the entities after 1 second, even if the Game is paused.
 						setTimeout(() => {
@@ -383,7 +357,7 @@ export const Nodes = Node.CreateMany({
 								speed: 48,
 							},
 							render: {
-								sprite: graphicsPool[ gpi ]
+								sprite: new PIXI.Graphics(),
 							},
 							state: {
 								current: EnumEntityState.MOVING,
@@ -410,8 +384,6 @@ export const Nodes = Node.CreateMany({
 
 						// Add the entity to the entities node
 						Nodes.entities.dispatch("add", entity);
-
-						if(++gpi >= graphicsPool.length) gpi = 0;
 
 						// STUB: This will destroy the entities after 1 second, even if the Game is paused.
 						setTimeout(() => {
@@ -465,9 +437,6 @@ export const Nodes = Node.CreateMany({
 				},
 			],
 		},
-	},
-	viewport: {
-		state: State.viewport(),
 	},
 });
 
