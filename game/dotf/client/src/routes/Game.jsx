@@ -34,7 +34,7 @@ export function Game() {
 		let fnBlur = null,
 			fnFocus = null;
 
-		main().then((nodes) => {
+		main().then(({ game, nodes } = {}) => {
 			const app = nodes.pixi.state.app;
 
 			setState(app);
@@ -42,12 +42,12 @@ export function Game() {
 			const onBlur = (e) => {
 				// "Pause" pixi so that it can resume properly upon refocus
 				// nodes.pixi.state.app.ticker.stop();
-				nodes.game.stop();
+				game.loop.stop();
 			};
 			const onFocus = (e) => {
 				// "Resume" pixi
 				// nodes.pixi.state.app.ticker.start();
-				nodes.game.start();
+				game.loop.start();
 			};
 
 			window.addEventListener("blur", onBlur);

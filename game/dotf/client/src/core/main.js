@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import { v4 as uuid } from "uuid";
-import MainLoop from "mainloop.js";
+
+import { Game } from "./Game.js";
 
 // import Chord from "@lespantsfancy/chord";
 import Node from "../@node/Node";
@@ -177,14 +178,6 @@ export const Reducers = {
 			return next;
 		},
 	},
-	game: {
-		merge: (state, data) => {
-			return {
-				...state,
-				...data,
-			};
-		},
-	}
 };
 
 export const Effects = {
@@ -287,7 +280,7 @@ export const Nodes = Node.CreateMany({
 						const mouseX = (e.pageX - canvasOffsetX);
 						const mouseY = (e.pageY - canvasOffsetY);
 
-						Nodes.game.state.mouse = [ mouseX, mouseY ];
+						Nodes.pixi.state.mouse = [ mouseX, mouseY ];
 					});
 					window.addEventListener("contextmenu", async e => {
 						e.preventDefault();
@@ -310,7 +303,7 @@ export const Nodes = Node.CreateMany({
 
 						const theta = Math.atan2(dy, dx);
 
-						Nodes.game.state.mouse = [ mouseX, mouseY ];
+						Nodes.pixi.state.mouse = [ mouseX, mouseY ];
 
 						// Use the mouse position to create a new entity projection
 						const entity = {
@@ -376,7 +369,7 @@ export const Nodes = Node.CreateMany({
 
 						const theta = Math.atan2(dy, dx);
 
-						Nodes.game.state.mouse = [ mouseX, mouseY ];
+						Nodes.pixi.state.mouse = [ mouseX, mouseY ];
 
 						// Use the mouse position to create a new entity projection
 						const entity = {
@@ -469,69 +462,33 @@ export const Nodes = Node.CreateMany({
 					// add the map and entities to the stage
 					pixi.stage.addChild(map);
 					pixi.stage.addChild(entities);
-
-
-
-					//STUB: START FPS COUNTER
-					const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
-					fpsText.x = 10;
-					fpsText.y = 10;
-					pixi.stage.addChild(fpsText);
-
-					let i = 0,
-						size = 500;
-					const fpsWindow = [];
-					pixi.ticker.add((delta) => {
-						fpsWindow[ i ] = delta;
-						++i;
-						if(i >= size) i = 0;
-
-						const avgDeltaInMilliseconds = fpsWindow.reduce((a, b) => a + b, 0) / size;
-						const avgFPS = 1000 / avgDeltaInMilliseconds;
-						fpsText.text = `FPS: ${ Math.round(avgFPS / 100) }`;
-					});
-					//STUB: END FPS COUNTER
 				},
 			],
 		},
 	},
-	game: {
-		state: {
-			fps: 30,
-			renderHistory: [],
-			debugFPSText: null,
-		},
-		reducers: Reducers.game,
-		events: {
-			init: [
-				(node) => {
-					MainLoop
-						.setSimulationTimestep(1000 / 24)
-						.setUpdate(delta => node.tick(delta / 1000))
-						// .setDraw((ip) => node.render(ip))
-						.start();
+	viewport: {
+		state: State.viewport(),
+	},
+});
 
-					Nodes.pixi.state.app.ticker.add((delta) => {
-						node.render(delta / 1000);
-					});
-				},
-			],
-		},
+export async function main() {
+	Nodes.map.init();
+	Nodes.pixi.init();
+	Nodes.input.init();
 
-		start() {
-			MainLoop.start();
-			Nodes.pixi.state.app.start();
-
-			console.log(`[${ Date.now() }]: Game STARTED`);
-		},
-		stop() {
-			MainLoop.stop();
-			Nodes.pixi.state.app.stop();
-
-			console.log(`[${ Date.now() }]: Game STOPPED`);
+	const game = new Game({
+		loop: {
+			start: true,
+			fps: 24,
+			onStart() {
+				Nodes.pixi.state.app.ticker.start();
+			},
+			onStop() {
+				Nodes.pixi.state.app.ticker.stop();
+			},
 		},
 
-		tick(dts) {
+		tick({ dt: dts, ip, startTime, lastTime, fps }) {
 			// update the entities
 			for(const id in Nodes.entities.state) {
 				const entity = Nodes.entities.state[ id ];
@@ -539,7 +496,6 @@ export const Nodes = Node.CreateMany({
 				// calculate the new position of the entity and set it
 				entity.physics.x += entity.physics.vx * dts;
 				entity.physics.y += entity.physics.vy * dts;
-
 			}
 
 			// update player
@@ -556,7 +512,7 @@ export const Nodes = Node.CreateMany({
 			player.physics.x += player.physics.vx * dts;
 			player.physics.y += player.physics.vy * dts;
 
-			let [ mouseX, mouseY ] = Nodes.game.state.mouse || [];
+			let [ mouseX, mouseY ] = Nodes.pixi.state.mouse || [];
 
 			// Calculate angle to mouse and set it
 			const dx = mouseX - (player.physics.x * Nodes.map.state.tw);
@@ -565,7 +521,7 @@ export const Nodes = Node.CreateMany({
 			const theta = Math.atan2(dy, dx);
 			player.physics.theta = theta;
 		},
-		render(dts) {
+		render: (delta) => {
 			//FIXME: Instead, this should manipulate the meta data on the Pixi objects, as it won't require a re-render every frame
 			// iterate through entities and draw the line towards the mouse
 			for(const id in Nodes.entities.state) {
@@ -617,19 +573,38 @@ export const Nodes = Node.CreateMany({
 			]);
 			playerGraphics.endFill();
 		},
-	},
-	viewport: {
-		state: State.viewport(),
-	},
-});
 
-export async function main() {
-	Nodes.map.init();
-	Nodes.pixi.init();
-	Nodes.game.init();
-	Nodes.input.init();
+		$run: true,
+		$init: (node) => {
+			const pixi = Nodes.pixi.state.app;
+			pixi.ticker.add((delta) => node.render(delta / 1000));
 
-	return Nodes;
+			//STUB: START FPS COUNTER
+			const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
+			fpsText.x = 10;
+			fpsText.y = 10;
+			pixi.stage.addChild(fpsText);
+
+			let i = 0,
+				size = 500;
+			const fpsWindow = [];
+			pixi.ticker.add((delta) => {
+				fpsWindow[ i ] = delta;
+				++i;
+				if(i >= size) i = 0;
+
+				const avgDeltaInMilliseconds = fpsWindow.reduce((a, b) => a + b, 0) / size;
+				const avgFPS = 1000 / avgDeltaInMilliseconds;
+				fpsText.text = `FPS: ${ Math.round(avgFPS / 100) }`;
+			});
+			//STUB: END FPS COUNTER
+		},
+	});
+
+	return {
+		game,
+		nodes: Nodes,
+	};
 };
 
 export default main;
