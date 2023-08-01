@@ -32,7 +32,6 @@ export function PixiView({ app, resizer = false, ...props }) {
 			window.removeEventListener("resize", resize);
 		}
 	}, [ resizer ]);
-
 	return (
 		<div ref={ canvasRef } {...props} />
 	);

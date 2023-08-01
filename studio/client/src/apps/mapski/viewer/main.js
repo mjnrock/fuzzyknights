@@ -107,25 +107,19 @@ export const Reducers = {
 			const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
 			fpsText.x = 10;
 			fpsText.y = 10;
-			next.stage.addChild(fpsText);
+			next.app.stage.addChild(fpsText);
 
-			let lastTime = 0;
+			let i = 0,
+				size = 500;
 			const fpsWindow = [];
 			next.app.ticker.add((delta) => {
-				const now = performance.now();
-				const elapsedTime = now - lastTime;
+				fpsWindow[ i ] = delta;
+				++i;
+				if(i >= size) i = 0;
 
-				// Skip this frame if elapsed time is 0, to avoid division by zero
-				if(elapsedTime === 0) return;
-
-				const fps = 1000 / elapsedTime;
-				lastTime = now;
-				fpsWindow.push(fps);
-				if(fpsWindow.length > 250) {
-					fpsWindow.shift();
-				}
-				const avgFPS = fpsWindow.reduce((a, b) => a + b, 0) / fpsWindow.length;
-				fpsText.text = `FPS: ${ Math.round(avgFPS) }`;
+				const avgDeltaInMilliseconds = fpsWindow.reduce((a, b) => a + b, 0) / size;
+				const avgFPS = 1000 / avgDeltaInMilliseconds;
+				fpsText.text = `FPS: ${ Math.round(avgFPS / 100) }`;
 			});
 			//STUB: END FPS COUNTER
 
