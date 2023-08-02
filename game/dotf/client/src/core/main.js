@@ -62,11 +62,6 @@ export let State = ({ $game }) => ({
 		tiles: [],
 		...map,
 	}),
-	input: (input = {}) => ({
-		keyMask: 0,
-		mouse: [],
-		...input,
-	}),
 });
 
 export const Reducers = ({ $game }) => ({
@@ -82,62 +77,6 @@ export const Reducers = ({ $game }) => ({
 			delete next[ entity.$id ];
 
 			return next;
-		},
-	},
-	input: {
-		handleKeyDown: (state, { code }) => {
-			let updatedKeyMask = state.keyMask;
-			switch(code) {
-				case "ArrowUp":
-				case "KeyW":
-					updatedKeyMask |= 0x01;
-					break;
-				case "ArrowLeft":
-				case "KeyA":
-					updatedKeyMask |= 0x02;
-					break;
-				case "ArrowDown":
-				case "KeyS":
-					updatedKeyMask |= 0x04;
-					break;
-				case "ArrowRight":
-				case "KeyD":
-					updatedKeyMask |= 0x08;
-					break;
-				default:
-					break;
-			}
-			return {
-				...state,
-				keyMask: updatedKeyMask,
-			};
-		},
-		handleKeyUp: (state, { code }) => {
-			let updatedKeyMask = state.keyMask;
-			switch(code) {
-				case "ArrowUp":
-				case "KeyW":
-					updatedKeyMask &= ~0x01;
-					break;
-				case "ArrowLeft":
-				case "KeyA":
-					updatedKeyMask &= ~0x02;
-					break;
-				case "ArrowDown":
-				case "KeyS":
-					updatedKeyMask &= ~0x04;
-					break;
-				case "ArrowRight":
-				case "KeyD":
-					updatedKeyMask &= ~0x08;
-					break;
-				default:
-					break;
-			}
-			return {
-				...state,
-				keyMask: updatedKeyMask,
-			};
 		},
 	},
 });
@@ -193,186 +132,6 @@ export const Nodes = ({ $game }) => Node.CreateMany({
 			],
 		},
 	},
-	input: {
-		state: State({ $game }).input(),
-		reducers: Reducers({ $game }).input,
-		events: {
-			init: [
-				(node) => {
-					// Event listener for keydown event
-					window.addEventListener("keydown", e => {
-						if([ "F5", "F11", "F12" ].includes(e.code)) {
-							return;
-						}
-
-						e.preventDefault();
-						e.stopPropagation();
-
-						$game.$nodes.input.dispatch("handleKeyDown", { code: e.code });
-					});
-
-					// Event listener for keyup event
-					window.addEventListener("keyup", e => {
-						if([ "F5", "F11", "F12" ].includes(e.code)) {
-							return;
-						}
-
-						e.preventDefault();
-						e.stopPropagation();
-
-						$game.$nodes.input.dispatch("handleKeyUp", { code: e.code });
-					});
-
-
-					const pixi = $game.pixi.app;
-					// Make the player look at the mouse as it moves
-					window.addEventListener("mousemove", async e => {
-						// Calculate the canvas offsets
-						const canvasOffsetX = pixi.view.offsetLeft;
-						const canvasOffsetY = pixi.view.offsetTop;
-
-						// Calculate the mouse position relative to the canvas
-						const mouseX = (e.pageX - canvasOffsetX);
-						const mouseY = (e.pageY - canvasOffsetY);
-
-						$game.$nodes.input.state.mouse = [ mouseX, mouseY ];
-					});
-					window.addEventListener("contextmenu", async e => {
-						e.preventDefault();
-						e.stopPropagation();
-
-						// Calculate the canvas offsets
-						const canvasOffsetX = pixi.view.offsetLeft;
-						const canvasOffsetY = pixi.view.offsetTop;
-
-						// Calculate the mouse position relative to the canvas
-						const mouseX = (e.pageX - canvasOffsetX);
-						const mouseY = (e.pageY - canvasOffsetY);
-
-						// update entity's theta position so that it faces the mouse
-						const player = $game.$nodes.entities.state.player
-
-						// Calculate angle to mouse and set it
-						const dx = mouseX - (player.physics.x * $game.$nodes.map.state.tw);
-						const dy = mouseY - (player.physics.y * $game.$nodes.map.state.th);
-
-						const theta = Math.atan2(dy, dx);
-
-						$game.$nodes.input.state.mouse = [ mouseX, mouseY ];
-
-						// Use the mouse position to create a new entity projection
-						const entity = {
-							$id: uuid(),
-							$tags: [],
-							physics: {
-								x: player.physics.x,
-								y: player.physics.y,
-								theta,
-								vtheta: 0,
-								speed: 24,
-							},
-							render: {
-								sprite: new PIXI.Graphics(),
-							},
-							state: {
-								current: EnumEntityState.MOVING,
-								default: EnumEntityState.MOVING,
-							},
-							model: {
-								type: EnumModelType.CIRCLE,
-								radius: 6,	//px
-								ox: 0,	//px
-								oy: 0,	//px
-							},
-						};
-
-						entity.render.sprite.clear();
-
-						// calculate a random "margin of error" to apply to the arrow (theta (radians) : variance (radians) : direction (+/-))
-						const thetaError = theta + (Math.random() * 0.12) * (Math.random() < 0.5 ? -1 : 1);
-
-						// calculate the velocity of the entity
-						entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
-						entity.physics.vy = Math.sin(thetaError) * entity.physics.speed;
-						entity.physics.theta = thetaError;
-
-						// Add the entity to the entities node
-						$game.$nodes.entities.dispatch("add", entity);
-
-						// STUB: This will destroy the entities after 1 second, even if the Game is paused.
-						setTimeout(() => {
-							$game.$nodes.entities.dispatch("remove", entity);
-						}, 2500);
-					});
-					window.addEventListener("click", async e => {
-						// Calculate the canvas offsets
-						const canvasOffsetX = pixi.view.offsetLeft;
-						const canvasOffsetY = pixi.view.offsetTop;
-
-						// Calculate the mouse position relative to the canvas
-						const mouseX = (e.pageX - canvasOffsetX);
-						const mouseY = (e.pageY - canvasOffsetY);
-
-						// update entity's theta position so that it faces the mouse
-						const player = $game.$nodes.entities.state.player
-
-						// Calculate angle to mouse and set it
-						const dx = mouseX - (player.physics.x * $game.$nodes.map.state.tw);
-						const dy = mouseY - (player.physics.y * $game.$nodes.map.state.th);
-
-						const theta = Math.atan2(dy, dx);
-
-						$game.$nodes.input.state.mouse = [ mouseX, mouseY ];
-
-						// Use the mouse position to create a new entity projection
-						const entity = {
-							$id: uuid(),
-							$tags: [],
-							physics: {
-								x: player.physics.x,
-								y: player.physics.y,
-								theta,
-								vtheta: 0,
-								speed: 48,
-							},
-							render: {
-								sprite: new PIXI.Graphics(),
-							},
-							state: {
-								current: EnumEntityState.MOVING,
-								default: EnumEntityState.MOVING,
-							},
-							model: {
-								type: EnumModelType.RECTANGLE,
-								width: 16,	//px
-								height: 1,	//px
-								ox: 0,	//px
-								oy: 0,	//px
-							},
-						};
-
-						entity.render.sprite.clear();
-
-						// calculate a random "margin of error" to apply to the arrow (theta : moe/variance : direction)
-						const thetaError = theta + (Math.random() * 0.17) * (Math.random() < 0.5 ? -1 : 1);
-
-						// calculate the velocity of the entity
-						entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
-						entity.physics.vy = Math.sin(thetaError) * entity.physics.speed;
-						entity.physics.theta = thetaError;
-
-						// Add the entity to the entities node
-						$game.$nodes.entities.dispatch("add", entity);
-
-						// STUB: This will destroy the entities after 1 second, even if the Game is paused.
-						setTimeout(() => {
-							$game.$nodes.entities.dispatch("remove", entity);
-						}, 1000);
-					});
-				},
-			],
-		},
-	},
 });
 
 export async function main() {
@@ -407,18 +166,18 @@ export async function main() {
 			// update player
 			const player = this.$nodes.entities.state.player;
 
-			if(this.$nodes.input.state.keyMask & 0x01) player.physics.vy = -player.physics.speed;
-			else if(this.$nodes.input.state.keyMask & 0x04) player.physics.vy = player.physics.speed;
+			if(this.input.key.hasUp) player.physics.vy = -player.physics.speed;
+			else if(this.input.key.hasDown) player.physics.vy = player.physics.speed;
 			else player.physics.vy = 0;
 
-			if(this.$nodes.input.state.keyMask & 0x02) player.physics.vx = -player.physics.speed;
-			else if(this.$nodes.input.state.keyMask & 0x08) player.physics.vx = player.physics.speed;
+			if(this.input.key.hasLeft) player.physics.vx = -player.physics.speed;
+			else if(this.input.key.hasRight) player.physics.vx = player.physics.speed;
 			else player.physics.vx = 0;
 
 			player.physics.x += player.physics.vx * dts;
 			player.physics.y += player.physics.vy * dts;
 
-			let [ mouseX, mouseY ] = this.$nodes.input.state.mouse || [];
+			let [ mouseX, mouseY ] = this.input.mouse.cursor || [];
 
 			// Calculate angle to mouse and set it
 			const dx = mouseX - (player.physics.x * this.$nodes.map.state.tw);
@@ -506,10 +265,127 @@ export async function main() {
 		},
 	});
 
+
 	game.$nodes.map.init();
-	game.$nodes.input.init();
 
 
+	//SECTION: Initialize the input controllers
+	game.input.mouse.addEventListener("onContextMenu", (self, e) => {
+		const [ mouseX, mouseY ] = self.cursor;
+
+		// update entity's theta position so that it faces the mouse
+		const player = game.$nodes.entities.state.player
+
+		// Calculate angle to mouse and set it
+		const dx = mouseX - (player.physics.x * game.$nodes.map.state.tw);
+		const dy = mouseY - (player.physics.y * game.$nodes.map.state.th);
+
+		const theta = Math.atan2(dy, dx);
+
+		// Use the mouse position to create a new entity projection
+		const entity = {
+			$id: uuid(),
+			$tags: [],
+			physics: {
+				x: player.physics.x,
+				y: player.physics.y,
+				theta,
+				vtheta: 0,
+				speed: 24,
+			},
+			render: {
+				sprite: new PIXI.Graphics(),
+			},
+			state: {
+				current: EnumEntityState.MOVING,
+				default: EnumEntityState.MOVING,
+			},
+			model: {
+				type: EnumModelType.CIRCLE,
+				radius: 6,	//px
+				ox: 0,	//px
+				oy: 0,	//px
+			},
+		};
+
+		entity.render.sprite.clear();
+
+		// calculate a random "margin of error" to apply to the arrow (theta (radians) : variance (radians) : direction (+/-))
+		const thetaError = theta + (Math.random() * 0.12) * (Math.random() < 0.5 ? -1 : 1);
+
+		// calculate the velocity of the entity
+		entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
+		entity.physics.vy = Math.sin(thetaError) * entity.physics.speed;
+		entity.physics.theta = thetaError;
+
+		// Add the entity to the entities node
+		game.$nodes.entities.dispatch("add", entity);
+
+		// STUB: This will destroy the entities after 1 second, even if the Game is paused.
+		setTimeout(() => {
+			game.$nodes.entities.dispatch("remove", entity);
+		}, 2500);
+	});
+	game.input.mouse.addEventListener("onClick", (self, e) => {
+		const [ mouseX, mouseY ] = self.cursor;
+
+		// update entity's theta position so that it faces the mouse
+		const player = game.$nodes.entities.state.player
+
+		// Calculate angle to mouse and set it
+		const dx = mouseX - (player.physics.x * game.$nodes.map.state.tw);
+		const dy = mouseY - (player.physics.y * game.$nodes.map.state.th);
+
+		const theta = Math.atan2(dy, dx);
+
+		// Use the mouse position to create a new entity projection
+		const entity = {
+			$id: uuid(),
+			$tags: [],
+			physics: {
+				x: player.physics.x,
+				y: player.physics.y,
+				theta,
+				vtheta: 0,
+				speed: 48,
+			},
+			render: {
+				sprite: new PIXI.Graphics(),
+			},
+			state: {
+				current: EnumEntityState.MOVING,
+				default: EnumEntityState.MOVING,
+			},
+			model: {
+				type: EnumModelType.RECTANGLE,
+				width: 16,	//px
+				height: 1,	//px
+				ox: 0,	//px
+				oy: 0,	//px
+			},
+		};
+
+		entity.render.sprite.clear();
+
+		// calculate a random "margin of error" to apply to the arrow (theta : moe/variance : direction)
+		const thetaError = theta + (Math.random() * 0.17) * (Math.random() < 0.5 ? -1 : 1);
+
+		// calculate the velocity of the entity
+		entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
+		entity.physics.vy = Math.sin(thetaError) * entity.physics.speed;
+		entity.physics.theta = thetaError;
+
+		// Add the entity to the entities node
+		game.$nodes.entities.dispatch("add", entity);
+
+		// STUB: This will destroy the entities after 1 second, even if the Game is paused.
+		setTimeout(() => {
+			game.$nodes.entities.dispatch("remove", entity);
+		}, 1000);
+	});
+	//SECTION END: Initialize the input controllers
+
+	//SECTION: Initialize the terrain and entity graphics
 	const pixi = game.pixi.app;
 	document.body.appendChild(pixi.view);
 
@@ -543,6 +419,7 @@ export async function main() {
 	// add the map and entities to the stage
 	pixi.stage.addChild(map);
 	pixi.stage.addChild(entities);
+	//SECTION END: Initialize the terrain and entity graphics
 
 	return {
 		game,

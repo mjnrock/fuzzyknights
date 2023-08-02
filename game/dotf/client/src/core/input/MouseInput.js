@@ -17,6 +17,7 @@ export class MouseInput extends IdentityClass {
 			onMouseDown: [],
 			onMouseUp: [],
 			onMouseMove: [],
+			onClick: [],
 			onContextMenu: [],
 			...events,
 		};
@@ -24,7 +25,47 @@ export class MouseInput extends IdentityClass {
 		this.$game.pixi.app.view.addEventListener("mousedown", (e) => this.onMouseDown.call(this, e));
 		this.$game.pixi.app.view.addEventListener("mouseup", (e) => this.onMouseUp.call(this, e));
 		this.$game.pixi.app.view.addEventListener("mousemove", (e) => this.onMouseMove.call(this, e));
-		this.$game.pixi.app.view.addEventListener("contextmenu", (e) => this.onMouseMove.call(this, e));
+		this.$game.pixi.app.view.addEventListener("click", (e) => this.onClick.call(this, e));
+		this.$game.pixi.app.view.addEventListener("contextmenu", (e) => this.onContextMenu.call(this, e));
+	}
+
+	addEventListener(type, fn) {
+		if(!this.events[ type ]) {
+			throw new Error(`Unknown event type: ${ type }`);
+		}
+
+		this.events[ type ].push(fn);
+
+		return this;
+	}
+	addEventListeners(eventObj) {
+		for(const [ type, fn ] of Object.entries(eventObj)) {
+			this.addEventListener(type, fn);
+		}
+
+		return this;
+	}
+	removeEventListener(type, fn) {
+		if(!this.events[ type ]) {
+			throw new Error(`Unknown event type: ${ type }`);
+		}
+
+		const index = this.events[ type ].indexOf(fn);
+
+		if(index === -1) {
+			throw new Error(`Unknown event listener: ${ fn }`);
+		}
+
+		this.events[ type ].splice(index, 1);
+
+		return this;
+	}
+	removeEventListeners(eventObj) {
+		for(const [ type, fn ] of Object.entries(eventObj)) {
+			this.removeEventListener(type, fn);
+		}
+
+		return this;
 	}
 
 	get x() {
@@ -54,12 +95,24 @@ export class MouseInput extends IdentityClass {
 		return this.buttons.get(button) ?? false;
 	}
 
+	calculateMousePosition(e) {
+		// Calculate the canvas offsets
+		const canvasOffsetX = this.$game.pixi.app.view.offsetLeft;
+		const canvasOffsetY = this.$game.pixi.app.view.offsetTop;
+
+		// Calculate the mouse position relative to the canvas
+		const mouseX = (e.pageX - canvasOffsetX);
+		const mouseY = (e.pageY - canvasOffsetY);
+
+		this.cursor = [ mouseX, mouseY ];
+	}
+
 	onMouseDown(e) {
 		e.preventDefault();
 		e.stopPropagation();
 
+		this.calculateMousePosition(e);
 		this.buttons.set(e.button, true);
-		this.cursor = [ e.pageX, e.pageY ];
 
 		this.events.onMouseDown.forEach((fn) => fn(this, e));
 	}
@@ -67,8 +120,8 @@ export class MouseInput extends IdentityClass {
 		e.preventDefault();
 		e.stopPropagation();
 
+		this.calculateMousePosition(e);
 		this.buttons.set(e.button, false);
-		this.cursor = [ e.pageX, e.pageY ];
 
 		this.events.onMouseUp.forEach((fn) => fn(this, e));
 	}
@@ -76,15 +129,23 @@ export class MouseInput extends IdentityClass {
 		e.preventDefault();
 		e.stopPropagation();
 
-		this.cursor = [ e.pageX, e.pageY ];
+		this.calculateMousePosition(e);
 
 		this.events.onMouseMove.forEach((fn) => fn(this, e));
+	}
+	onClick(e) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		this.calculateMousePosition(e);
+
+		this.events.onClick.forEach((fn) => fn(this, e));
 	}
 	onContextMenu(e) {
 		e.preventDefault();
 		e.stopPropagation();
 
-		this.cursor = [ e.pageX, e.pageY ];
+		this.calculateMousePosition(e);
 
 		this.events.onContextMenu.forEach((fn) => fn(this, e));
 	}
