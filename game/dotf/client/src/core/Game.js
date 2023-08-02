@@ -17,10 +17,10 @@ export class Game extends Node {
 		return game;
 	}
 
-	constructor ({ nodes = {}, pixi = {}, loop = {}, $run, ...self } = {}) {
+	constructor ({ $nodes = {}, pixi = {}, loop = {}, $run, ...self } = {}) {
 		super({ ...self, $run: false });
 
-		this.nodes = typeof nodes === "function" ? nodes({ $game: this }) : nodes;
+		this.$nodes = typeof $nodes === "function" ? $nodes({ $game: this }) : $nodes;
 
 		this.pixi = new Pixi({
 			$game: this,

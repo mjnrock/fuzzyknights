@@ -64,6 +64,7 @@ export let State = ({ $game }) => ({
 	}),
 	input: (input = {}) => ({
 		keyMask: 0,
+		mouse: [],
 		...input,
 	}),
 });
@@ -207,7 +208,7 @@ export const Nodes = ({ $game }) => Node.CreateMany({
 						e.preventDefault();
 						e.stopPropagation();
 
-						$game.nodes.input.dispatch("handleKeyDown", { code: e.code });
+						$game.$nodes.input.dispatch("handleKeyDown", { code: e.code });
 					});
 
 					// Event listener for keyup event
@@ -219,7 +220,7 @@ export const Nodes = ({ $game }) => Node.CreateMany({
 						e.preventDefault();
 						e.stopPropagation();
 
-						$game.nodes.input.dispatch("handleKeyUp", { code: e.code });
+						$game.$nodes.input.dispatch("handleKeyUp", { code: e.code });
 					});
 
 
@@ -234,7 +235,7 @@ export const Nodes = ({ $game }) => Node.CreateMany({
 						const mouseX = (e.pageX - canvasOffsetX);
 						const mouseY = (e.pageY - canvasOffsetY);
 
-						$game.nodes.input.state.mouse = [ mouseX, mouseY ];
+						$game.$nodes.input.state.mouse = [ mouseX, mouseY ];
 					});
 					window.addEventListener("contextmenu", async e => {
 						e.preventDefault();
@@ -249,15 +250,15 @@ export const Nodes = ({ $game }) => Node.CreateMany({
 						const mouseY = (e.pageY - canvasOffsetY);
 
 						// update entity's theta position so that it faces the mouse
-						const player = $game.nodes.entities.state.player
+						const player = $game.$nodes.entities.state.player
 
 						// Calculate angle to mouse and set it
-						const dx = mouseX - (player.physics.x * $game.nodes.map.state.tw);
-						const dy = mouseY - (player.physics.y * $game.nodes.map.state.th);
+						const dx = mouseX - (player.physics.x * $game.$nodes.map.state.tw);
+						const dy = mouseY - (player.physics.y * $game.$nodes.map.state.th);
 
 						const theta = Math.atan2(dy, dx);
 
-						$game.nodes.input.state.mouse = [ mouseX, mouseY ];
+						$game.$nodes.input.state.mouse = [ mouseX, mouseY ];
 
 						// Use the mouse position to create a new entity projection
 						const entity = {
@@ -296,11 +297,11 @@ export const Nodes = ({ $game }) => Node.CreateMany({
 						entity.physics.theta = thetaError;
 
 						// Add the entity to the entities node
-						$game.nodes.entities.dispatch("add", entity);
+						$game.$nodes.entities.dispatch("add", entity);
 
 						// STUB: This will destroy the entities after 1 second, even if the Game is paused.
 						setTimeout(() => {
-							$game.nodes.entities.dispatch("remove", entity);
+							$game.$nodes.entities.dispatch("remove", entity);
 						}, 2500);
 					});
 					window.addEventListener("click", async e => {
@@ -313,15 +314,15 @@ export const Nodes = ({ $game }) => Node.CreateMany({
 						const mouseY = (e.pageY - canvasOffsetY);
 
 						// update entity's theta position so that it faces the mouse
-						const player = $game.nodes.entities.state.player
+						const player = $game.$nodes.entities.state.player
 
 						// Calculate angle to mouse and set it
-						const dx = mouseX - (player.physics.x * $game.nodes.map.state.tw);
-						const dy = mouseY - (player.physics.y * $game.nodes.map.state.th);
+						const dx = mouseX - (player.physics.x * $game.$nodes.map.state.tw);
+						const dy = mouseY - (player.physics.y * $game.$nodes.map.state.th);
 
 						const theta = Math.atan2(dy, dx);
 
-						$game.nodes.input.state.mouse = [ mouseX, mouseY ];
+						$game.$nodes.input.state.mouse = [ mouseX, mouseY ];
 
 						// Use the mouse position to create a new entity projection
 						const entity = {
@@ -361,11 +362,11 @@ export const Nodes = ({ $game }) => Node.CreateMany({
 						entity.physics.theta = thetaError;
 
 						// Add the entity to the entities node
-						$game.nodes.entities.dispatch("add", entity);
+						$game.$nodes.entities.dispatch("add", entity);
 
 						// STUB: This will destroy the entities after 1 second, even if the Game is paused.
 						setTimeout(() => {
-							$game.nodes.entities.dispatch("remove", entity);
+							$game.$nodes.entities.dispatch("remove", entity);
 						}, 1000);
 					});
 				},
@@ -376,10 +377,12 @@ export const Nodes = ({ $game }) => Node.CreateMany({
 
 export async function main() {
 	const game = new Game({
+		$nodes: Nodes,
+
 		config: {
 			scale: 2.5,
 		},
-		nodes: Nodes,
+
 		loop: {
 			start: true,
 			fps: 24,
@@ -393,8 +396,8 @@ export async function main() {
 
 		tick({ dt: dts, ip, startTime, lastTime, fps }) {
 			// update the entities
-			for(const id in this.nodes.entities.state) {
-				const entity = this.nodes.entities.state[ id ];
+			for(const id in this.$nodes.entities.state) {
+				const entity = this.$nodes.entities.state[ id ];
 
 				// calculate the new position of the entity and set it
 				entity.physics.x += entity.physics.vx * dts;
@@ -402,24 +405,24 @@ export async function main() {
 			}
 
 			// update player
-			const player = this.nodes.entities.state.player;
+			const player = this.$nodes.entities.state.player;
 
-			if(this.nodes.input.state.keyMask & 0x01) player.physics.vy = -player.physics.speed;
-			else if(this.nodes.input.state.keyMask & 0x04) player.physics.vy = player.physics.speed;
+			if(this.$nodes.input.state.keyMask & 0x01) player.physics.vy = -player.physics.speed;
+			else if(this.$nodes.input.state.keyMask & 0x04) player.physics.vy = player.physics.speed;
 			else player.physics.vy = 0;
 
-			if(this.nodes.input.state.keyMask & 0x02) player.physics.vx = -player.physics.speed;
-			else if(this.nodes.input.state.keyMask & 0x08) player.physics.vx = player.physics.speed;
+			if(this.$nodes.input.state.keyMask & 0x02) player.physics.vx = -player.physics.speed;
+			else if(this.$nodes.input.state.keyMask & 0x08) player.physics.vx = player.physics.speed;
 			else player.physics.vx = 0;
 
 			player.physics.x += player.physics.vx * dts;
 			player.physics.y += player.physics.vy * dts;
 
-			let [ mouseX, mouseY ] = this.nodes.input.state.mouse || [];
+			let [ mouseX, mouseY ] = this.$nodes.input.state.mouse || [];
 
 			// Calculate angle to mouse and set it
-			const dx = mouseX - (player.physics.x * this.nodes.map.state.tw);
-			const dy = mouseY - (player.physics.y * this.nodes.map.state.th);
+			const dx = mouseX - (player.physics.x * this.$nodes.map.state.tw);
+			const dy = mouseY - (player.physics.y * this.$nodes.map.state.th);
 
 			const theta = Math.atan2(dy, dx);
 			player.physics.theta = theta;
@@ -427,15 +430,15 @@ export async function main() {
 		render(delta) {
 			//FIXME: Instead, this should manipulate the meta data on the Pixi objects, as it won't require a re-render every frame
 			// iterate through entities and draw the line towards the mouse
-			for(const id in this.nodes.entities.state) {
-				const entity = this.nodes.entities.state[ id ];
+			for(const id in this.$nodes.entities.state) {
+				const entity = this.$nodes.entities.state[ id ];
 				const graphics = entity.render.sprite;
 
 				// clear previous line
 				graphics.clear();
 
-				graphics.x = entity.physics.x * this.nodes.map.state.tw;
-				graphics.y = entity.physics.y * this.nodes.map.state.th;
+				graphics.x = entity.physics.x * this.$nodes.map.state.tw;
+				graphics.y = entity.physics.y * this.$nodes.map.state.th;
 
 				// redraw entity
 				if(entity.model.radius >= 10) {
@@ -460,12 +463,12 @@ export async function main() {
 				graphics.endFill();
 			}
 
-			const player = this.nodes.entities.state.player;
+			const player = this.$nodes.entities.state.player;
 			const playerGraphics = player.render.sprite;
 
 			// draw a triangle that follows the mouse and if "in front" of the player, draw it in front of the player
-			playerGraphics.x = player.physics.x * this.nodes.map.state.tw;
-			playerGraphics.y = player.physics.y * this.nodes.map.state.th;
+			playerGraphics.x = player.physics.x * this.$nodes.map.state.tw;
+			playerGraphics.y = player.physics.y * this.$nodes.map.state.th;
 			playerGraphics.rotation = player.physics.theta;
 
 			playerGraphics.beginFill(0x00ff00, 1.0);
@@ -503,8 +506,8 @@ export async function main() {
 		},
 	});
 
-	game.nodes.map.init();
-	game.nodes.input.init();
+	game.$nodes.map.init();
+	game.$nodes.input.init();
 
 
 	const pixi = game.pixi.app;
@@ -512,17 +515,17 @@ export async function main() {
 
 	// draw the map, using green Pixi Graphics objects of .tw and .th size at tx and ty positions
 	const map = new PIXI.Container();
-	for(let row = 0; row < game.nodes.map.state.rows; row++) {
-		for(let col = 0; col < game.nodes.map.state.cols; col++) {
-			const tile = game.nodes.map.state.tiles[ row ][ col ];
-			const terrain = game.nodes.terrain.state[ tile.data ];
+	for(let row = 0; row < game.$nodes.map.state.rows; row++) {
+		for(let col = 0; col < game.$nodes.map.state.cols; col++) {
+			const tile = game.$nodes.map.state.tiles[ row ][ col ];
+			const terrain = game.$nodes.terrain.state[ tile.data ];
 			const graphics = new PIXI.Graphics();
 
 			graphics.beginFill(terrain.color, 1.0);
-			graphics.drawRect(0, 0, game.nodes.map.state.tw * game.config.scale, game.nodes.map.state.th * game.config.scale); // game.config.scale the dimensions
+			graphics.drawRect(0, 0, game.$nodes.map.state.tw * game.config.scale, game.$nodes.map.state.th * game.config.scale); // game.config.scale the dimensions
 			graphics.endFill();
-			graphics.x = tile.x * game.nodes.map.state.tw * game.config.scale; // game.config.scale the position
-			graphics.y = tile.y * game.nodes.map.state.th * game.config.scale; // game.config.scale the position
+			graphics.x = tile.x * game.$nodes.map.state.tw * game.config.scale; // game.config.scale the position
+			graphics.y = tile.y * game.$nodes.map.state.th * game.config.scale; // game.config.scale the position
 
 			map.addChild(graphics);
 		}
@@ -530,11 +533,11 @@ export async function main() {
 
 	// seed the entities container with graphics objects
 	const entities = new PIXI.Container();
-	for(const id in game.nodes.entities.state) {
+	for(const id in game.$nodes.entities.state) {
 		const graphics = new PIXI.Graphics();
 		entities.addChild(graphics);
 
-		game.nodes.entities.state[ id ].render.sprite = graphics;
+		game.$nodes.entities.state[ id ].render.sprite = graphics;
 	}
 
 	// add the map and entities to the stage
@@ -543,7 +546,7 @@ export async function main() {
 
 	return {
 		game,
-		nodes: game.nodes,
+		nodes: game.$nodes,
 	};
 };
 
