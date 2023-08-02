@@ -19,7 +19,7 @@ export class Game extends Node {
 	}
 
 	constructor ({ input = {}, pixi = {}, loop = {}, $nodes = {}, $run, ...self } = {}) {
-		super({ ...self, $run: false });
+		super({ ...self, $run: false });	// Don't run the init function quite yet
 
 		this.$nodes = typeof $nodes === "function" ? $nodes({ $game: this }) : $nodes;
 
