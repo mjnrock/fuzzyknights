@@ -137,14 +137,45 @@ export const Nodes = ({ $game }) => Node.CreateMany({
 export async function main() {
 	const game = new Game({
 		$nodes: Nodes,
+		$run: true,
+		$init: (game) => {
+			const pixi = game.pixi.app;
 
+			//STUB: START FPS COUNTER
+			const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
+			fpsText.x = 10;
+			fpsText.y = 10;
+			pixi.stage.addChild(fpsText);
+
+			let i = 0,
+				size = 500;
+			const fpsWindow = [];
+			pixi.ticker.add((delta) => {
+				fpsWindow[ i ] = delta;
+				++i;
+				if(i >= size) i = 0;
+
+				const avgDeltaInMilliseconds = fpsWindow.reduce((a, b) => a + b, 0) / size;
+				const avgFPS = 1000 / avgDeltaInMilliseconds;
+				fpsText.text = `FPS: ${ Math.round(avgFPS / 100) }`;
+
+				// bring fpsText to the front
+				pixi.stage.removeChild(fpsText);
+				pixi.stage.addChild(fpsText);
+			});
+			//STUB: END FPS COUNTER
+		},
+
+		/* Config */
 		config: {
 			scale: 2.5,
 		},
-
+		/* PixiJS Rendering */
+		pixi: {},
+		/* Game Loop */
 		loop: {
 			start: true,
-			fps: 24,
+			fps: 30,
 			onStart() {
 				this.$game.pixi.app.ticker.start();
 			},
@@ -153,6 +184,7 @@ export async function main() {
 			},
 		},
 
+		/* Extra methods */
 		tick({ dt: dts, ip, startTime, lastTime, fps }) {
 			// update the entities
 			for(const id in this.$nodes.entities.state) {
@@ -237,35 +269,6 @@ export async function main() {
 				3 + (player.model.radius * this.config.scale) / 2 * this.config.scale, 0,
 			]);
 			playerGraphics.endFill();
-		},
-
-		$run: true,
-		$init: (game) => {
-			const pixi = game.pixi.app;
-
-			//STUB: START FPS COUNTER
-			const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
-			fpsText.x = 10;
-			fpsText.y = 10;
-			pixi.stage.addChild(fpsText);
-
-			let i = 0,
-				size = 500;
-			const fpsWindow = [];
-			pixi.ticker.add((delta) => {
-				fpsWindow[ i ] = delta;
-				++i;
-				if(i >= size) i = 0;
-
-				const avgDeltaInMilliseconds = fpsWindow.reduce((a, b) => a + b, 0) / size;
-				const avgFPS = 1000 / avgDeltaInMilliseconds;
-				fpsText.text = `FPS: ${ Math.round(avgFPS / 100) }`;
-
-				// bring fpsText to the front
-				pixi.stage.removeChild(fpsText);
-				pixi.stage.addChild(fpsText);
-			});
-			//STUB: END FPS COUNTER
 		},
 	});
 
