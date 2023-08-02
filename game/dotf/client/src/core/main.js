@@ -269,11 +269,12 @@ export async function main() {
 		},
 	});
 
-
+	//#region Initialize the map
 	game.$nodes.map.init();
+	//#endregion
 
 
-	//SECTION: Initialize the input controllers
+	//#region Initialize the input controllers
 	game.input.mouse.addEventListener("onContextMenu", (self, e) => {
 		const [ mouseX, mouseY ] = self.cursor;
 
@@ -387,9 +388,9 @@ export async function main() {
 			game.$nodes.entities.dispatch("remove", entity);
 		}, 1000);
 	});
-	//SECTION END: Initialize the input controllers
+	//#endregion
 
-	//SECTION: Initialize the terrain and entity graphics
+	//#region Initialize the terrain and entity graphics
 	const pixi = game.pixi.app;
 	document.body.appendChild(pixi.view);
 
@@ -423,7 +424,7 @@ export async function main() {
 	// add the map and entities to the stage
 	pixi.stage.addChild(map);
 	pixi.stage.addChild(entities);
-	//SECTION END: Initialize the terrain and entity graphics
+	//#endregion
 
 	return {
 		game,
