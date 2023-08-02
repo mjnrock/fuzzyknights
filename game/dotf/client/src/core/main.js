@@ -16,7 +16,7 @@ export const EnumEntityState = {
 	MOVING: "MOVING",
 };
 
-export let State = {
+export let State = ({ $game }) => ({
 	entities: (entities = {}) => ({
 		player: {
 			$id: uuid(),
@@ -66,22 +66,9 @@ export let State = {
 		keyMask: 0,
 		...input,
 	}),
-	pixi: (pixi = {}) => ({
-		scale: 2.5,
-		app: new PIXI.Application({
-			hello: "world",
+});
 
-			backgroundColor: 0x000000,
-			resizeTo: window,
-			antialias: true,
-			preserveDrawingBuffer: true,
-		}),
-		stage: new PIXI.Container(),
-		...pixi,
-	}),
-};
-
-export const Reducers = {
+export const Reducers = ({ $game }) => ({
 	entities: {
 		add: (state, entity) => {
 			return {
@@ -152,39 +139,30 @@ export const Reducers = {
 			};
 		},
 	},
-	pixi: {
-		register: (state, container) => {
-			const next = { ...state };
+});
 
-			next.app.stage.addChild(container);
-
-			return next;
-		},
-	},
-};
-
-export const Effects = {
+export const Effects = ({ $game }) => ({
 	entities: {
 		add: (node, entity) => {
-			Nodes.pixi.dispatchAsync("register", entity.render.sprite);
+			$game.pixi.register(entity.render.sprite);
 		},
 		remove: (node, entity) => {
-			Nodes.pixi.state.app.stage.removeChild(entity.render.sprite);
+			$game.pixi.unregister(entity.render.sprite);
 		},
 	},
-};
+});
 
-export const Nodes = Node.CreateMany({
+export const Nodes = ({ $game }) => Node.CreateMany({
 	entities: {
-		state: State.entities(),
-		reducers: Reducers.entities,
-		effects: Effects.entities,
+		state: State({ $game }).entities(),
+		reducers: Reducers({ $game }).entities,
+		effects: Effects({ $game }).entities,
 	},
 	terrain: {
-		state: State.terrain(),
+		state: State({ $game }).terrain(),
 	},
 	map: {
-		state: State.map(),
+		state: State({ $game }).map(),
 
 		events: {
 			init: [
@@ -215,8 +193,8 @@ export const Nodes = Node.CreateMany({
 		},
 	},
 	input: {
-		state: State.input(),
-		reducers: Reducers.input,
+		state: State({ $game }).input(),
+		reducers: Reducers({ $game }).input,
 		events: {
 			init: [
 				(node) => {
@@ -229,7 +207,7 @@ export const Nodes = Node.CreateMany({
 						e.preventDefault();
 						e.stopPropagation();
 
-						Nodes.input.dispatch("handleKeyDown", { code: e.code });
+						$game.nodes.input.dispatch("handleKeyDown", { code: e.code });
 					});
 
 					// Event listener for keyup event
@@ -241,11 +219,11 @@ export const Nodes = Node.CreateMany({
 						e.preventDefault();
 						e.stopPropagation();
 
-						Nodes.input.dispatch("handleKeyUp", { code: e.code });
+						$game.nodes.input.dispatch("handleKeyUp", { code: e.code });
 					});
 
 
-					const pixi = Nodes.pixi.state.app;
+					const pixi = $game.pixi.app;
 					// Make the player look at the mouse as it moves
 					window.addEventListener("mousemove", async e => {
 						// Calculate the canvas offsets
@@ -256,7 +234,7 @@ export const Nodes = Node.CreateMany({
 						const mouseX = (e.pageX - canvasOffsetX);
 						const mouseY = (e.pageY - canvasOffsetY);
 
-						Nodes.pixi.state.mouse = [ mouseX, mouseY ];
+						$game.nodes.input.state.mouse = [ mouseX, mouseY ];
 					});
 					window.addEventListener("contextmenu", async e => {
 						e.preventDefault();
@@ -271,15 +249,15 @@ export const Nodes = Node.CreateMany({
 						const mouseY = (e.pageY - canvasOffsetY);
 
 						// update entity's theta position so that it faces the mouse
-						const player = Nodes.entities.state.player
+						const player = $game.nodes.entities.state.player
 
 						// Calculate angle to mouse and set it
-						const dx = mouseX - (player.physics.x * Nodes.map.state.tw);
-						const dy = mouseY - (player.physics.y * Nodes.map.state.th);
+						const dx = mouseX - (player.physics.x * $game.nodes.map.state.tw);
+						const dy = mouseY - (player.physics.y * $game.nodes.map.state.th);
 
 						const theta = Math.atan2(dy, dx);
 
-						Nodes.pixi.state.mouse = [ mouseX, mouseY ];
+						$game.nodes.input.state.mouse = [ mouseX, mouseY ];
 
 						// Use the mouse position to create a new entity projection
 						const entity = {
@@ -318,11 +296,11 @@ export const Nodes = Node.CreateMany({
 						entity.physics.theta = thetaError;
 
 						// Add the entity to the entities node
-						Nodes.entities.dispatch("add", entity);
+						$game.nodes.entities.dispatch("add", entity);
 
 						// STUB: This will destroy the entities after 1 second, even if the Game is paused.
 						setTimeout(() => {
-							Nodes.entities.dispatch("remove", entity);
+							$game.nodes.entities.dispatch("remove", entity);
 						}, 2500);
 					});
 					window.addEventListener("click", async e => {
@@ -335,15 +313,15 @@ export const Nodes = Node.CreateMany({
 						const mouseY = (e.pageY - canvasOffsetY);
 
 						// update entity's theta position so that it faces the mouse
-						const player = Nodes.entities.state.player
+						const player = $game.nodes.entities.state.player
 
 						// Calculate angle to mouse and set it
-						const dx = mouseX - (player.physics.x * Nodes.map.state.tw);
-						const dy = mouseY - (player.physics.y * Nodes.map.state.th);
+						const dx = mouseX - (player.physics.x * $game.nodes.map.state.tw);
+						const dy = mouseY - (player.physics.y * $game.nodes.map.state.th);
 
 						const theta = Math.atan2(dy, dx);
 
-						Nodes.pixi.state.mouse = [ mouseX, mouseY ];
+						$game.nodes.input.state.mouse = [ mouseX, mouseY ];
 
 						// Use the mouse position to create a new entity projection
 						const entity = {
@@ -383,57 +361,13 @@ export const Nodes = Node.CreateMany({
 						entity.physics.theta = thetaError;
 
 						// Add the entity to the entities node
-						Nodes.entities.dispatch("add", entity);
+						$game.nodes.entities.dispatch("add", entity);
 
 						// STUB: This will destroy the entities after 1 second, even if the Game is paused.
 						setTimeout(() => {
-							Nodes.entities.dispatch("remove", entity);
+							$game.nodes.entities.dispatch("remove", entity);
 						}, 1000);
 					});
-				},
-			],
-		},
-	},
-	pixi: {
-		state: State.pixi(),
-		reducers: Reducers.pixi,
-
-		events: {
-			init: [
-				(node) => {
-					const pixi = node.state.app;
-					document.body.appendChild(pixi.view);
-
-					// draw the map, using green Pixi Graphics objects of .tw and .th size at tx and ty positions
-					const map = new PIXI.Container();
-					for(let row = 0; row < Nodes.map.state.rows; row++) {
-						for(let col = 0; col < Nodes.map.state.cols; col++) {
-							const tile = Nodes.map.state.tiles[ row ][ col ];
-							const terrain = Nodes.terrain.state[ tile.data ];
-							const graphics = new PIXI.Graphics();
-
-							graphics.beginFill(terrain.color, 1.0);
-							graphics.drawRect(0, 0, Nodes.map.state.tw * node.state.scale, Nodes.map.state.th * node.state.scale); // node.state.scale the dimensions
-							graphics.endFill();
-							graphics.x = tile.x * Nodes.map.state.tw * node.state.scale; // node.state.scale the position
-							graphics.y = tile.y * Nodes.map.state.th * node.state.scale; // node.state.scale the position
-
-							map.addChild(graphics);
-						}
-					}
-
-					// seed the entities container with graphics objects
-					const entities = new PIXI.Container();
-					for(const id in Nodes.entities.state) {
-						const graphics = new PIXI.Graphics();
-						entities.addChild(graphics);
-
-						Nodes.entities.state[ id ].render.sprite = graphics;
-					}
-
-					// add the map and entities to the stage
-					pixi.stage.addChild(map);
-					pixi.stage.addChild(entities);
 				},
 			],
 		},
@@ -441,26 +375,26 @@ export const Nodes = Node.CreateMany({
 });
 
 export async function main() {
-	Nodes.map.init();
-	Nodes.pixi.init();
-	Nodes.input.init();
-
 	const game = new Game({
+		config: {
+			scale: 2.5,
+		},
+		nodes: Nodes,
 		loop: {
 			start: true,
 			fps: 24,
 			onStart() {
-				Nodes.pixi.state.app.ticker.start();
+				this.$game.pixi.app.ticker.start();
 			},
 			onStop() {
-				Nodes.pixi.state.app.ticker.stop();
+				this.$game.pixi.app.ticker.stop();
 			},
 		},
 
 		tick({ dt: dts, ip, startTime, lastTime, fps }) {
 			// update the entities
-			for(const id in Nodes.entities.state) {
-				const entity = Nodes.entities.state[ id ];
+			for(const id in this.nodes.entities.state) {
+				const entity = this.nodes.entities.state[ id ];
 
 				// calculate the new position of the entity and set it
 				entity.physics.x += entity.physics.vx * dts;
@@ -468,40 +402,40 @@ export async function main() {
 			}
 
 			// update player
-			const player = Nodes.entities.state.player;
+			const player = this.nodes.entities.state.player;
 
-			if(Nodes.input.state.keyMask & 0x01) player.physics.vy = -player.physics.speed;
-			else if(Nodes.input.state.keyMask & 0x04) player.physics.vy = player.physics.speed;
+			if(this.nodes.input.state.keyMask & 0x01) player.physics.vy = -player.physics.speed;
+			else if(this.nodes.input.state.keyMask & 0x04) player.physics.vy = player.physics.speed;
 			else player.physics.vy = 0;
 
-			if(Nodes.input.state.keyMask & 0x02) player.physics.vx = -player.physics.speed;
-			else if(Nodes.input.state.keyMask & 0x08) player.physics.vx = player.physics.speed;
+			if(this.nodes.input.state.keyMask & 0x02) player.physics.vx = -player.physics.speed;
+			else if(this.nodes.input.state.keyMask & 0x08) player.physics.vx = player.physics.speed;
 			else player.physics.vx = 0;
 
 			player.physics.x += player.physics.vx * dts;
 			player.physics.y += player.physics.vy * dts;
 
-			let [ mouseX, mouseY ] = Nodes.pixi.state.mouse || [];
+			let [ mouseX, mouseY ] = this.nodes.input.state.mouse || [];
 
 			// Calculate angle to mouse and set it
-			const dx = mouseX - (player.physics.x * Nodes.map.state.tw);
-			const dy = mouseY - (player.physics.y * Nodes.map.state.th);
+			const dx = mouseX - (player.physics.x * this.nodes.map.state.tw);
+			const dy = mouseY - (player.physics.y * this.nodes.map.state.th);
 
 			const theta = Math.atan2(dy, dx);
 			player.physics.theta = theta;
 		},
-		render: (delta) => {
+		render(delta) {
 			//FIXME: Instead, this should manipulate the meta data on the Pixi objects, as it won't require a re-render every frame
 			// iterate through entities and draw the line towards the mouse
-			for(const id in Nodes.entities.state) {
-				const entity = Nodes.entities.state[ id ];
+			for(const id in this.nodes.entities.state) {
+				const entity = this.nodes.entities.state[ id ];
 				const graphics = entity.render.sprite;
 
 				// clear previous line
 				graphics.clear();
 
-				graphics.x = entity.physics.x * Nodes.map.state.tw;
-				graphics.y = entity.physics.y * Nodes.map.state.th;
+				graphics.x = entity.physics.x * this.nodes.map.state.tw;
+				graphics.y = entity.physics.y * this.nodes.map.state.th;
 
 				// redraw entity
 				if(entity.model.radius >= 10) {
@@ -514,10 +448,10 @@ export async function main() {
 
 				switch(entity.model.type) {
 					case EnumModelType.CIRCLE:
-						graphics.drawCircle(entity.model.ox * Nodes.pixi.state.scale, entity.model.oy * Nodes.pixi.state.scale, entity.model.radius * Nodes.pixi.state.scale);
+						graphics.drawCircle(entity.model.ox * this.config.scale, entity.model.oy * this.config.scale, entity.model.radius * this.config.scale);
 						break;
 					case EnumModelType.RECTANGLE:
-						graphics.drawRect(entity.model.ox * Nodes.pixi.state.scale, entity.model.oy * Nodes.pixi.state.scale, entity.model.width * Nodes.pixi.state.scale, entity.model.height * Nodes.pixi.state.scale);
+						graphics.drawRect(entity.model.ox * this.config.scale, entity.model.oy * this.config.scale, entity.model.width * this.config.scale, entity.model.height * this.config.scale);
 						graphics.rotation = entity.physics.theta;
 						break;
 					default:
@@ -526,27 +460,26 @@ export async function main() {
 				graphics.endFill();
 			}
 
-			const player = Nodes.entities.state.player;
+			const player = this.nodes.entities.state.player;
 			const playerGraphics = player.render.sprite;
 
 			// draw a triangle that follows the mouse and if "in front" of the player, draw it in front of the player
-			playerGraphics.x = player.physics.x * Nodes.map.state.tw;
-			playerGraphics.y = player.physics.y * Nodes.map.state.th;
+			playerGraphics.x = player.physics.x * this.nodes.map.state.tw;
+			playerGraphics.y = player.physics.y * this.nodes.map.state.th;
 			playerGraphics.rotation = player.physics.theta;
 
 			playerGraphics.beginFill(0x00ff00, 1.0);
 			playerGraphics.drawPolygon([
-				3 + player.model.radius * Nodes.pixi.state.scale, -5 * Nodes.pixi.state.scale,
-				3 + player.model.radius * Nodes.pixi.state.scale, 5 * Nodes.pixi.state.scale,
-				3 + (player.model.radius * Nodes.pixi.state.scale) / 2 * Nodes.pixi.state.scale, 0,
+				3 + player.model.radius * this.config.scale, -5 * this.config.scale,
+				3 + player.model.radius * this.config.scale, 5 * this.config.scale,
+				3 + (player.model.radius * this.config.scale) / 2 * this.config.scale, 0,
 			]);
 			playerGraphics.endFill();
 		},
 
 		$run: true,
-		$init: (node) => {
-			const pixi = Nodes.pixi.state.app;
-			pixi.ticker.add((delta) => node.render(delta / 1000));
+		$init: (game) => {
+			const pixi = game.pixi.app;
 
 			//STUB: START FPS COUNTER
 			const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
@@ -570,9 +503,47 @@ export async function main() {
 		},
 	});
 
+	game.nodes.map.init();
+	game.nodes.input.init();
+
+
+	const pixi = game.pixi.app;
+	document.body.appendChild(pixi.view);
+
+	// draw the map, using green Pixi Graphics objects of .tw and .th size at tx and ty positions
+	const map = new PIXI.Container();
+	for(let row = 0; row < game.nodes.map.state.rows; row++) {
+		for(let col = 0; col < game.nodes.map.state.cols; col++) {
+			const tile = game.nodes.map.state.tiles[ row ][ col ];
+			const terrain = game.nodes.terrain.state[ tile.data ];
+			const graphics = new PIXI.Graphics();
+
+			graphics.beginFill(terrain.color, 1.0);
+			graphics.drawRect(0, 0, game.nodes.map.state.tw * game.config.scale, game.nodes.map.state.th * game.config.scale); // game.config.scale the dimensions
+			graphics.endFill();
+			graphics.x = tile.x * game.nodes.map.state.tw * game.config.scale; // game.config.scale the position
+			graphics.y = tile.y * game.nodes.map.state.th * game.config.scale; // game.config.scale the position
+
+			map.addChild(graphics);
+		}
+	}
+
+	// seed the entities container with graphics objects
+	const entities = new PIXI.Container();
+	for(const id in game.nodes.entities.state) {
+		const graphics = new PIXI.Graphics();
+		entities.addChild(graphics);
+
+		game.nodes.entities.state[ id ].render.sprite = graphics;
+	}
+
+	// add the map and entities to the stage
+	pixi.stage.addChild(map);
+	pixi.stage.addChild(entities);
+
 	return {
 		game,
-		nodes: Nodes,
+		nodes: game.nodes,
 	};
 };
 

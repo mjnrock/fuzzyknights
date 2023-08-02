@@ -1,7 +1,9 @@
 export class GameLoop {
 	static MAX_DT = 1000;
 
-	constructor ({ fps = 60, onTick, onStart, onStop, start = false } = {}) {
+	constructor ({ fps = 60, onTick, onStart, onStop, start = false, $game } = {}) {
+		this.$game = $game;
+
 		this.fps = fps;
 		this.onTick = onTick;
 		this.onStart = onStart;

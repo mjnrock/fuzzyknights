@@ -35,7 +35,7 @@ export function Game() {
 			fnFocus = null;
 
 		main().then(({ game, nodes } = {}) => {
-			const app = nodes.pixi.state.app;
+			const app = game.pixi.app;
 
 			setState(app);
 

@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import Node from "../@node/Node";
 
 import { GameLoop } from "./GameLoop.js";
+import Pixi from "./Pixi";
 
 export class Game extends Node {
 	static Instances = new Map();
@@ -16,25 +17,28 @@ export class Game extends Node {
 		return game;
 	}
 
-	constructor ({ pixi = {}, loop = {}, ...self } = {}) {
-		super({ ...self });
+	constructor ({ nodes = {}, pixi = {}, loop = {}, $run, ...self } = {}) {
+		super({ ...self, $run: false });
 
-		//TODO: Ready to go, just need to refactor to use it
-		// this.pixi = new PIXI.Application({
-		// 	hello: "world",
+		this.nodes = typeof nodes === "function" ? nodes({ $game: this }) : nodes;
 
-		// 	backgroundColor: 0x000000,
-		// 	resizeTo: window,
-		// 	antialias: true,
-		// 	preserveDrawingBuffer: true,
-		// 	...pixi,
-		// });
-		this.loop = new GameLoop({
-			...loop,
+		this.pixi = new Pixi({
+			$game: this,
 
-			/* Abstract this out to a method of the Game class */
-			onTick: this.tick.bind(this),
+			pixi,
+			onRender: (...args) => this.render.call(this, ...args),
 		});
+
+		this.loop = new GameLoop({
+			$game: this,
+
+			...loop,
+			onTick: (...args) => this.tick.call(this, ...args),
+		});
+
+		if($run) {
+			this.init.call(this, ...(Array.isArray($run) ? $run : []));
+		}
 
 		Game.Instances.set(this.$id, this);
 	}
