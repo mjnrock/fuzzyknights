@@ -260,6 +260,10 @@ export async function main() {
 				const avgDeltaInMilliseconds = fpsWindow.reduce((a, b) => a + b, 0) / size;
 				const avgFPS = 1000 / avgDeltaInMilliseconds;
 				fpsText.text = `FPS: ${ Math.round(avgFPS / 100) }`;
+
+				// bring fpsText to the front
+				pixi.stage.removeChild(fpsText);
+				pixi.stage.addChild(fpsText);
 			});
 			//STUB: END FPS COUNTER
 		},
