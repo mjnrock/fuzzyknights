@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from "react";
 
-export function PixiView({ app, resizer = false, ...props }) {
+//TODO: Implement the observer
+
+export function PixiView({ app, observer, resizer = false, ...props }) {
 	const canvasRef = useRef(null);
 
 	useEffect(() => {

@@ -3,6 +3,9 @@ import { Routes, Route } from "react-router-dom";
 import { Default as DefaultRoute } from "./routes/Default.jsx";
 import { Game as GameRoute } from "./routes/Game.jsx";
 
+import { Realm } from "./core/Realm.js";
+console.log(Realm());
+
 export function App() {
 	return (
 		<Routes>
