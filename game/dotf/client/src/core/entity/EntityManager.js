@@ -2,6 +2,15 @@ import Registry from "../../@node/Registry";
 import { IdentityClass } from "../../@node/Identity";
 import { EnumEntityType } from "./Entity";
 
+/**
+ * The EntityManager is a container for all EntityCollections, differentiated
+ * by their type (as defined in the EnumEntityType).  As such, there will be
+ * a resulting EntityCollection for each EnumEntityType.
+ * 
+ * Iterating over the EntityManager will iterate over all EntityCollections,
+ * collapsed into a single array.  Accordingly, this method can be used to
+ * indiscriminately iterate over all entities in the EntityManager.
+ */
 export class EntityManager extends IdentityClass {
 	constructor ({ collections = {}, ...args } = {}) {
 		super({ ...args });
