@@ -22,11 +22,11 @@ export class MouseInput extends IdentityClass {
 			...events,
 		};
 
-		this.$game.pixi.app.view.addEventListener("mousedown", (e) => this.onMouseDown.call(this, e));
-		this.$game.pixi.app.view.addEventListener("mouseup", (e) => this.onMouseUp.call(this, e));
-		this.$game.pixi.app.view.addEventListener("mousemove", (e) => this.onMouseMove.call(this, e));
-		this.$game.pixi.app.view.addEventListener("click", (e) => this.onClick.call(this, e));
-		this.$game.pixi.app.view.addEventListener("contextmenu", (e) => this.onContextMenu.call(this, e));
+		this.$game.renderer.app.view.addEventListener("mousedown", (e) => this.onMouseDown.call(this, e));
+		this.$game.renderer.app.view.addEventListener("mouseup", (e) => this.onMouseUp.call(this, e));
+		this.$game.renderer.app.view.addEventListener("mousemove", (e) => this.onMouseMove.call(this, e));
+		this.$game.renderer.app.view.addEventListener("click", (e) => this.onClick.call(this, e));
+		this.$game.renderer.app.view.addEventListener("contextmenu", (e) => this.onContextMenu.call(this, e));
 	}
 
 	addEventListener(type, fn) {
@@ -97,8 +97,8 @@ export class MouseInput extends IdentityClass {
 
 	calculateMousePosition(e) {
 		// Calculate the canvas offsets
-		const canvasOffsetX = this.$game.pixi.app.view.offsetLeft;
-		const canvasOffsetY = this.$game.pixi.app.view.offsetTop;
+		const canvasOffsetX = this.$game.renderer.app.view.offsetLeft;
+		const canvasOffsetY = this.$game.renderer.app.view.offsetTop;
 
 		// Calculate the mouse position relative to the canvas
 		const mouseX = (e.pageX - canvasOffsetX);

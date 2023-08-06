@@ -1,7 +1,7 @@
 import { PixiView } from "../PixiView.jsx";
 
 export function Camera({ game, observer }) {
-	const app = game?.pixi?.app;
+	const app = game?.renderer?.app;
 
 	if(!app) return null;
 

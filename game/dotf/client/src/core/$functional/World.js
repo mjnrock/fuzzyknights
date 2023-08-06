@@ -4,10 +4,11 @@ export const Reducers = ({ $game } = {}) => ({
 
 });
 
-export const World = ({ $world, maps = {}, tick, render } = {}) => Identity.New({
-	$world,
+export const World = ({ $realm, maps = {}, observers = [], tick, render } = {}) => Identity.New({
+	$realm,
 
 	maps,
+	observers,
 
 	tick,
 	render,

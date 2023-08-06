@@ -84,10 +84,10 @@ export const Reducers = ({ $game }) => ({
 export const Effects = ({ $game }) => ({
 	entities: {
 		add: (node, entity) => {
-			$game.pixi.register(entity.render.sprite);
+			$game.renderer.register(entity.render.sprite);
 		},
 		remove: (node, entity) => {
-			$game.pixi.unregister(entity.render.sprite);
+			$game.renderer.unregister(entity.render.sprite);
 		},
 	},
 });
@@ -139,7 +139,7 @@ export async function main() {
 		$nodes: Nodes,
 		$run: true,
 		$init: (game) => {
-			const pixi = game.pixi.app;
+			const pixi = game.renderer.app;
 
 			//STUB: START FPS COUNTER
 			const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
@@ -177,10 +177,10 @@ export async function main() {
 			start: true,
 			fps: 30,
 			onStart() {
-				this.$game.pixi.app.ticker.start();
+				this.$game.renderer.app.ticker.start();
 			},
 			onStop() {
-				this.$game.pixi.app.ticker.stop();
+				this.$game.renderer.app.ticker.stop();
 			},
 		},
 
@@ -394,7 +394,7 @@ export async function main() {
 	//#endregion
 
 	//#region Initialize the terrain and entity graphics
-	const pixi = game.pixi.app;
+	const pixi = game.renderer.app;
 	document.body.appendChild(pixi.view);
 
 	// draw the map, using green Pixi Graphics objects of .tw and .th size at tx and ty positions

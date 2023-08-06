@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { IdentityClass } from "../@node/Identity";
+import { IdentityClass } from "../../@node/Identity";
 
 export class Pixi extends IdentityClass {
 	constructor ({ pixi, stage, onRender, $game, ...self } = {}) {
