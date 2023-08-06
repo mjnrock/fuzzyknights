@@ -161,6 +161,7 @@ export async function main() {
 	});
 
 	//#region Initialize the map
+	//STUB
 	const dropDice = (sides = 2) => {
 		const roll = ~~(Math.random() * sides);
 
@@ -171,7 +172,8 @@ export async function main() {
 		}
 	};
 
-	// generate the map
+	//STUB: generate the map
+	//TODO: Build the zone independently of this
 	for(let row = 0; row < game.realm.worlds.overworld.zones.A.rows; row++) {
 		game.realm.worlds.overworld.zones.A.tiles[ row ] = [];
 		for(let col = 0; col < game.realm.worlds.overworld.zones.A.cols; col++) {
