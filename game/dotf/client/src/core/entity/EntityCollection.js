@@ -7,8 +7,6 @@ import { EnumEntryType, RegistryClass } from "../../@node/Registry";
 export class EntityCollection extends RegistryClass {
 	constructor ({ entities = {}, ...args } = {}) {
 		super({ entries: entities, ...args });
-
-		console.log(this)
 	}
 
 	/**

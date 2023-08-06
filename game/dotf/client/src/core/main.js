@@ -4,7 +4,6 @@ import { v4 as uuid } from "uuid";
 import { Game } from "./Game.js";
 
 // import Chord from "@lespantsfancy/chord";
-import Node from "../@node/Node";
 import Entity from "./entity/Entity.js";
 
 export const EnumModelType = {
@@ -17,68 +16,13 @@ export const EnumEntityState = {
 	MOVING: "MOVING",
 };
 
-export let State = ({ $game }) => ({
-	terrain: (terrain = {}) => ({
-		GRASS: { type: "GRASS", color: "#66cc66" },
-		WATER: { type: "WATER", color: "#33ccff" },
-		...terrain,
-	}),
-	map: (map = {}) => ({
-		rows: 15,
-		cols: 15,
-		tw: 32,
-		th: 32,
-		tiles: [],
-		...map,
-	}),
-});
-
-export const Reducers = ({ $game }) => ({
-});
-
-export const Effects = ({ $game }) => ({
-});
-
-export const Nodes = ({ $game }) => Node.CreateMany({
-	terrain: {
-		state: State({ $game }).terrain(),
-	},
-	map: {
-		state: State({ $game }).map(),
-
-		events: {
-			init: [
-				(node) => {
-					const dropDice = (sides = 2) => {
-						const roll = ~~(Math.random() * sides);
-
-						if(roll === 0) {
-							return "GRASS";
-						} else if(roll === 1) {
-							return "WATER";
-						}
-					};
-
-					// generate the map
-					for(let row = 0; row < node.state.rows; row++) {
-						node.state.tiles[ row ] = [];
-						for(let col = 0; col < node.state.cols; col++) {
-							node.state.tiles[ row ][ col ] = {
-								x: col,
-								y: row,
-								data: dropDice(),
-							};
-						}
-					}
-				},
-			],
-		},
-	},
-});
+export const EnumTerrainType = {
+	GRASS: { type: "GRASS", color: "#66cc66" },
+	WATER: { type: "WATER", color: "#33ccff" },
+};
 
 export async function main() {
 	const game = new Game({
-		$nodes: Nodes,
 		$run: true,
 		$init: (game) => {
 			const pixi = game.renderer.app;
@@ -110,7 +54,11 @@ export async function main() {
 
 		/* Config */
 		config: {
-			scale: 2.5,
+			scale: 1.0,
+			tiles: {
+				width: 32,
+				height: 32,
+			},
 		},
 		/* PixiJS Rendering */
 		pixi: {},
@@ -155,8 +103,8 @@ export async function main() {
 			let [ mouseX, mouseY ] = this.input.mouse.cursor || [];
 
 			// Calculate angle to mouse and set it
-			const dx = mouseX - (player.physics.x * 32);
-			const dy = mouseY - (player.physics.y * 32);
+			const dx = mouseX - (player.physics.x * game.config.tiles.width * game.config.scale);
+			const dy = mouseY - (player.physics.y * game.config.tiles.height * game.config.scale);
 
 			const theta = Math.atan2(dy, dx);
 			player.physics.theta = theta;
@@ -170,8 +118,8 @@ export async function main() {
 				// clear previous line
 				graphics.clear();
 
-				graphics.x = entity.physics.x * 32;
-				graphics.y = entity.physics.y * 32;
+				graphics.x = entity.physics.x * game.config.tiles.width * game.config.scale;
+				graphics.y = entity.physics.y * game.config.tiles.height * game.config.scale;
 
 				// redraw entity
 				if(entity.model.radius >= 10) {
@@ -213,7 +161,27 @@ export async function main() {
 	});
 
 	//#region Initialize the map
-	game.$nodes.map.init();
+	const dropDice = (sides = 2) => {
+		const roll = ~~(Math.random() * sides);
+
+		if(roll === 0) {
+			return "GRASS";
+		} else if(roll === 1) {
+			return "WATER";
+		}
+	};
+
+	// generate the map
+	for(let row = 0; row < game.realm.worlds.overworld.zones.A.rows; row++) {
+		game.realm.worlds.overworld.zones.A.tiles[ row ] = [];
+		for(let col = 0; col < game.realm.worlds.overworld.zones.A.cols; col++) {
+			game.realm.worlds.overworld.zones.A.tiles[ row ][ col ] = {
+				x: col,
+				y: row,
+				data: dropDice(),
+			};
+		}
+	}
 	//#endregion
 
 
@@ -225,8 +193,8 @@ export async function main() {
 		const player = game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
 
 		// Calculate angle to mouse and set it
-		const dx = mouseX - (player.physics.x * 32);
-		const dy = mouseY - (player.physics.y * 32);
+		const dx = mouseX - (player.physics.x * game.config.tiles.width * game.config.scale);
+		const dy = mouseY - (player.physics.y * game.config.tiles.height * game.config.scale);
 
 		const theta = Math.atan2(dy, dx);
 
@@ -241,7 +209,7 @@ export async function main() {
 				y: player.physics.y,
 				theta,
 				vtheta: 0,
-				speed: 24,
+				speed: 12,
 			},
 			render: {
 				sprite: new PIXI.Graphics(),
@@ -286,8 +254,8 @@ export async function main() {
 		const player = game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
 
 		// Calculate angle to mouse and set it
-		const dx = mouseX - (player.physics.x * 32);
-		const dy = mouseY - (player.physics.y * 32);
+		const dx = mouseX - (player.physics.x * game.config.tiles.width * game.config.scale);
+		const dy = mouseY - (player.physics.y * game.config.tiles.height * game.config.scale);
 
 		const theta = Math.atan2(dy, dx);
 
@@ -302,7 +270,7 @@ export async function main() {
 				y: player.physics.y,
 				theta,
 				vtheta: 0,
-				speed: 48,
+				speed: 24,
 			},
 			render: {
 				sprite: new PIXI.Graphics(),
@@ -348,17 +316,18 @@ export async function main() {
 
 	// draw the map, using green Pixi Graphics objects of .tw and .th size at tx and ty positions
 	const map = new PIXI.Container();
-	for(let row = 0; row < game.$nodes.map.state.rows; row++) {
-		for(let col = 0; col < game.$nodes.map.state.cols; col++) {
-			const tile = game.$nodes.map.state.tiles[ row ][ col ];
-			const terrain = game.$nodes.terrain.state[ tile.data ];
+	for(let row = 0; row < game.realm.worlds.overworld.zones.A.rows; row++) {
+		for(let col = 0; col < game.realm.worlds.overworld.zones.A.cols; col++) {
+			const tile = game.realm.worlds.overworld.zones.A.tiles[ row ][ col ];
+			const terrain = EnumTerrainType[ tile.data ];
+
 			const graphics = new PIXI.Graphics();
 
 			graphics.beginFill(terrain.color, 1.0);
-			graphics.drawRect(0, 0, 32 * game.config.scale, 32 * game.config.scale); // game.config.scale the dimensions
+			graphics.drawRect(0, 0, game.config.tiles.width * game.config.scale, game.config.tiles.height * game.config.scale);
 			graphics.endFill();
-			graphics.x = tile.x * 32 * game.config.scale; // game.config.scale the position
-			graphics.y = tile.y * 32 * game.config.scale; // game.config.scale the position
+			graphics.x = tile.x * game.config.tiles.width  * game.config.scale; // game.config.scale the position
+			graphics.y = tile.y * game.config.tiles.height * game.config.scale; // game.config.scale the position
 
 			map.addChild(graphics);
 		}

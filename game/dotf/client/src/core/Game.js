@@ -54,7 +54,11 @@ export class Game extends Node {
 
 		//STUB
 		this.realm.worlds.overworld = new World({ $realm: this.realm });
-		this.realm.worlds.overworld.zones.A = new Zone({ $world: this.realm.worlds.overworld });
+		this.realm.worlds.overworld.zones.A = new Zone({
+			$world: this.realm.worlds.overworld,
+			rows: 10,
+			cols: 10,
+		});
 		this.realm.worlds.overworld.zones.A.entities.collections.CREATURE.register(new Entity({
 			$id: uuid(),
 			$tags: [],
@@ -69,7 +73,7 @@ export class Game extends Node {
 				vy: 0,
 				vtheta: 0,
 
-				speed: 4.20,
+				speed: 1.33,
 			},
 			render: {
 				sprite: new PIXI.Graphics(),
