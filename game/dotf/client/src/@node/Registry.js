@@ -1,5 +1,5 @@
 import { v4 as uuid, validate } from "uuid";
-import Identity from "./Identity.js";
+import { Identity, IdentityClass } from "./Identity.js";
 
 /*
  * @Schema = {
@@ -465,8 +465,82 @@ export const Transformer = {
 	}
 };
 
+export class RegistryClass extends IdentityClass {
+	static New = Registry.New;
+	static Next = Registry.Next;
+
+	static Reader = Reader;
+	static Writer = Writer;
+	static Resolver = Resolver;
+	static Transformer = Transformer;
+
+	constructor ({ entries, ...args } = {}) {
+		super({ ...args });
+
+		this.state = Registry.New(entries);
+
+		return new Proxy(this, {
+			get(target, key) {
+				if(key in target) {
+					return target[ key ];
+				}
+
+				if(key in target.state) {
+					const entry = target.state[ key ];
+
+					if(entry.type === EnumEntryType.ALIAS) {
+						return target.state[ entry.value ].value;
+					} else if(entry.type === EnumEntryType.POOL) {
+						return entry.value.map(id => target.state[ id ].value);
+					} else {
+						return entry.value;
+					}
+				}
+
+				return;
+			},
+		});
+	}
+
+	[ Symbol.iterator ]() {
+		const entries = [];
+
+		for(const key in this.state) {
+			const entry = this.state[ key ];
+
+			if(entry.type === EnumEntryType.ENTRY) {
+				entries.push(entry.value);
+			}
+		}
+
+		return entries[ Symbol.iterator ]();
+	}
+};
+
+for(const key in Reader) {
+	RegistryClass.prototype[ key ] = function (...args) {
+		return Reader[ key ](this.state, ...args);
+	}
+}
+for(const key in Writer) {
+	RegistryClass.prototype[ key ] = function (...args) {
+		return Writer[ key ](this.state, ...args);
+	}
+}
+for(const key in Registry) {
+	if(key === "New" || key === "Next") {
+		continue;
+	}
+
+	RegistryClass.prototype[ key ] = function (...args) {
+		return Registry[ key ](this.state, ...args);
+	};
+}
 
 export default {
+	EnumEntryType,
+	RegistryEntry,
+	RegistryClass,
 	Registry,
 	Reader,
 	Writer,

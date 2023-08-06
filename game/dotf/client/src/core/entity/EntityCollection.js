@@ -1,4 +1,5 @@
 import { IdentityClass } from "../@node/Identity";
+import { EnumEntryType, RegistryClass } from "../../@node/Registry";
 
 /**
  * Similarly to the Entity, the EntityCollection is a stripped-down
@@ -45,6 +46,25 @@ export class EntityCollection extends IdentityClass {
 			// resolve the group-level promise with the list of promises
 			resolve(Promise.all(promises));
 		});
+	}
+
+	tick({ ...args } = {}) {
+		for(const entry of Object.values(this.entities)) {
+			if(entry.type === EnumEntryType.ENTRY) {
+				const entity = entry.value;
+
+				entity.tick({ ...args });
+			}
+		}
+	}
+	render({ ...args } = {}) {
+		for(const entry of Object.values(this.entities)) {
+			if(entry.type === EnumEntryType.ENTRY) {
+				const entity = entry.value;
+
+				entity.render({ ...args });
+			}
+		}
 	}
 
 	set(entities) {

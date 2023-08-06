@@ -56,6 +56,9 @@ export class Entity extends IdentityClass {
 			resolve(this.next(action, ...args));
 		});
 	}
+
+	tick() { }
+	render() { }
 };
 
 export default Entity;
