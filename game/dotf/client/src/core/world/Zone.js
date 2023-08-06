@@ -1,17 +1,16 @@
-import { IdentityClass } from "../@node/Identity";
+import { IdentityClass } from "../../@node/Identity";
+import { EntityManager } from "../entity/EntityManager";
 
 /**
  * This is a Map, but since that's a "reserved word", we'll call it a Zone.
  */
 export class Zone extends IdentityClass {
-	constructor ({ $world, tiles = [], entities = {}, portals = {}, ...args } = {}) {
+	constructor ({ $world, tiles = [], entities = [], portals = {}, ...args } = {}) {
 		super({ ...args });
 
 		this.$world = $world;
 
-		this.tiles = tiles;
-		this.entities = entities;
-		this.portals = portals;
+		this.entities = new EntityManager({ entities });
 	}
 
 	section(x, y, width, height) {

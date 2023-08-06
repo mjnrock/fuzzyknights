@@ -79,8 +79,8 @@ export const Registry = {
 		return Registry.Next(Identity.New(), entries);
 	},
 
-	register(registry, entry, isIdentity = false) {
-		let id = isIdentity || (typeof entry === "object" && entry.$id) ? entry.$id : uuid();
+	register(registry, entry, ...aliases) {
+		let id = entry.$id ?? uuid();
 
 		if(!id) {
 			return false;
@@ -90,6 +90,10 @@ export const Registry = {
 			type: EnumEntryType.ENTRY,
 			value: entry,
 		});
+
+		if(aliases.length) {
+			Registry.addAlias(registry, id, ...aliases);
+		}
 
 		return id;
 	},

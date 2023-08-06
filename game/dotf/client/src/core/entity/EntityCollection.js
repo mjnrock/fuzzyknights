@@ -1,19 +1,14 @@
-import { IdentityClass } from "../@node/Identity";
 import { EnumEntryType, RegistryClass } from "../../@node/Registry";
 
 /**
  * Similarly to the Entity, the EntityCollection is a stripped-down
  * version of a Registry, but is specifically for Entities.
  */
-export class EntityCollection extends IdentityClass {
+export class EntityCollection extends RegistryClass {
 	constructor ({ entities = {}, ...args } = {}) {
-		super({ ...args });
+		super({ entries: entities, ...args });
 
-		this.set(entities);
-	}
-
-	[ Symbol.iterator ]() {
-		return Object.entries(this.entities)[ Symbol.iterator ]();
+		console.log(this)
 	}
 
 	/**
@@ -22,7 +17,7 @@ export class EntityCollection extends IdentityClass {
 	next(action, ...args) {
 		const results = [];
 
-		for(const entity of Object.values(this.entities)) {
+		for(const entity of this.state) {
 			results.push(entity.next(action, ...args));
 		}
 
@@ -35,7 +30,7 @@ export class EntityCollection extends IdentityClass {
 			const promises = [];
 
 			// for each entity
-			for(const entity of Object.values(this.entities)) {
+			for(const entity of this.state) {
 				// create a promise for the entity
 				const promise = entity.nextAsync(action, ...args);
 
@@ -49,7 +44,7 @@ export class EntityCollection extends IdentityClass {
 	}
 
 	tick({ ...args } = {}) {
-		for(const entry of Object.values(this.entities)) {
+		for(const entry of this.state) {
 			if(entry.type === EnumEntryType.ENTRY) {
 				const entity = entry.value;
 
@@ -58,7 +53,7 @@ export class EntityCollection extends IdentityClass {
 		}
 	}
 	render({ ...args } = {}) {
-		for(const entry of Object.values(this.entities)) {
+		for(const entry of this.state) {
 			if(entry.type === EnumEntryType.ENTRY) {
 				const entity = entry.value;
 
@@ -67,61 +62,34 @@ export class EntityCollection extends IdentityClass {
 		}
 	}
 
-	set(entities) {
-		if(Array.isArray(entities)) {
-			this.entities = entities.reduce((acc, entity) => {
-				acc[ entity.$id ] = entity;
-
-				return acc;
-			}, {});
-		} else {
-			this.entities = entities;
-		}
-
-		return this;
-	}
-	add(...entities) {
-		for(const entity of entities) {
-			this.entities[ entity.$id ] = entity;
-		}
-	}
-	remove(...entities) {
-		for(const entity of entities) {
-			delete this.entities[ entity.$id ];
-		}
-	}
-	has(entity) {
-		return this.entities.hasOwnProperty(entity.$id);
-	}
-
 	each(fn, ...args) {
-		for(const entity of Object.values(this.entities)) {
+		for(const entity of this.state) {
 			fn(entity, ...args);
 		}
 	}
 	map(fn, ...args) {
-		return Object.values(this.entities).map(entity => fn(entity, ...args));
+		return Object.values(this.state).map(entity => fn(entity, ...args));
 	}
 	reduce(fn, initial, ...args) {
-		return Object.values(this.entities).reduce((acc, entity) => fn(acc, entity, ...args), initial);
+		return Object.values(this.state).reduce((acc, entity) => fn(acc, entity, ...args), initial);
 	}
 	filter(fn, ...args) {
-		return Object.values(this.entities).filter(entity => fn(entity, ...args));
+		return Object.values(this.state).filter(entity => fn(entity, ...args));
 	}
 	filterByMask(mask = []) {
-		return Object.values(this.entities).filter((entity, index) => mask[ index ]);
+		return Object.values(this.state).filter((entity, index) => mask[ index ]);
 	}
 	filterByComponent(...components) {
-		return Object.values(this.entities).filter(entity => components.every(component => entity.hasOwnProperty(component)));
+		return Object.values(this.state).filter(entity => components.every(component => entity.hasOwnProperty(component)));
 	}
 	filterByType(...types) {
-		return Object.values(this.entities).filter(entity => types.includes(entity.type));
+		return Object.values(this.state).filter(entity => types.includes(entity.type));
 	}
 
 	union(...entityCollections) {
 		return new EntityCollection({
 			entities: [
-				...Object.values(this.entities),
+				...Object.values(this.state),
 				...entityCollections.reduce((acc, collection) => [ ...acc, ...Object.values(collection.entities) ], []),
 			],
 		});
@@ -129,7 +97,7 @@ export class EntityCollection extends IdentityClass {
 	intersection(...entityCollections) {
 		return new EntityCollection({
 			entities: [
-				...Object.values(this.entities),
+				...Object.values(this.state),
 				...entityCollections.reduce((acc, collection) => [ ...acc, ...Object.values(collection.entities) ], []),
 			].reduce((acc, entity) => {
 				if(acc.hasOwnProperty(entity.$id)) {
@@ -144,32 +112,32 @@ export class EntityCollection extends IdentityClass {
 
 	mapToNew(fn, ...args) {
 		return new EntityCollection({
-			entities: Object.values(this.entities).map(entity => fn(entity, ...args)),
+			entities: Object.values(this.state).map(entity => fn(entity, ...args)),
 		});
 	}
 	reduceToNew(fn, initial, ...args) {
 		return new EntityCollection({
-			entities: Object.values(this.entities).reduce((acc, entity) => fn(acc, entity, ...args), initial),
+			entities: Object.values(this.state).reduce((acc, entity) => fn(acc, entity, ...args), initial),
 		});
 	}
 	filterToNew(fn, ...args) {
 		return new EntityCollection({
-			entities: Object.values(this.entities).filter(entity => fn(entity, ...args)),
+			entities: Object.values(this.state).filter(entity => fn(entity, ...args)),
 		});
 	}
 	filterByMaskToNew(mask = []) {
 		return new EntityCollection({
-			entities: Object.values(this.entities).filter((entity, index) => mask[ index ]),
+			entities: Object.values(this.state).filter((entity, index) => mask[ index ]),
 		});
 	}
 	filterByComponentToNew(...components) {
 		return new EntityCollection({
-			entities: Object.values(this.entities).filter(entity => components.every(component => entity.hasOwnProperty(component))),
+			entities: Object.values(this.state).filter(entity => components.every(component => entity.hasOwnProperty(component))),
 		});
 	}
 	filterByTypeToNew(...types) {
 		return new EntityCollection({
-			entities: Object.values(this.entities).filter(entity => types.includes(entity.type)),
+			entities: Object.values(this.state).filter(entity => types.includes(entity.type)),
 		});
 	}
 };

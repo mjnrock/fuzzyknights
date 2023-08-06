@@ -5,6 +5,7 @@ import { Game } from "./Game.js";
 
 // import Chord from "@lespantsfancy/chord";
 import Node from "../@node/Node";
+import Entity from "./entity/Entity.js";
 
 export const EnumModelType = {
 	CIRCLE: "CIRCLE",
@@ -17,38 +18,6 @@ export const EnumEntityState = {
 };
 
 export let State = ({ $game }) => ({
-	entities: (entities = {}) => ({
-		player: {
-			$id: uuid(),
-			$tags: [],
-
-			physics: {
-				x: 0,
-				y: 0,
-				theta: 0,
-
-				vx: 0,
-				vy: 0,
-				vtheta: 0,
-
-				speed: 4.20,
-			},
-			render: {
-				sprite: new PIXI.Sprite(),
-			},
-			state: {
-				current: EnumEntityState.IDLE,
-				default: EnumEntityState.IDLE,
-			},
-			model: {
-				type: EnumModelType.CIRCLE,
-				radius: 10,	//px
-				ox: 0,	//px
-				oy: 0,	//px
-			},
-		},
-		...entities,
-	}),
 	terrain: (terrain = {}) => ({
 		GRASS: { type: "GRASS", color: "#66cc66" },
 		WATER: { type: "WATER", color: "#33ccff" },
@@ -65,39 +34,12 @@ export let State = ({ $game }) => ({
 });
 
 export const Reducers = ({ $game }) => ({
-	entities: {
-		add: (state, entity) => {
-			return {
-				...state,
-				[ entity.$id ]: entity,
-			};
-		},
-		remove: (state, entity) => {
-			let next = { ...state };
-			delete next[ entity.$id ];
-
-			return next;
-		},
-	},
 });
 
 export const Effects = ({ $game }) => ({
-	entities: {
-		add: (node, entity) => {
-			$game.renderer.register(entity.render.sprite);
-		},
-		remove: (node, entity) => {
-			$game.renderer.unregister(entity.render.sprite);
-		},
-	},
 });
 
 export const Nodes = ({ $game }) => Node.CreateMany({
-	entities: {
-		state: State({ $game }).entities(),
-		reducers: Reducers({ $game }).entities,
-		effects: Effects({ $game }).entities,
-	},
 	terrain: {
 		state: State({ $game }).terrain(),
 	},
@@ -187,16 +129,17 @@ export async function main() {
 		/* Extra methods */
 		tick({ dt: dts, ip, startTime, lastTime, fps }) {
 			// update the entities
-			for(const id in this.$nodes.entities.state) {
-				const entity = this.$nodes.entities.state[ id ];
-
+			for(const entity of this.realm.worlds.overworld.zones.A.entities) {
 				// calculate the new position of the entity and set it
-				entity.physics.x += entity.physics.vx * dts;
-				entity.physics.y += entity.physics.vy * dts;
+				if(entity.physics) {
+					entity.physics.x += entity.physics.vx * dts;
+					entity.physics.y += entity.physics.vy * dts;
+				}
 			}
 
 			// update player
-			const player = this.$nodes.entities.state.player;
+			//STUB
+			const player = this.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
 
 			if(this.input.key.hasUp) player.physics.vy = -player.physics.speed;
 			else if(this.input.key.hasDown) player.physics.vy = player.physics.speed;
@@ -212,8 +155,8 @@ export async function main() {
 			let [ mouseX, mouseY ] = this.input.mouse.cursor || [];
 
 			// Calculate angle to mouse and set it
-			const dx = mouseX - (player.physics.x * this.$nodes.map.state.tw);
-			const dy = mouseY - (player.physics.y * this.$nodes.map.state.th);
+			const dx = mouseX - (player.physics.x * 32);
+			const dy = mouseY - (player.physics.y * 32);
 
 			const theta = Math.atan2(dy, dx);
 			player.physics.theta = theta;
@@ -221,15 +164,14 @@ export async function main() {
 		render(delta) {
 			//FIXME: Instead, this should manipulate the meta data on the Pixi objects, as it won't require a re-render every frame
 			// iterate through entities and draw the line towards the mouse
-			for(const id in this.$nodes.entities.state) {
-				const entity = this.$nodes.entities.state[ id ];
+			for(const entity of this.realm.worlds.overworld.zones.A.entities) {
 				const graphics = entity.render.sprite;
 
 				// clear previous line
 				graphics.clear();
 
-				graphics.x = entity.physics.x * this.$nodes.map.state.tw;
-				graphics.y = entity.physics.y * this.$nodes.map.state.th;
+				graphics.x = entity.physics.x * 32;
+				graphics.y = entity.physics.y * 32;
 
 				// redraw entity
 				if(entity.model.radius >= 10) {
@@ -254,12 +196,10 @@ export async function main() {
 				graphics.endFill();
 			}
 
-			const player = this.$nodes.entities.state.player;
-			const playerGraphics = player.render.sprite;
+			const player = this.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
+			const [ playerGraphics ] = player.render.sprite.children;
 
 			// draw a triangle that follows the mouse and if "in front" of the player, draw it in front of the player
-			playerGraphics.x = player.physics.x * this.$nodes.map.state.tw;
-			playerGraphics.y = player.physics.y * this.$nodes.map.state.th;
 			playerGraphics.rotation = player.physics.theta;
 
 			playerGraphics.beginFill(0x00ff00, 1.0);
@@ -282,18 +222,20 @@ export async function main() {
 		const [ mouseX, mouseY ] = self.cursor;
 
 		// update entity's theta position so that it faces the mouse
-		const player = game.$nodes.entities.state.player
+		const player = game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
 
 		// Calculate angle to mouse and set it
-		const dx = mouseX - (player.physics.x * game.$nodes.map.state.tw);
-		const dy = mouseY - (player.physics.y * game.$nodes.map.state.th);
+		const dx = mouseX - (player.physics.x * 32);
+		const dy = mouseY - (player.physics.y * 32);
 
 		const theta = Math.atan2(dy, dx);
 
 		// Use the mouse position to create a new entity projection
-		const entity = {
+		const entity = new Entity({
 			$id: uuid(),
 			$tags: [],
+			type: "EFFECT",
+
 			physics: {
 				x: player.physics.x,
 				y: player.physics.y,
@@ -314,7 +256,7 @@ export async function main() {
 				ox: 0,	//px
 				oy: 0,	//px
 			},
-		};
+		});
 
 		entity.render.sprite.clear();
 
@@ -327,29 +269,34 @@ export async function main() {
 		entity.physics.theta = thetaError;
 
 		// Add the entity to the entities node
-		game.$nodes.entities.dispatch("add", entity);
+		//TODO: A .register should handle the stage.addChild as well
+		game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.register(entity);
+		game.renderer.app.stage.addChild(entity.render.sprite);
 
 		// STUB: This will destroy the entities after 1 second, even if the Game is paused.
 		setTimeout(() => {
-			game.$nodes.entities.dispatch("remove", entity);
+			game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.unregister(entity);
+			game.renderer.app.stage.removeChild(entity.render.sprite);
 		}, 2500);
 	});
 	game.input.mouse.addEventListener("onClick", (self, e) => {
 		const [ mouseX, mouseY ] = self.cursor;
 
 		// update entity's theta position so that it faces the mouse
-		const player = game.$nodes.entities.state.player
+		const player = game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
 
 		// Calculate angle to mouse and set it
-		const dx = mouseX - (player.physics.x * game.$nodes.map.state.tw);
-		const dy = mouseY - (player.physics.y * game.$nodes.map.state.th);
+		const dx = mouseX - (player.physics.x * 32);
+		const dy = mouseY - (player.physics.y * 32);
 
 		const theta = Math.atan2(dy, dx);
 
 		// Use the mouse position to create a new entity projection
-		const entity = {
+		const entity = new Entity({
 			$id: uuid(),
 			$tags: [],
+			type: "EFFECT",
+
 			physics: {
 				x: player.physics.x,
 				y: player.physics.y,
@@ -371,7 +318,7 @@ export async function main() {
 				ox: 0,	//px
 				oy: 0,	//px
 			},
-		};
+		});
 
 		entity.render.sprite.clear();
 
@@ -384,11 +331,13 @@ export async function main() {
 		entity.physics.theta = thetaError;
 
 		// Add the entity to the entities node
-		game.$nodes.entities.dispatch("add", entity);
+		game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.register(entity);
+		game.renderer.app.stage.addChild(entity.render.sprite);
 
 		// STUB: This will destroy the entities after 1 second, even if the Game is paused.
 		setTimeout(() => {
-			game.$nodes.entities.dispatch("remove", entity);
+			game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.unregister(entity);
+			game.renderer.app.stage.removeChild(entity.render.sprite);
 		}, 1000);
 	});
 	//#endregion
@@ -406,27 +355,25 @@ export async function main() {
 			const graphics = new PIXI.Graphics();
 
 			graphics.beginFill(terrain.color, 1.0);
-			graphics.drawRect(0, 0, game.$nodes.map.state.tw * game.config.scale, game.$nodes.map.state.th * game.config.scale); // game.config.scale the dimensions
+			graphics.drawRect(0, 0, 32 * game.config.scale, 32 * game.config.scale); // game.config.scale the dimensions
 			graphics.endFill();
-			graphics.x = tile.x * game.$nodes.map.state.tw * game.config.scale; // game.config.scale the position
-			graphics.y = tile.y * game.$nodes.map.state.th * game.config.scale; // game.config.scale the position
+			graphics.x = tile.x * 32 * game.config.scale; // game.config.scale the position
+			graphics.y = tile.y * 32 * game.config.scale; // game.config.scale the position
 
 			map.addChild(graphics);
 		}
 	}
 
-	// seed the entities container with graphics objects
-	const entities = new PIXI.Container();
-	for(const id in game.$nodes.entities.state) {
-		const graphics = new PIXI.Graphics();
-		entities.addChild(graphics);
-
-		game.$nodes.entities.state[ id ].render.sprite = graphics;
-	}
-
 	// add the map and entities to the stage
 	pixi.stage.addChild(map);
-	pixi.stage.addChild(entities);
+
+	// seed the entities container with graphics objects
+	for(const entity of game.realm.worlds.overworld.zones.A.entities.collections.CREATURE) {
+		pixi.stage.addChild(entity.render.sprite);
+
+		//STUB
+		entity.render.sprite.addChild(new PIXI.Graphics());
+	}
 	//#endregion
 
 	return {

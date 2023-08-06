@@ -1,6 +1,6 @@
-import Registry from "../../@node/Registry";
 import { IdentityClass } from "../../@node/Identity";
 import { EnumEntityType } from "./Entity";
+import { EntityCollection } from "./EntityCollection";
 
 /**
  * The EntityManager is a container for all EntityCollections, differentiated
@@ -12,14 +12,24 @@ import { EnumEntityType } from "./Entity";
  * indiscriminately iterate over all entities in the EntityManager.
  */
 export class EntityManager extends IdentityClass {
-	constructor ({ collections = {}, ...args } = {}) {
+	constructor ({ entities = [], ...args } = {}) {
 		super({ ...args });
 
 		this.collections = {};
 		for(const type in EnumEntityType) {
-			const collection = new Registry.RegistryClass({ entries: collections?.[ type ] || {} });
+			const collection = new EntityCollection();
 
 			this.collections[ type ] = collection;
+		}
+
+		if(entities.length) {
+			for(const entity of entities) {
+				const collection = this.collections[ entity.type ];
+
+				collection.register(entity);
+
+				this.collections[ entity.type ] = collection;
+			}
 		}
 	}
 

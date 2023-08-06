@@ -1,9 +1,16 @@
+import { v4 as uuid } from "uuid";
+import * as PIXI from "pixi.js";
+
 import Chord from "@lespantsfancy/chord";
 import Node from "../@node/Node";
 
 import { GameLoop } from "./GameLoop.js";
 import { Pixi } from "./render/Pixi.js";
 import Input from "./input/package.js";
+import Realm from "./world/Realm";
+import World from "./world/World";
+import Zone from "./world/Zone";
+import Entity from "./entity/Entity";
 
 export class Game extends Node {
 	static Instances = new Map();
@@ -42,6 +49,42 @@ export class Game extends Node {
 			sequences: {},
 			...assets,
 		};
+
+		this.realm = new Realm({ $game: this });
+
+		//STUB
+		this.realm.worlds.overworld = new World({ $realm: this.realm });
+		this.realm.worlds.overworld.zones.A = new Zone({ $world: this.realm.worlds.overworld });
+		this.realm.worlds.overworld.zones.A.entities.collections.CREATURE.register(new Entity({
+			$id: uuid(),
+			$tags: [],
+			type: "CREATURE",
+
+			physics: {
+				x: 0,
+				y: 0,
+				theta: 0,
+
+				vx: 0,
+				vy: 0,
+				vtheta: 0,
+
+				speed: 4.20,
+			},
+			render: {
+				sprite: new PIXI.Graphics(),
+			},
+			state: {
+				current: "IDLE",
+				default: "IDLE",
+			},
+			model: {
+				type: "CIRCLE",
+				radius: 10,	//px
+				ox: 0,	//px
+				oy: 0,	//px
+			},
+		}), "player");
 
 
 		//NOTE: The instantiation order below is important

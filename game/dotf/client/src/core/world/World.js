@@ -1,4 +1,4 @@
-import { IdentityClass } from "../@node/Identity";
+import { IdentityClass } from "../../@node/Identity";
 
 /**
  * This is the "Super Map", in the sense that it's a collection of Zones.
@@ -6,7 +6,7 @@ import { IdentityClass } from "../@node/Identity";
  * caves, buildings, etc.
  */
 export class World extends IdentityClass {
-	constructor ({ $realm, zones, ...args } = {}) {
+	constructor ({ $realm, zones = {}, ...args } = {}) {
 		super({ ...args });
 
 		this.$realm = $realm;

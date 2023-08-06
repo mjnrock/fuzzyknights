@@ -5,7 +5,7 @@ import { IdentityClass } from "../../@node/Identity";
  * additionally, there can be multiple Realms.
  */
 export class Realm extends IdentityClass {
-	constructor ({ $game, worlds, ...args } = {}) {
+	constructor ({ $game, worlds = {}, ...args } = {}) {
 		super({ ...args });
 
 		this.$game = $game;
