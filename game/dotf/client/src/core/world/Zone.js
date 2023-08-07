@@ -31,7 +31,7 @@ export class Zone extends IdentityClass {
 	}
 
 	tick() { }
-	render() { }
+	draw() { }
 };
 
 export default Zone;

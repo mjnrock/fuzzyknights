@@ -13,12 +13,30 @@ export class Realm extends IdentityClass {
 		this.worlds = worlds;
 	}
 
+	get current() {
+		const player = this.$game.players.player;
+		const { observer } = player;
+
+		return {
+			player,
+			zone: observer.zone,
+		};
+	}
+
 	[ Symbol.iterator ]() {
 		return Object.entries(this.worlds)[ Symbol.iterator ]();
 	}
 
-	tick() { }
-	render() { }
+	tick({ dt, ip, startTime, lastTime, fps }) {
+		const { zone, player: { observer } } = this.$game.realm.current;
+
+		zone.tick({ observer, dt, ip, startTime, lastTime, fps });
+	}
+	draw({ dt }) {
+		const { zone, player: { observer } } = this.$game.realm.current;
+
+		zone.draw({ observer, dt });
+	}
 };
 
 export default Realm;

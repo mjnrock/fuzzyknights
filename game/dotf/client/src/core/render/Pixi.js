@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import { IdentityClass } from "../../@node/Identity";
 
 export class Pixi extends IdentityClass {
-	constructor ({ pixi, stage, onRender, $game, ...self } = {}) {
+	constructor ({ pixi, stage, onDraw, $game, ...self } = {}) {
 		super({ ...self });
 
 		this.$game = $game;
@@ -18,7 +18,7 @@ export class Pixi extends IdentityClass {
 		});
 		this.stage = stage ?? new PIXI.Container();
 		
-		this.app.ticker.add((delta) => onRender(delta / 1000));
+		this.app.ticker.add((delta) => onDraw(delta / 1000));
 	}
 
 	register(container) {

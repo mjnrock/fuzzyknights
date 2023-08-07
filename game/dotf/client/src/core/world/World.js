@@ -19,7 +19,7 @@ export class World extends IdentityClass {
 	}
 
 	tick() { }
-	render() { }
+	draw() { }
 };
 
 export default World;

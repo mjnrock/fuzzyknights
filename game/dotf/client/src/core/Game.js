@@ -25,7 +25,7 @@ export class Game extends Node {
 		return game;
 	}
 
-	constructor ({ input = {}, players ={}, pixi = {}, loop = {}, assets = {}, $nodes = {}, $factory = {}, $registry = {}, $run, ...self } = {}) {
+	constructor ({ input = {}, players = {}, realm = {}, pixi = {}, loop = {}, assets = {}, $nodes = {}, $factory = {}, $registry = {}, $run, ...self } = {}) {
 		super({ ...self, $run: false });	// Don't run the init function quite yet
 
 		/**
@@ -56,7 +56,7 @@ export class Game extends Node {
 		this.renderer = new Pixi({
 			$game: this,
 			pixi,
-			onRender: (...args) => this.render.call(this, ...args),
+			onDraw: (...args) => this.draw.call(this, ...args),
 		});
 
 		/**
@@ -83,7 +83,7 @@ export class Game extends Node {
 			onTick: (...args) => this.tick.call(this, ...args),
 		});
 
-		this.realm = new Realm({ $game: this });
+		this.realm = new Realm({ $game: this, ...realm });
 		this.players = players;
 
 		if($run) {
@@ -152,7 +152,7 @@ export class Game extends Node {
 	}
 
 	tick({ dt, ip, startTime, lastTime, fps }) { }
-	render(dt) { }
+	draw(dt) { }
 };
 
 export default Game;

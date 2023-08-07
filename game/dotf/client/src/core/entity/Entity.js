@@ -58,7 +58,7 @@ export class Entity extends IdentityClass {
 	}
 
 	tick() { }
-	render() { }
+	draw() { }
 };
 
 export default Entity;

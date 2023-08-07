@@ -50,12 +50,12 @@ export class EntityCollection extends RegistryClass {
 			}
 		}
 	}
-	render({ ...args } = {}) {
+	draw({ ...args } = {}) {
 		for(const entry of this.state) {
 			if(entry.type === EnumEntryType.ENTRY) {
 				const entity = entry.value;
 
-				entity.render({ ...args });
+				entity.draw({ ...args });
 			}
 		}
 	}

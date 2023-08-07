@@ -55,8 +55,7 @@ export const summonFireball = (self, e) => {
 	const { $game: game } = self;
 	const [ mouseX, mouseY ] = self.cursor;
 
-	// update entity's theta position so that it faces the mouse
-	const player = game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
+	const { zone, player: { entity: player } } = game.realm.current;
 
 	// Calculate angle to mouse and set it
 	const dx = mouseX - (player.physics.x * game.config.tiles.width * game.config.scale);
@@ -104,12 +103,12 @@ export const summonFireball = (self, e) => {
 
 	// Add the entity to the entities node
 	//TODO: A .register should handle the stage.addChild as well
-	game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.register(entity);
+	zone.entities.collections.EFFECT.register(entity);
 	game.renderer.app.stage.addChild(entity.render.sprite);
 
 	// STUB: This will destroy the entities after 1 second, even if the Game is paused.
 	setTimeout(() => {
-		game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.unregister(entity);
+		zone.entities.collections.EFFECT.unregister(entity);
 		game.renderer.app.stage.removeChild(entity.render.sprite);
 	}, 2500);
 };
@@ -117,8 +116,7 @@ export const summonArrow = (self, e) => {
 	const { $game: game } = self;
 	const [ mouseX, mouseY ] = self.cursor;
 
-	// update entity's theta position so that it faces the mouse
-	const player = game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
+	const { zone, player: { entity: player } } = game.realm.current;
 
 	// Calculate angle to mouse and set it
 	const dx = mouseX - (player.physics.x * game.config.tiles.width * game.config.scale);
@@ -166,12 +164,12 @@ export const summonArrow = (self, e) => {
 	entity.physics.theta = thetaError;
 
 	// Add the entity to the entities node
-	game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.register(entity);
+	zone.entities.collections.EFFECT.register(entity);
 	game.renderer.app.stage.addChild(entity.render.sprite);
 
 	// STUB: This will destroy the entities after 1 second, even if the Game is paused.
 	setTimeout(() => {
-		game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.unregister(entity);
+		zone.entities.collections.EFFECT.unregister(entity);
 		game.renderer.app.stage.removeChild(entity.render.sprite);
 	}, 1000);
 };
@@ -229,53 +227,49 @@ export async function main() {
 			},
 		},
 
+		realm: {},
+
 		players: {
-			player: new Entity({
-				$id: uuid(),
-				$tags: [],
-				type: "CREATURE",
+			player: {
+				observer: {},
+				entity: new Entity({
+					$id: uuid(),
+					$tags: [],
+					type: "CREATURE",
 
-				physics: {
-					x: 0,
-					y: 0,
-					theta: 0,
+					physics: {
+						x: 0,
+						y: 0,
+						theta: 0,
 
-					vx: 0,
-					vy: 0,
-					vtheta: 0,
+						vx: 0,
+						vy: 0,
+						vtheta: 0,
 
-					speed: 1.33,
-				},
-				render: {
-					sprite: new PIXI.Graphics(),
-				},
-				state: {
-					current: "IDLE",
-					default: "IDLE",
-				},
-				model: {
-					type: "CIRCLE",
-					radius: 10,	//px
-					ox: 0,	//px
-					oy: 0,	//px
-				},
-			}),
+						speed: 1.33,
+					},
+					render: {
+						sprite: new PIXI.Graphics(),
+					},
+					state: {
+						current: "IDLE",
+						default: "IDLE",
+					},
+					model: {
+						type: "CIRCLE",
+						radius: 10,	//px
+						ox: 0,	//px
+						oy: 0,	//px
+					},
+				}),
+			},
 		},
 
 		/* Extra methods */
 		tick({ dt: dts, ip, startTime, lastTime, fps }) {
-			// update the entities
-			for(const entity of this.realm.worlds.overworld.zones.A.entities) {
-				// calculate the new position of the entity and set it
-				if(entity.physics) {
-					entity.physics.x += entity.physics.vx * dts;
-					entity.physics.y += entity.physics.vy * dts;
-				}
-			}
+			const { player: { entity: player } } = game.realm.current;
 
-			// update player
-			//STUB
-			const player = this.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
+			this.realm.tick({ dt: dts, ip, startTime, lastTime, fps });
 
 			if(this.input.key.hasUp) player.physics.vy = -player.physics.speed;
 			else if(this.input.key.hasDown) player.physics.vy = player.physics.speed;
@@ -297,42 +291,11 @@ export async function main() {
 			const theta = Math.atan2(dy, dx);
 			player.physics.theta = theta;
 		},
-		render(delta) {
-			//FIXME: Instead, this should manipulate the meta data on the Pixi objects, as it won't require a re-render every frame
-			// iterate through entities and draw the line towards the mouse
-			for(const entity of this.realm.worlds.overworld.zones.A.entities) {
-				const graphics = entity.render.sprite;
+		draw(delta) {
+			const { player: { entity: player } } = game.realm.current;
 
-				// clear previous line
-				graphics.clear();
+			this.realm.draw({ dt: delta });
 
-				graphics.x = entity.physics.x * game.config.tiles.width * game.config.scale;
-				graphics.y = entity.physics.y * game.config.tiles.height * game.config.scale;
-
-				// redraw entity
-				if(entity.model.radius >= 10) {
-					graphics.beginFill(0xff0000, 1.0);
-				} else if(entity.model.radius >= 5) {
-					graphics.beginFill("#ff9900", 1.0);
-				} else {
-					graphics.beginFill("#86592d", 1.0);
-				}
-
-				switch(entity.model.type) {
-					case EnumModelType.CIRCLE:
-						graphics.drawCircle(entity.model.ox * this.config.scale, entity.model.oy * this.config.scale, entity.model.radius * this.config.scale);
-						break;
-					case EnumModelType.RECTANGLE:
-						graphics.drawRect(entity.model.ox * this.config.scale, entity.model.oy * this.config.scale, entity.model.width * this.config.scale, entity.model.height * this.config.scale);
-						graphics.rotation = entity.physics.theta;
-						break;
-					default:
-						break;
-				}
-				graphics.endFill();
-			}
-
-			const player = this.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
 			const [ playerGraphics ] = player.render.sprite.children;
 
 			// draw a triangle that follows the mouse and if "in front" of the player, draw it in front of the player
@@ -353,6 +316,98 @@ export async function main() {
 	game.realm.worlds.overworld.zones.A = new Zone({
 		$world: game.realm.worlds.overworld,
 		tiles: CommonDataMap.map.tiles,
+
+		tick: function ({ observer, dt, ip, startTime, lastTime, fps }) {
+			if(observer.subject) {
+				let { x: dx, y: dy } = observer.subject({ dt, ip, startTime, lastTime, fps });
+
+				observer.position.x = dx;
+				observer.position.y = dy;
+			}
+
+			if(observer.shape.type === EnumModelType.RECTANGLE) {
+				// only update the tiles that are visible to the observer, with the observer at the center
+				const { x, y } = observer.position;
+				const { width, height } = observer.shape;
+
+				const rowStart = Math.max(0, Math.floor(y - (height / 2)));
+				const rowEnd = Math.min(this.rows, Math.ceil(y + (height / 2)));
+				const colStart = Math.max(0, Math.floor(x - (width / 2)));
+				const colEnd = Math.min(this.columns, Math.ceil(x + (width / 2)));
+
+				for(const entity of this.entities) {
+					if(entity.physics) {
+						const { x, y } = entity.physics;
+
+						if(x >= colStart && x <= colEnd && y >= rowStart && y <= rowEnd) {
+							entity.physics.x += entity.physics.vx * dt;
+							entity.physics.y += entity.physics.vy * dt;
+
+							entity.tick({ observer, dt, ip, startTime, lastTime, fps });
+						}
+						// else {
+						// 	console.log(entity.$id)
+						// 	this.entities.unregister(entity);
+						// }
+					}
+				}
+			}
+		},
+		draw: function ({ observer, dt }) {
+			if(observer.shape.type === EnumModelType.RECTANGLE) {
+				// only update the tiles that are visible to the observer, with the observer at the center
+				const { x, y } = observer.position;
+				const { width, height } = observer.shape;
+
+				const rowStart = Math.max(0, Math.floor(y - (height / 2)));
+				const rowEnd = Math.min(this.rows, Math.ceil(y + (height / 2)));
+				const colStart = Math.max(0, Math.floor(x - (width / 2)));
+				const colEnd = Math.min(this.columns, Math.ceil(x + (width / 2)));
+
+				for(const entity of this.entities) {
+					if(entity.physics) {
+						const { x, y } = entity.physics;
+						const graphics = entity.render.sprite;
+
+						if(x >= colStart && x <= colEnd && y >= rowStart && y <= rowEnd) {
+							graphics.visible = true;
+
+							// clear previous line
+							graphics.clear();
+
+							graphics.x = entity.physics.x * game.config.tiles.width * game.config.scale;
+							graphics.y = entity.physics.y * game.config.tiles.height * game.config.scale;
+
+							// redraw entity
+							if(entity.model.radius >= 10) {
+								graphics.beginFill(0xff0000, 1.0);
+							} else if(entity.model.radius >= 5) {
+								graphics.beginFill("#ff9900", 1.0);
+							} else {
+								graphics.beginFill("#86592d", 1.0);
+							}
+
+							switch(entity.model.type) {
+								case EnumModelType.CIRCLE:
+									graphics.drawCircle(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.radius * game.config.scale);
+									break;
+								case EnumModelType.RECTANGLE:
+									graphics.drawRect(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.width * game.config.scale, entity.model.height * game.config.scale);
+									graphics.rotation = entity.physics.theta;
+									break;
+								default:
+									break;
+							}
+							graphics.endFill();
+
+							// entity.draw({ observer, dt });
+						} else {
+							graphics.visible = false;
+						}
+					}
+				}
+			}
+		}
 	});
 	//#endregion
 
@@ -373,10 +428,26 @@ export async function main() {
 
 
 	//#region Initialize the entity graphics
-	game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.register(game.players.player, "player");
+	game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.register(game.players.player.entity, "player");
+	game.players.player.observer = {
+		zone: game.realm.worlds.overworld.zones.A,
+		position: {
+			x: 0,
+			y: 0,
+		},
+		shape: {
+			type: EnumModelType.RECTANGLE,
+			width: 16,	// +/- 8
+			height: 16,	// +/- 8
+		},
+		subject: () => ({
+			x: game.players.player.entity.physics.x,
+			y: game.players.player.entity.physics.y,
+		}),
+	};
 
 	// seed the entities container with graphics objects
-	for(const entity of game.realm.worlds.overworld.zones.A.entities.collections.CREATURE) {
+	for(const entity of game.players.player.observer.zone.entities.collections.CREATURE) {
 		pixi.stage.addChild(entity.render.sprite);
 
 		//STUB: Add a child graphics object to the entity's sprite for debugging stuff (e.g. facing triangle)

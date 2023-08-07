@@ -45,6 +45,17 @@ export class EntityManager extends IdentityClass {
 
 		return entityArray[ Symbol.iterator ]();
 	}
+
+	register(entity) {
+		this.collections[ entity.type ].register(entity);
+
+		return this;
+	}
+	unregister(entity) {
+		this.collections[ entity.type ].unregister(entity);
+
+		return this;
+	}
 };
 
 export default EntityManager;
