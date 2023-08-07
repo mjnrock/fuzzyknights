@@ -5,6 +5,11 @@ import { Game } from "./Game.js";
 
 // import Chord from "@lespantsfancy/chord";
 import Entity from "./entity/Entity.js";
+import { World } from "./world/World.js";
+import { Zone } from "./world/Zone.js";
+
+//STUB: Example map import
+import CommonDataMap from "../common/data/map/14802e55-defd-4ba4-a82f-697bc6f95c46.json";
 
 export const EnumModelType = {
 	CIRCLE: "CIRCLE",
@@ -19,6 +24,156 @@ export const EnumEntityState = {
 export const EnumTerrainType = {
 	GRASS: { type: "GRASS", color: "#66cc66" },
 	WATER: { type: "WATER", color: "#33ccff" },
+	SAND: { type: "SAND", color: "#ffcc66" },
+	DIRT: { type: "DIRT", color: "#996633" },
+	SNOW: { type: "SNOW", color: "#ffffff" },
+	ROCK: { type: "ROCK", color: "#999999" },
+};
+
+export const drawTerrainTiles = ({ game, zone, parent }) => {
+	for(let row = 0; row < zone.rows; row++) {
+		for(let col = 0; col < zone.columns; col++) {
+			const tile = zone.tiles[ row ][ col ];
+			const terrain = EnumTerrainType[ tile.data ];
+
+			const graphics = new PIXI.Graphics();
+
+			graphics.beginFill(terrain.color, 1.0);
+			graphics.drawRect(0, 0, game.config.tiles.width * game.config.scale, game.config.tiles.height * game.config.scale);
+			graphics.endFill();
+			graphics.x = tile.x * game.config.tiles.width * game.config.scale; // game.config.scale the position
+			graphics.y = tile.y * game.config.tiles.height * game.config.scale; // game.config.scale the position
+
+			if(parent) {
+				parent.addChild(graphics);
+			}
+		}
+	}
+};
+
+export const summonFireball = (self, e) => {
+	const { $game: game } = self;
+	const [ mouseX, mouseY ] = self.cursor;
+
+	// update entity's theta position so that it faces the mouse
+	const player = game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
+
+	// Calculate angle to mouse and set it
+	const dx = mouseX - (player.physics.x * game.config.tiles.width * game.config.scale);
+	const dy = mouseY - (player.physics.y * game.config.tiles.height * game.config.scale);
+
+	const theta = Math.atan2(dy, dx);
+
+	// Use the mouse position to create a new entity projection
+	const entity = new Entity({
+		$id: uuid(),
+		$tags: [],
+		type: "EFFECT",
+
+		physics: {
+			x: player.physics.x,
+			y: player.physics.y,
+			theta,
+			vtheta: 0,
+			speed: 12,
+		},
+		render: {
+			sprite: new PIXI.Graphics(),
+		},
+		state: {
+			current: EnumEntityState.MOVING,
+			default: EnumEntityState.MOVING,
+		},
+		model: {
+			type: EnumModelType.CIRCLE,
+			radius: 6,	//px
+			ox: 0,	//px
+			oy: 0,	//px
+		},
+	});
+
+	entity.render.sprite.clear();
+
+	// calculate a random "margin of error" to apply to the arrow (theta (radians) : variance (radians) : direction (+/-))
+	const thetaError = theta + (Math.random() * 0.12) * (Math.random() < 0.5 ? -1 : 1);
+
+	// calculate the velocity of the entity
+	entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
+	entity.physics.vy = Math.sin(thetaError) * entity.physics.speed;
+	entity.physics.theta = thetaError;
+
+	// Add the entity to the entities node
+	//TODO: A .register should handle the stage.addChild as well
+	game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.register(entity);
+	game.renderer.app.stage.addChild(entity.render.sprite);
+
+	// STUB: This will destroy the entities after 1 second, even if the Game is paused.
+	setTimeout(() => {
+		game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.unregister(entity);
+		game.renderer.app.stage.removeChild(entity.render.sprite);
+	}, 2500);
+};
+export const summonArrow = (self, e) => {
+	const { $game: game } = self;
+	const [ mouseX, mouseY ] = self.cursor;
+
+	// update entity's theta position so that it faces the mouse
+	const player = game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
+
+	// Calculate angle to mouse and set it
+	const dx = mouseX - (player.physics.x * game.config.tiles.width * game.config.scale);
+	const dy = mouseY - (player.physics.y * game.config.tiles.height * game.config.scale);
+
+	const theta = Math.atan2(dy, dx);
+
+	// Use the mouse position to create a new entity projection
+	const entity = new Entity({
+		$id: uuid(),
+		$tags: [],
+		type: "EFFECT",
+
+		physics: {
+			x: player.physics.x,
+			y: player.physics.y,
+			theta,
+			vtheta: 0,
+			speed: 24,
+		},
+		render: {
+			sprite: new PIXI.Graphics(),
+		},
+		state: {
+			current: EnumEntityState.MOVING,
+			default: EnumEntityState.MOVING,
+		},
+		model: {
+			type: EnumModelType.RECTANGLE,
+			width: 16,	//px
+			height: 1,	//px
+			ox: 0,	//px
+			oy: 0,	//px
+		},
+	});
+
+	entity.render.sprite.clear();
+
+	// calculate a random "margin of error" to apply to the arrow (theta : moe/variance : direction)
+	const thetaError = theta + (Math.random() * 0.17) * (Math.random() < 0.5 ? -1 : 1);
+
+	// calculate the velocity of the entity
+	entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
+	entity.physics.vy = Math.sin(thetaError) * entity.physics.speed;
+	entity.physics.theta = thetaError;
+
+	// Add the entity to the entities node
+	game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.register(entity);
+	game.renderer.app.stage.addChild(entity.render.sprite);
+
+	// STUB: This will destroy the entities after 1 second, even if the Game is paused.
+	setTimeout(() => {
+		game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.unregister(entity);
+		game.renderer.app.stage.removeChild(entity.render.sprite);
+	}, 1000);
 };
 
 export async function main() {
@@ -54,7 +209,7 @@ export async function main() {
 
 		/* Config */
 		config: {
-			scale: 1.0,
+			scale: 3.0,
 			tiles: {
 				width: 32,
 				height: 32,
@@ -72,6 +227,39 @@ export async function main() {
 			onStop() {
 				this.$game.renderer.app.ticker.stop();
 			},
+		},
+
+		players: {
+			player: new Entity({
+				$id: uuid(),
+				$tags: [],
+				type: "CREATURE",
+
+				physics: {
+					x: 0,
+					y: 0,
+					theta: 0,
+
+					vx: 0,
+					vy: 0,
+					vtheta: 0,
+
+					speed: 1.33,
+				},
+				render: {
+					sprite: new PIXI.Graphics(),
+				},
+				state: {
+					current: "IDLE",
+					default: "IDLE",
+				},
+				model: {
+					type: "CIRCLE",
+					radius: 10,	//px
+					ox: 0,	//px
+					oy: 0,	//px
+				},
+			}),
 		},
 
 		/* Extra methods */
@@ -161,188 +349,37 @@ export async function main() {
 	});
 
 	//#region Initialize the map
-	//STUB
-	const dropDice = (sides = 2) => {
-		const roll = ~~(Math.random() * sides);
-
-		if(roll === 0) {
-			return "GRASS";
-		} else if(roll === 1) {
-			return "WATER";
-		}
-	};
-
-	//STUB: generate the map
-	//TODO: Build the zone independently of this
-	for(let row = 0; row < game.realm.worlds.overworld.zones.A.rows; row++) {
-		game.realm.worlds.overworld.zones.A.tiles[ row ] = [];
-		for(let col = 0; col < game.realm.worlds.overworld.zones.A.cols; col++) {
-			game.realm.worlds.overworld.zones.A.tiles[ row ][ col ] = {
-				x: col,
-				y: row,
-				data: dropDice(),
-			};
-		}
-	}
+	game.realm.worlds.overworld = new World({ $realm: game.realm });
+	game.realm.worlds.overworld.zones.A = new Zone({
+		$world: game.realm.worlds.overworld,
+		tiles: CommonDataMap.map.tiles,
+	});
 	//#endregion
 
 
 	//#region Initialize the input controllers
-	game.input.mouse.addEventListener("onContextMenu", (self, e) => {
-		const [ mouseX, mouseY ] = self.cursor;
-
-		// update entity's theta position so that it faces the mouse
-		const player = game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
-
-		// Calculate angle to mouse and set it
-		const dx = mouseX - (player.physics.x * game.config.tiles.width * game.config.scale);
-		const dy = mouseY - (player.physics.y * game.config.tiles.height * game.config.scale);
-
-		const theta = Math.atan2(dy, dx);
-
-		// Use the mouse position to create a new entity projection
-		const entity = new Entity({
-			$id: uuid(),
-			$tags: [],
-			type: "EFFECT",
-
-			physics: {
-				x: player.physics.x,
-				y: player.physics.y,
-				theta,
-				vtheta: 0,
-				speed: 12,
-			},
-			render: {
-				sprite: new PIXI.Graphics(),
-			},
-			state: {
-				current: EnumEntityState.MOVING,
-				default: EnumEntityState.MOVING,
-			},
-			model: {
-				type: EnumModelType.CIRCLE,
-				radius: 6,	//px
-				ox: 0,	//px
-				oy: 0,	//px
-			},
-		});
-
-		entity.render.sprite.clear();
-
-		// calculate a random "margin of error" to apply to the arrow (theta (radians) : variance (radians) : direction (+/-))
-		const thetaError = theta + (Math.random() * 0.12) * (Math.random() < 0.5 ? -1 : 1);
-
-		// calculate the velocity of the entity
-		entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
-		entity.physics.vy = Math.sin(thetaError) * entity.physics.speed;
-		entity.physics.theta = thetaError;
-
-		// Add the entity to the entities node
-		//TODO: A .register should handle the stage.addChild as well
-		game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.register(entity);
-		game.renderer.app.stage.addChild(entity.render.sprite);
-
-		// STUB: This will destroy the entities after 1 second, even if the Game is paused.
-		setTimeout(() => {
-			game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.unregister(entity);
-			game.renderer.app.stage.removeChild(entity.render.sprite);
-		}, 2500);
-	});
-	game.input.mouse.addEventListener("onClick", (self, e) => {
-		const [ mouseX, mouseY ] = self.cursor;
-
-		// update entity's theta position so that it faces the mouse
-		const player = game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.player;
-
-		// Calculate angle to mouse and set it
-		const dx = mouseX - (player.physics.x * game.config.tiles.width * game.config.scale);
-		const dy = mouseY - (player.physics.y * game.config.tiles.height * game.config.scale);
-
-		const theta = Math.atan2(dy, dx);
-
-		// Use the mouse position to create a new entity projection
-		const entity = new Entity({
-			$id: uuid(),
-			$tags: [],
-			type: "EFFECT",
-
-			physics: {
-				x: player.physics.x,
-				y: player.physics.y,
-				theta,
-				vtheta: 0,
-				speed: 24,
-			},
-			render: {
-				sprite: new PIXI.Graphics(),
-			},
-			state: {
-				current: EnumEntityState.MOVING,
-				default: EnumEntityState.MOVING,
-			},
-			model: {
-				type: EnumModelType.RECTANGLE,
-				width: 16,	//px
-				height: 1,	//px
-				ox: 0,	//px
-				oy: 0,	//px
-			},
-		});
-
-		entity.render.sprite.clear();
-
-		// calculate a random "margin of error" to apply to the arrow (theta : moe/variance : direction)
-		const thetaError = theta + (Math.random() * 0.17) * (Math.random() < 0.5 ? -1 : 1);
-
-		// calculate the velocity of the entity
-		entity.physics.vx = Math.cos(thetaError) * entity.physics.speed;
-		entity.physics.vy = Math.sin(thetaError) * entity.physics.speed;
-		entity.physics.theta = thetaError;
-
-		// Add the entity to the entities node
-		game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.register(entity);
-		game.renderer.app.stage.addChild(entity.render.sprite);
-
-		// STUB: This will destroy the entities after 1 second, even if the Game is paused.
-		setTimeout(() => {
-			game.realm.worlds.overworld.zones.A.entities.collections.EFFECT.unregister(entity);
-			game.renderer.app.stage.removeChild(entity.render.sprite);
-		}, 1000);
-	});
+	game.input.mouse.addEventListener("onClick", summonArrow);
+	game.input.mouse.addEventListener("onContextMenu", summonFireball);
 	//#endregion
 
-	//#region Initialize the terrain and entity graphics
+	//#region Initialize the terrain graphics
 	const pixi = game.renderer.app;
 	document.body.appendChild(pixi.view);
 
-	// draw the map, using green Pixi Graphics objects of .tw and .th size at tx and ty positions
 	const map = new PIXI.Container();
-	for(let row = 0; row < game.realm.worlds.overworld.zones.A.rows; row++) {
-		for(let col = 0; col < game.realm.worlds.overworld.zones.A.cols; col++) {
-			const tile = game.realm.worlds.overworld.zones.A.tiles[ row ][ col ];
-			const terrain = EnumTerrainType[ tile.data ];
-
-			const graphics = new PIXI.Graphics();
-
-			graphics.beginFill(terrain.color, 1.0);
-			graphics.drawRect(0, 0, game.config.tiles.width * game.config.scale, game.config.tiles.height * game.config.scale);
-			graphics.endFill();
-			graphics.x = tile.x * game.config.tiles.width  * game.config.scale; // game.config.scale the position
-			graphics.y = tile.y * game.config.tiles.height * game.config.scale; // game.config.scale the position
-
-			map.addChild(graphics);
-		}
-	}
-
-	// add the map and entities to the stage
+	drawTerrainTiles({ game, zone: game.realm.worlds.overworld.zones.A, parent: map });
 	pixi.stage.addChild(map);
+	//#endregion
+
+
+	//#region Initialize the entity graphics
+	game.realm.worlds.overworld.zones.A.entities.collections.CREATURE.register(game.players.player, "player");
 
 	// seed the entities container with graphics objects
 	for(const entity of game.realm.worlds.overworld.zones.A.entities.collections.CREATURE) {
 		pixi.stage.addChild(entity.render.sprite);
 
-		//STUB
+		//STUB: Add a child graphics object to the entity's sprite for debugging stuff (e.g. facing triangle)
 		entity.render.sprite.addChild(new PIXI.Graphics());
 	}
 	//#endregion

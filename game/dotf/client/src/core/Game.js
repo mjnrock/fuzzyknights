@@ -25,7 +25,7 @@ export class Game extends Node {
 		return game;
 	}
 
-	constructor ({ input = {}, pixi = {}, loop = {}, assets = {}, $nodes = {}, $factory = {}, $registry = {}, $run, ...self } = {}) {
+	constructor ({ input = {}, players ={}, pixi = {}, loop = {}, assets = {}, $nodes = {}, $factory = {}, $registry = {}, $run, ...self } = {}) {
 		super({ ...self, $run: false });	// Don't run the init function quite yet
 
 		/**
@@ -49,49 +49,6 @@ export class Game extends Node {
 			sequences: {},
 			...assets,
 		};
-
-		this.realm = new Realm({ $game: this });
-
-		//STUB
-		this.realm.worlds.overworld = new World({ $realm: this.realm });
-		this.realm.worlds.overworld.zones.A = new Zone({
-			$world: this.realm.worlds.overworld,
-			rows: 10,
-			cols: 10,
-		});
-		this.realm.worlds.overworld.zones.A.entities.collections.CREATURE.register(new Entity({
-			$id: uuid(),
-			$tags: [],
-			type: "CREATURE",
-
-			physics: {
-				x: 0,
-				y: 0,
-				theta: 0,
-
-				vx: 0,
-				vy: 0,
-				vtheta: 0,
-
-				speed: 1.33,
-			},
-			render: {
-				sprite: new PIXI.Graphics(),
-			},
-			state: {
-				current: "IDLE",
-				default: "IDLE",
-			},
-			model: {
-				type: "CIRCLE",
-				radius: 10,	//px
-				ox: 0,	//px
-				oy: 0,	//px
-			},
-		}), "player");
-
-
-		//NOTE: The instantiation order below is important
 
 		/**
 		 * The renderer is the PixiJS instance that handles the rendering of the game.
@@ -125,6 +82,9 @@ export class Game extends Node {
 			...loop,
 			onTick: (...args) => this.tick.call(this, ...args),
 		});
+
+		this.realm = new Realm({ $game: this });
+		this.players = players;
 
 		if($run) {
 			this.init.call(this, ...(Array.isArray($run) ? $run : []));
@@ -189,13 +149,6 @@ export class Game extends Node {
 		}
 
 		return;
-	}
-	$next(reducer, target, ...args) {
-		const next = reducer(target, ...args);
-
-		this.$registry[ next.$id ].value = next;
-
-		return next;
 	}
 
 	tick({ dt, ip, startTime, lastTime, fps }) { }
