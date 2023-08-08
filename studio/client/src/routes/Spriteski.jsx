@@ -37,6 +37,8 @@ export const tessellator = Tessellator.New({
 	},
 });
 
+//TODO: EXPORT currently only stores the image data, *not* any of the tessellation parameters/data
+
 export function Spriteski() {
 	const canvasRef = useRef(null);
 	const [ tiles, setTiles ] = useState([]);
