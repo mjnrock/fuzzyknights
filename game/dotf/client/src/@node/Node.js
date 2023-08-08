@@ -117,7 +117,7 @@ export class Node extends IdentityClass {
 
 		/* A convenience argument to immediately invoke the initialization events, with optional arguments */
 		if($run) {
-			this.init(...(Array.isArray($run) ? $run : []));
+			this.init.call(this, ...(Array.isArray($run) ? $run : []));
 		}
 	}
 

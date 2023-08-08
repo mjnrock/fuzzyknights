@@ -102,4 +102,7 @@ export const Identity = {
 	},
 };
 
-export default Identity;
+export default {
+	IdentityClass,
+	Identity,
+};

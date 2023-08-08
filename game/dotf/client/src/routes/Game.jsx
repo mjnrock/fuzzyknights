@@ -27,7 +27,7 @@ if(gl) {
 
 
 export function Game() {
-	// const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(Nodes.pixi);
+	// const { state: pixiData, dispatch: pixiDispatch } = Chord.Node.React.useNode(Nodes.renderer);
 	const [ state, setState ] = React.useState();
 
 	React.useEffect(() => {
@@ -35,18 +35,18 @@ export function Game() {
 			fnFocus = null;
 
 		main().then(({ game, nodes } = {}) => {
-			const app = nodes.pixi.state.app;
+			const app = game.renderer.app;
 
 			setState(app);
 
 			const onBlur = (e) => {
 				// "Pause" pixi so that it can resume properly upon refocus
-				// nodes.pixi.state.app.ticker.stop();
+				// nodes.renderer.state.app.ticker.stop();
 				game.loop.stop();
 			};
 			const onFocus = (e) => {
 				// "Resume" pixi
-				// nodes.pixi.state.app.ticker.start();
+				// nodes.renderer.state.app.ticker.start();
 				game.loop.start();
 			};
 
