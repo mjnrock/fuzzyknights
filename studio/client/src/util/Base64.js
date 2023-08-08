@@ -44,6 +44,16 @@ export const Base64 = {
 					ctx.drawImage(input, 0, 0);
 
 					return resolve(canvas);
+				} else if(input instanceof ImageData) {
+					const canvas = document.createElement("canvas");
+					const ctx = canvas.getContext("2d");
+
+					canvas.width = input.width;
+					canvas.height = input.height;
+
+					ctx.putImageData(input, 0, 0);
+
+					return resolve(canvas);
 				} else if(isBase64(input, { mimeRequired: true })) {
 					const canvas = document.createElement("canvas");
 					const ctx = canvas.getContext("2d");
