@@ -1,8 +1,8 @@
 import { EnumFieldComponent } from "./EnumFieldComponent.js"
 
 export function Field({ field, ctx, ...props }) {
-	const { renderSection, renderField, state, lookup, update, validate, submit } = ctx;
-	const Component = EnumFieldComponent[ field.type ];
+	const { renderSection, renderField, jsxMap, state, lookup, update, validate, submit } = ctx;
+	const Component = jsxMap?.[ field?.type ] ?? EnumFieldComponent[ field?.type ];
 
 	if(!Component) {
 		return null;

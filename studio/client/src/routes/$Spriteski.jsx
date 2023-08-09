@@ -1,12 +1,12 @@
 import { useForm } from "../@form/react/useForm";
-import TestForm from "../@form/tests/data/TestForm";
+import TestSchema from "../@form/tests/data/TestForm";
 
 import { Form } from "../@form/react/components/Form.jsx";
 import { Field } from "../@form/react/components/Field.jsx";
 
 import { debounce } from "../util/debounce.js";
 
-const schema = TestForm({});
+const schema = TestSchema({});
 export function Spriteski() {
 	const form = useForm(schema, {
 		onUpdate: next => console.log("NEXT", next),
@@ -34,7 +34,10 @@ export function Spriteski() {
 								field={ field }
 								ctx={ {
 									...ctx,
-									update: debounce(update, 350),	// Throttle updates to 350ms
+									update: debounce(update, 250),	// Throttle updates to 350ms
+									// jsxMap: ({
+									// 	enum: () => (<div>ENUM</div>),
+									// }),
 								} }
 								{ ...props }
 							/>
