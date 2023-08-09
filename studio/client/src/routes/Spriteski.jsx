@@ -58,12 +58,12 @@ export function Spriteski() {
 				ctx.drawImage(sourceImage, 0, 0, sourceImage.width, sourceImage.height, 0, 0, canvasRef.current.width, canvasRef.current.height);
 			}
 
-			const scaleX = canvasRef.current.width / sourceImage.width;
-			const scaleY = canvasRef.current.height / sourceImage.height;
+			const scaleX = canvasRef.current.width / (sourceImage?.width ?? 1);
+			const scaleY = canvasRef.current.height / (sourceImage?.height ?? 1);
 
 			// Draw the red rectangles
 			ctx.strokeStyle = "red";
-			ctx.lineWidth = 2;
+			ctx.lineWidth = 1;
 			for(let row = 0; row < size[ 0 ]; row++) {
 				for(let col = 0; col < size[ 1 ]; col++) {
 					ctx.strokeRect(
