@@ -292,14 +292,19 @@ export function Spriteski() {
 
 			<hr />
 
-			<div className="flex flex-col items-center justify-center">
+			<div className="flex flex-col">
 				<h2 className="text-lg italic">Tiles</h2>
 
-				<div style={ { gridTemplateColumns: `repeat(${ size[ 1 ] }, 1fr)` } } className="grid gap-1">
+				<div style={ { gridTemplateColumns: `repeat(${ size[ 1 ] }, 1fr)` } } className="grid">
 					{ tiles.map((row, y) => (
 						row.map((tile, x) => (
 							<div key={ `${ y }-${ x }` } className="flex flex-col">
-								<TileCanvas tile={ tile } width={ tileSize[ 0 ] } height={ tileSize[ 1 ] } />
+								<TileCanvas
+									className="border-4 border-transparent border-solid hover:border-red-500 hover:cursor-pointer"
+									tile={ tile }
+									width={ tileSize[ 0 ] }
+									height={ tileSize[ 1 ] }
+								/>
 							</div>
 						))
 					)) }

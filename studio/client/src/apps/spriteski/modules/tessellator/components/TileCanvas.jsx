@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export const TileCanvas = ({ tile, width, height }) => {
+export const TileCanvas = ({ tile, width, height, ...props }) => {
 	const canvasRef = useRef(null);
 
 	useEffect(() => {
@@ -18,6 +18,8 @@ export const TileCanvas = ({ tile, width, height }) => {
 			data-id={ tile.$id }
 			data-width={ tile.width }
 			data-height={ tile.height }
+
+			{ ...props }
 		/>
 	);
 };
