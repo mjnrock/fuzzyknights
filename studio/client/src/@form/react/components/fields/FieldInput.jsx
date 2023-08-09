@@ -8,6 +8,9 @@ export function FieldInput({ field, value, ctx, ...props }) {
 			name={ name }
 			type={ type }
 			value={ value }
+			onChange={ e => {
+				update(name, e.target.value);
+			} }
 			{ ...field?.html }
 			{ ...props }
 		/>

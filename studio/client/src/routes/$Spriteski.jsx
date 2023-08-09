@@ -4,6 +4,8 @@ import TestForm from "../@form/tests/data/TestForm";
 import { Form } from "../@form/react/components/Form.jsx";
 import { Field } from "../@form/react/components/Field.jsx";
 
+import { debounce } from "../util/debounce.js";
+
 const schema = TestForm({});
 export function Spriteski() {
 	const form = useForm(schema, {
@@ -30,7 +32,10 @@ export function Spriteski() {
 							<Component
 								key={ field.id }
 								field={ field }
-								ctx={ ctx }
+								ctx={ {
+									...ctx,
+									update: debounce(update, 350),	// Throttle updates to 350ms
+								} }
 								{ ...props }
 							/>
 						);
