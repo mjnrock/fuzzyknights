@@ -1,3 +1,4 @@
+import { EnumFieldType } from "../../EnumFieldType.js";
 import { EnumFieldComponent } from "./EnumFieldComponent.js"
 
 export function Field({ field, ctx, ...props }) {
@@ -8,7 +9,7 @@ export function Field({ field, ctx, ...props }) {
 		return null;
 	}
 
-	if(field.type === EnumFieldComponent.SECTION) {
+	if(field.type === EnumFieldType.SECTION) {
 		return renderSection({ field, ctx, ...props });
 	}
 

@@ -29,18 +29,22 @@ export function TestForm() {
 						const { state, lookup, update, validate, submit } = ctx;
 
 						return (
-							<Component
-								key={ field.id }
-								field={ field }
-								ctx={ {
-									...ctx,
-									update: debounce(update, 250),	// Throttle updates to 350ms
-									// jsxMap: ({
-									// 	enum: () => (<div>ENUM</div>),
-									// }),
-								} }
-								{ ...props }
-							/>
+							<div className="flex flex-col gap-2 m-2">
+								<div>{ field.name }</div>
+								<Component
+									key={ field.id }
+									className="p-2 border border-solid rounded border-neutral-200 hover:bg-neutral-50"
+									field={ field }
+									ctx={ {
+										...ctx,
+										update: debounce(update, 250),	// Throttle updates to 350ms
+										// jsxMap: ({
+										// 	enum: () => (<div>ENUM</div>),
+										// }),
+									} }
+									{ ...props }
+								/>
+							</div>
 						);
 					} }
 					renderSection={ ({ children, field, ctx, ...props }) => {
