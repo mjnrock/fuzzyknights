@@ -8,42 +8,17 @@ import { Tessellator } from "../apps/spriteski/modules/tessellator/Tessellator";
 import { TileCanvas } from "../apps/spriteski/modules/tessellator/components/TileCanvas";
 import Base64 from "../util/Base64";
 
+import { LTRTTB } from "../apps/spriteski/modules/tessellator/data/algorithms/LTRTTB";
+
 export const tessellator = Tessellator.New({
-	algorithm: async (canvas, { tw, th, sx = 0, sy = 0, sw = canvas.width, sh = canvas.height } = {}) => {
-		const tiles = [];
-
-		const rows = Math.ceil(sh / th);
-		const cols = Math.ceil(sw / tw);
-
-		const ctx = canvas.getContext("2d");
-		for(let row = 0; row < rows; row++) {
-			const tileRow = [];
-
-			for(let col = 0; col < cols; col++) {
-				const data = ctx.getImageData(sx + col * tw, sy + row * th, tw, th);
-				const tile = Chord.Node.Identity.New({
-					data: await Base64.Decode(data),
-					width: tw,
-					height: th,
-				});
-
-				tileRow.push(tile);
-			}
-
-			tiles.push(tileRow);
-		}
-
-		return tiles;
-	},
+	algorithm: LTRTTB,
 });
-
-//TODO: EXPORT currently only stores the image data, *not* any of the tessellation parameters/data
 
 export function Spriteski() {
 	const canvasRef = useRef(null);
 	const [ tiles, setTiles ] = useState([]);
 	const [ size, setSize ] = useState([ 5, 5 ]); // size[0] = rows, size[1] = cols
-	const [ tileSize, setTileSize ] = useState([ 32, 32 ]); // tileSize[0] = width, tileSize[1] = height
+	const [ tileSize, setTileSize ] = useState([ 64, 64 ]); // tileSize[0] = width, tileSize[1] = height
 	const [ sourceRegion, setSourceRegion ] = useState([ 0, 0, 0, 0 ]); // sourceRegion[0] = x, sourceRegion[1] = y, sourceRegion[2] = w, sourceRegion[3] = h
 	const [ preview, setPreview ] = useState(false);
 	const [ sourceImage, setSourceImage ] = useState(null);
@@ -139,7 +114,7 @@ export function Spriteski() {
 			};
 			img.src = e.target.result;
 		};
-		
+
 		reader?.readAsDataURL(file);
 	};
 
