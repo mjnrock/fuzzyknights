@@ -93,7 +93,7 @@ export function FileSource({ data, update }) {
 				<label>
 					<canvas
 						ref={ canvasRef }
-						className="p-1 border border-solid rounded shadow-lg cursor-pointer border-neutral-200 hover:bg-neutral-700 active:bg-neutral-600 bg-neutral-800"
+						className="p-2 border border-solid rounded shadow-lg cursor-pointer border-neutral-200 hover:bg-neutral-700 active:bg-neutral-600 bg-neutral-800"
 					/>
 					<input
 						type="file"
@@ -106,7 +106,7 @@ export function FileSource({ data, update }) {
 					className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow-lg cursor-pointer border-neutral-200 hover:bg-neutral-50 active:bg-neutral-100 text-neutral-400"
 					onClick={ () => tessellatorDispatch({ type: "togglePreview" }) }
 				>
-					{ preview ? <BsEyeSlash /> : <BsEye /> }
+					{ preview ? <BsEye className="text-emerald-400" /> : <BsEyeSlash className="text-rose-400" /> }
 				</button>
 			</div>
 		</div>
