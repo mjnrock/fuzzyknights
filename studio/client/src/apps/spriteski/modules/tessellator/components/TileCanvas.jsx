@@ -6,6 +6,7 @@ export const TileCanvas = ({ tile, width, height, ...props }) => {
 	useEffect(() => {
 		const ctx = canvasRef.current.getContext("2d");
 		
+		ctx.clearRect(0, 0, width, height);
 		ctx.drawImage(tile.data, 0, 0, tile.width, tile.height, 0, 0, width, height);
 	}, [ tile ]);
 

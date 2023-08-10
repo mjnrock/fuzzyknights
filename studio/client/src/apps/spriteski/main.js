@@ -1,5 +1,4 @@
 import Chord from "@lespantsfancy/chord";
-import { Node } from "../../@node/Node";
 
 import Tile from "./modules/tessellator/Tile";
 import { LTRTTB } from "./modules/tessellator/data/algorithms/LTRTTB";
@@ -25,33 +24,17 @@ export const Reducers = {
 			return {
 				...state,
 				source: canvas,
+				parameters: {
+					...state.parameters,
+					sw: canvas.width,
+					sh: canvas.height,
+				},
 			};
 		},
 		async tessellate(state) {
 			const { source, algorithm, parameters } = state;
-			const tiles = [];
-
-			const rows = Math.ceil(parameters.sh / parameters.th);
-			const cols = Math.ceil(parameters.sw / parameters.tw);
-
-			const ctx = source.getContext("2d");
-			for(let row = 0; row < rows; row++) {
-				const tileRow = [];
-
-				for(let col = 0; col < cols; col++) {
-					const data = ctx.getImageData(parameters.sx + col * parameters.tw, parameters.sy + row * parameters.th, parameters.tw, parameters.th);
-					const tile = Tile.New({
-						data: await Base64.Decode(data),
-						width: parameters.tw,
-						height: parameters.th,
-					});
-
-					tileRow.push(tile);
-				}
-
-				tiles.push(tileRow);
-			}
-
+			const tiles = await algorithm(source, parameters);
+			
 			return {
 				...state,
 				tiles,
@@ -60,8 +43,7 @@ export const Reducers = {
 	},
 };
 
-// export const Nodes = Chord.Node.Node.CreateMany({
-export const Nodes = Node.CreateMany({
+export const Nodes = Chord.Node.Node.CreateMany({
 	tessellator: {
 		state: {
 			source: document.createElement("canvas"),
