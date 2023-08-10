@@ -10,6 +10,7 @@ export const EnumFieldType = {
 	TIME: "time",
 	ARRAY: "array",
 	OBJECT: "object",
+	FUNCTION: "function",
 
 	REFERENCE: "reference",
 	ENUM: "enum",
