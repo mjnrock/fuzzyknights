@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
-		"@headlessui/react": "^1.7.15",
+		"@headlessui/react": "^1.7.16",
 		"@lespantsfancy/chord": "^0.2.1",
 		"@testing-library/jest-dom": "^5.14.1",
 		"@testing-library/react": "^13.0.0",
@@ -40,7 +40,8 @@
 			"import/no-anonymous-default-export": "off",
 			"no-unused-vars": "off",
 			"no-eval": "off",
-			"array-callback-return": "off"
+			"array-callback-return": "off",
+			"react/jsx-pascal-case": "off"
 		}
 	},
 	"browserslist": {

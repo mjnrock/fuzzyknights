@@ -1,0 +1,6 @@
+Form:
+	☐ Create a "Form Registry" parser that converts a Schema into a Registry of Fields
+		☐ Recurse the Schema object and register all available Fields
+			☐ Enforce a "seen" list to prevent infinite recursion
+		☐ Take the `id` and `name` properties as UUIDs and Aliases for *all* Fields
+		☐ Create pools from the Section and Form `names`
