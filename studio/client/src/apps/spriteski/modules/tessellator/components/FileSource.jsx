@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { BsEye, BsEyeSlash, BsImage } from "react-icons/bs";
 
 export function FileSource({ data, update }) {
@@ -37,15 +37,64 @@ export function FileSource({ data, update }) {
 		reader?.readAsDataURL(file);
 	};
 
+	useEffect(() => {
+		const { source: sourceImage, parameters } = tessellatorData;
+
+		if(!sourceImage) {
+			// Draw the text "Please select a file" on the canvas
+			const canvas = canvasRef.current;
+			const ctx = canvas.getContext("2d");
+
+			ctx.font = "24px sans-serif";
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+			ctx.fillStyle = "#ccc";
+			ctx.fillText("Please select a file", canvas.width / 2, canvas.height / 2);
+
+			return;
+		}
+
+		let sourceRegion = [ parameters.sx, parameters.sy, parameters.sw, parameters.sh ],
+			size = [ Math.ceil(parameters.sh / parameters.th), Math.ceil(parameters.sw / parameters.tw) ],
+			tileSize = [ parameters.tw, parameters.th ];
+
+		if(preview) {
+			const ctx = canvasRef.current.getContext("2d");
+			ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+			ctx.drawImage(sourceImage, 0, 0, sourceImage.width, sourceImage.height, 0, 0, canvasRef.current.width, canvasRef.current.height);
+
+			const scaleX = canvasRef.current.width / (sourceImage?.width ?? 1);
+			const scaleY = canvasRef.current.height / (sourceImage?.height ?? 1);
+
+			// Draw the red rectangles
+			ctx.strokeStyle = "red";
+			ctx.lineWidth = 1;
+			for(let row = 0; row < size[ 0 ]; row++) {
+				for(let col = 0; col < size[ 1 ]; col++) {
+					ctx.strokeRect(
+						(sourceRegion[ 0 ] + col * tileSize[ 0 ]) * scaleX,
+						(sourceRegion[ 1 ] + row * tileSize[ 1 ]) * scaleY,
+						tileSize[ 0 ] * scaleX,
+						tileSize[ 1 ] * scaleY
+					);
+				}
+			}
+		} else {
+			// Revert the canvas to its original state if preview is turned off
+			const ctx = canvasRef.current.getContext("2d");
+			ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+			ctx.drawImage(sourceImage, 0, 0, sourceImage.width, sourceImage.height, 0, 0, canvasRef.current.width, canvasRef.current.height);
+		}
+	}, [ tessellatorData.parameters, preview ]);
+
 	return (
 		<div className="flex flex-col items-center justify-center">
-			<h2 className="text-lg italic">File Source</h2>
-
-			<div className="flex flex-row items-center justify-center gap-2">
-				<label
-					className="p-4 border border-solid rounded shadow cursor-pointer border-sky-200 hover:bg-sky-50 active:bg-sky-100 text-sky-400"
-				>
-					<BsImage />
+			<div className="flex flex-row items-start justify-center gap-2">
+				<label>
+					<canvas
+						ref={ canvasRef }
+						className="p-1 border border-solid rounded shadow cursor-pointer border-neutral-200 hover:bg-neutral-50"
+					/>
 					<input
 						type="file"
 						className="hidden"
@@ -59,13 +108,6 @@ export function FileSource({ data, update }) {
 				>
 					{ preview ? <BsEyeSlash /> : <BsEye /> }
 				</button>
-			</div>
-
-			<div className="flex flex-col items-center justify-center">
-				<canvas
-					ref={ canvasRef }
-					className="p-1 m-2 border border-solid rounded shadow border-neutral-200"
-				/>
 			</div>
 		</div>
 	);

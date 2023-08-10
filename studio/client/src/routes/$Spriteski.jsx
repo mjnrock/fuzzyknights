@@ -10,11 +10,13 @@ export function Spriteski() {
 	const { state: tessellatorData, dispatch: tessellatorDispatch, dispatchAsync: tessellatorDispatchAsync } = Chord.Node.React.useNode(Nodes.tessellator);
 
 	useEffect(() => {
-		tessellatorDispatchAsync({ type: "tessellate" });
+		if(tessellatorData.source) {
+			tessellatorDispatchAsync({ type: "tessellate" });
+		}
 	}, [ tessellatorData.source ]);
 
 	return (
-		<div>
+		<div className="m-2">
 			<FileSource
 				data={ { tessellatorData } }
 				update={ { tessellatorDispatch } }

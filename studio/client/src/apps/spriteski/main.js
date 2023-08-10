@@ -46,7 +46,7 @@ export const Reducers = {
 export const Nodes = Chord.Node.Node.CreateMany({
 	tessellator: {
 		state: {
-			source: document.createElement("canvas"),
+			source: null,
 			preview: true,
 			algorithm: LTRTTB,
 			parameters: {
