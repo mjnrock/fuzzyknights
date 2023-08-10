@@ -49,13 +49,14 @@ export function Spriteski() {
 				if(name.startsWith("$")) {
 					word = name;
 				}
-				
+
 				next.push({
 					id: uuid(),
 					type: EnumFieldType.TEXT,
 					name: word,
 					meta: {
 						label: name,
+						isConfigurable: true,
 					},
 					state: null,
 				});
@@ -66,6 +67,7 @@ export function Spriteski() {
 					name: word,
 					meta: {
 						label: word,
+						isConfigurable: false,
 					},
 					state: word,
 				});
@@ -109,7 +111,7 @@ export function Spriteski() {
 				next.push(field);
 			}
 		}
-		
+
 		setFields({
 			...fields,
 			state: [
@@ -146,6 +148,20 @@ export function Spriteski() {
 					form={ form }
 					renderField={ ({ children, field, value, ctx, jsx: Component, ...props }) => {
 						const { state, lookup, update, validate, submit } = ctx;
+
+						if(field?.meta?.isConfigurable === false) {
+							return (
+								<div className="flex flex-col gap-2 m-2">
+									<div>{ field.meta.label }</div>
+									<div
+										key={ field.id }
+										className="p-2 border border-solid rounded border-neutral-200 hover:bg-neutral-50"
+									>
+										{ field.state.toString() }
+									</div>
+								</div>
+							);
+						}
 
 						return (
 							<div className="flex flex-col gap-2 m-2">
