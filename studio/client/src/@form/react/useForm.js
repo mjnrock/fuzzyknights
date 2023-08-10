@@ -1,9 +1,14 @@
+import { v4 as uuid } from "uuid";
 import { useEffect, useState } from "react";
 import EnumFieldType from "../EnumFieldType";
 
 export function useForm(schema, { onUpdate, onValidate, onSubmit } = {}) {
-	const [ lookup, setLookup ] = useState({});
-	const [ state, setState ] = useState({});
+	const [ lookup, setLookup ] = useState({
+		$id: uuid(),
+	});
+	const [ state, setState ] = useState({
+		$id: uuid(),
+	});
 
 	useEffect(() => {
 		const nextRepo = {};
@@ -92,6 +97,7 @@ export function useForm(schema, { onUpdate, onValidate, onSubmit } = {}) {
 	return {
 		id: schema.id,
 		state,
+		setState,
 		lookup,
 
 		update,

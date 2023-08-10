@@ -139,7 +139,8 @@ export function Spriteski() {
 			};
 			img.src = e.target.result;
 		};
-		reader.readAsDataURL(file);
+		
+		reader?.readAsDataURL(file);
 	};
 
 	const performTessellation = async () => {
@@ -298,7 +299,7 @@ export function Spriteski() {
 				<div style={ { gridTemplateColumns: `repeat(${ size[ 1 ] }, 1fr)` } } className="grid">
 					{ tiles.map((row, y) => (
 						row.map((tile, x) => (
-							<div key={ `${ y }-${ x }` } className="flex flex-col">
+							<div key={ `${ y }-${ x }` } className="">
 								<TileCanvas
 									className="border-4 border-transparent border-solid hover:border-red-500 hover:cursor-pointer"
 									tile={ tile }
