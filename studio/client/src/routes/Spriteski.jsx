@@ -43,7 +43,7 @@ export function Spriteski() {
 	const canvasRef = useRef(null);
 	const [ tiles, setTiles ] = useState([]);
 	const [ size, setSize ] = useState([ 5, 5 ]); // size[0] = rows, size[1] = cols
-	const [ tileSize, setTileSize ] = useState([ 32, 32 ]); // tileSize[0] = width, tileSize[1] = height
+	const [ tileSize, setTileSize ] = useState([ 64, 64 ]); // tileSize[0] = width, tileSize[1] = height
 	const [ sourceRegion, setSourceRegion ] = useState([ 0, 0, 0, 0 ]); // sourceRegion[0] = x, sourceRegion[1] = y, sourceRegion[2] = w, sourceRegion[3] = h
 	const [ preview, setPreview ] = useState(false);
 	const [ sourceImage, setSourceImage ] = useState(null);
@@ -139,7 +139,7 @@ export function Spriteski() {
 			};
 			img.src = e.target.result;
 		};
-		
+
 		reader?.readAsDataURL(file);
 	};
 

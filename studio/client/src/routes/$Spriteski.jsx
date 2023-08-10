@@ -2,6 +2,8 @@ import { v4 as uuid } from "uuid";
 import React, { useEffect, useRef } from "react";
 import { useForm } from "../@form/react/useForm";
 import { EnumFieldType } from "../@form/EnumFieldType.js";
+import CodeMirror from "@uiw/react-codemirror";
+import { javascript } from "@codemirror/lang-javascript";
 
 import { Form } from "../@form/react/components/Form.jsx";
 import { Field } from "../@form/react/components/Field.jsx";
@@ -130,9 +132,18 @@ export function Spriteski() {
 	});
 	const { id: formId, state, lookup, update, validate, submit } = form;
 
+	const onCodeMirrorChange = React.useCallback((value, viewUpdate) => {
+		console.log("value:", value, viewUpdate);
+	}, []);
 	return (
 		<div>
 			<h1>Spriteski</h1>
+			<CodeMirror
+				value="console.log('hello world!');"
+				height="200px"
+				extensions={ [ javascript({ jsx: true }) ] }
+				onChange={ onCodeMirrorChange }
+			/>
 
 			<div className="flex flex-col gap-2 m-2">
 				<div className="flex flex-col gap-2 m-2">
