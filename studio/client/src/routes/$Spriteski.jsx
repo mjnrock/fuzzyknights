@@ -22,12 +22,12 @@ export function Spriteski() {
 				update={ { tessellatorDispatch } }
 			/>
 
-			<div style={ { gridTemplateColumns: `repeat(${ tessellatorData.parameters.sw / tessellatorData.parameters.tw }, 1fr)`, justifyItems: "center" } } className={ `grid ${ tessellatorData.tiles.length ? "p-2 m-2 border border-solid rounded border-neutral-200 bg-neutral-50" : "" }` }>
+			<div style={ { gridTemplateColumns: `repeat(${ tessellatorData.parameters.sw / tessellatorData.parameters.tw }, 1fr)`, justifyItems: "center" } } className={ `grid ${ tessellatorData.tiles.length ? "p-2 m-2 border border-solid rounded border-neutral-200 bg-neutral-800" : "" }` }>
 				{ tessellatorData.tiles.map((row, y) => (
 					row.map((tile, x) => (
-						<div key={ `${ y }-${ x }` } className="">
+						<div key={ `${ y }-${ x }` } className="p-1 m-1 border border-solid rounded shadow cursor-pointer border-neutral-200 bg-neutral-50 hover:bg-neutral-200 active:bg-neutral-300">
 							<TileCanvas
-								className="border-4 border-transparent border-solid hover:border-red-500 hover:cursor-pointer"
+								className="cursor-pointer"
 								tile={ tile }
 								width={ tile.width }
 								height={ tile.height }
