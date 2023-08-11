@@ -3,80 +3,83 @@ import Chord from "@lespantsfancy/chord";
 
 import { EnumFieldType } from "../../@form/EnumFieldType";
 import { LTRTTB } from "./modules/tessellator/data/algorithms/LTRTTB";
+import Form from "./modules/nominator/Form";
 
 export const Helpers = {
-	calcPattern(phrase) {
-		// split the pattern-phrase into an array of words
-		const pattern = [];
-		const values = phrase.split("-");
-		for(let i = 0; i < values.length; i++) {
-			let word = values[ i ].trim();
-			if(word.startsWith("{") && word.endsWith("}")) {
-				const variable = word.slice(1, -1).trim();
+	nominator: {
+		calcPattern(phrase) {
+			// split the pattern-phrase into an array of words
+			const pattern = [];
+			const values = phrase.split("-");
+			for(let i = 0; i < values.length; i++) {
+				let word = values[ i ].trim();
+				if(word.startsWith("{") && word.endsWith("}")) {
+					const variable = word.slice(1, -1).trim();
 
-				if(variable.startsWith("$")) {
-					pattern.push(variable);
+					if(variable.startsWith("$")) {
+						pattern.push(variable);
+					} else {
+						pattern.push(`@${ variable }`);
+					}
 				} else {
-					pattern.push(`@${ variable }`);
+					pattern.push(word);
 				}
-			} else {
-				pattern.push(word);
 			}
-		}
 
-		return pattern;
-	},
-	calcFields: (pattern) => {
-		// use the pattern array to create a Field array
-		const next = [];
-		for(let word of pattern) {
-			if(word.startsWith("@")) {
-				let name = word.slice(1);
+			return pattern;
+		},
+		calcFields: (pattern) => {
+			// use the pattern array to create a Field array
+			const next = [];
+			for(let word of pattern) {
+				if(word.startsWith("@")) {
+					let name = word.slice(1);
 
-				if(name.startsWith("$")) {
-					word = name;
+					if(name.startsWith("$")) {
+						word = name;
+					}
+
+					next.push({
+						id: uuid(),
+						type: EnumFieldType.TEXT,
+						name: word,
+						meta: {
+							label: name,
+							isConfigurable: true,
+						},
+						state: null,
+					});
+				} else {
+					next.push({
+						id: uuid(),
+						type: EnumFieldType.TEXT,
+						name: word,
+						meta: {
+							label: word,
+							isConfigurable: false,
+						},
+						state: word,
+					});
 				}
-
-				next.push({
-					id: uuid(),
-					type: EnumFieldType.TEXT,
-					name: word,
-					meta: {
-						label: name,
-						isConfigurable: true,
-					},
-					state: null,
-				});
-			} else {
-				next.push({
-					id: uuid(),
-					type: EnumFieldType.TEXT,
-					name: word,
-					meta: {
-						label: word,
-						isConfigurable: false,
-					},
-					state: word,
-				});
 			}
-		}
 
-		return {
-			id: uuid(),
-			type: EnumFieldType.FORM,
-			name: "@root",
-			state: [
-				{
-					id: uuid(),
-					type: EnumFieldType.SECTION,
-					name: "@section",
-					meta: {
-						isVirtual: false,
+			return {
+				id: uuid(),
+				type: EnumFieldType.FORM,
+				name: "@root",
+				state: [
+					{
+						id: uuid(),
+						type: EnumFieldType.SECTION,
+						name: "@section",
+						meta: {
+							isVirtual: false,
+						},
+						state: next,
 					},
-					state: next,
-				},
-			],
-		};
+				],
+			};
+		},
 	},
 };
 
@@ -151,9 +154,9 @@ export const Reducers = {
 				phrase,
 			};
 
-			let pattern = Helpers.calcPattern(phrase);
+			let pattern = Helpers.nominator.calcPattern(phrase);
 			next.pattern = pattern;
-			next.form = Helpers.calcFields(pattern);
+			next.form.schema = Helpers.nominator.calcFields(pattern);
 
 			console.log(next)
 
@@ -166,11 +169,33 @@ export const Reducers = {
 			};
 		},
 
+		setFields(state, fields) {
+			const { form } = state;
+
+			return {
+				...state,
+				form: Form.Reducers().setSectionState(form, form.state[ 0 ].id, fields),
+			};
+		},
+		setFormData(state, data) {
+			const { form } = state;
+
+			return {
+				...state,
+				form: {
+					...form,
+					data,
+				},
+			};
+		},
+
+
 		nominate(state, tiles) {
 			const { phrase, form, pattern } = state;
+			const { data } = form;
 			const nominations = {};
 
-			console.log(tiles, phrase, form, pattern);
+			console.log(tiles, phrase, form, data, pattern);
 			let $i = 0,
 				$x = 0,
 				$y = 0;
@@ -186,7 +211,14 @@ export const Reducers = {
 					console.log(x, y, pattern)
 
 					const name = pattern.map(p => {
-						const v = p.startsWith("({") ? eval(p).toString() : p.toString();
+						if(p.startsWith("$")) {
+							if(p === "$i") return $i;
+							if(p === "$x") return $x;
+							if(p === "$y") return $y;
+						}
+
+						const entry = data?.[ p ];
+						const v = entry?.startsWith("({") ? eval(entry)?.toString() : entry?.toString();
 
 						if(typeof v === "function") {
 							return v({ $i, $x, $y, tile });
@@ -235,7 +267,10 @@ export const Nodes = Chord.Node.Node.CreateMany({
 	nominator: {
 		state: {
 			phrase: "entity-{entityType}-{entitySubType}-{state}-{$y}-{$x}",
-			form: null,
+			form: {
+				schema: Form.Templates.SimpleForm(),
+				data: {},
+			},
 			pattern: [],
 			nominations: {},
 		},

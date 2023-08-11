@@ -52,13 +52,22 @@ export function Spriteski() {
 			>
 				{ tessellatorData.tiles.map((row, y) => (
 					row.map((tile, x) => (
-						<div key={ `${ y }-${ x }` } className="p-1 m-1 border border-solid rounded shadow cursor-pointer border-neutral-200 bg-neutral-50 hover:bg-sky-200 active:bg-sky-300 hover:border-sky-200 active:border-sky-300">
+						<div key={ `${ y }-${ x }` } className="flex flex-col items-center justify-center p-1 m-1 border border-solid rounded shadow cursor-pointer select-none border-neutral-200 bg-neutral-50 hover:bg-sky-200 active:bg-sky-300 hover:border-sky-200 active:border-sky-300">
 							<TileCanvas
 								className="border border-solid cursor-pointer border-neutral-300 bg-neutral-50"
 								tile={ tile }
 								width={ tile.width }
 								height={ tile.height }
 							/>
+							<pre>
+								{
+									tile.$name && (
+										<div className="text-xs text-center text-neutral-700">
+											{ tile.$name }
+										</div>
+									)
+								}
+							</pre>
 						</div>
 					))
 				)) }

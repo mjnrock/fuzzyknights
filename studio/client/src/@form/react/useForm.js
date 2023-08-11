@@ -2,13 +2,27 @@ import { v4 as uuid } from "uuid";
 import { useEffect, useState } from "react";
 import EnumFieldType from "../EnumFieldType";
 
-export function useForm(schema, { onUpdate, onValidate, onSubmit } = {}) {
+/**
+ * This differs from `useForm` in that the form data only exists
+ * within this hook.  As such, use when React alone is sufficient
+ * to manage the form state (i.e. no external users)
+ */
+export function useForm(schema, { onInit, onUpdate, onValidate, onSubmit } = {}, sync = {}) {
 	const [ lookup, setLookup ] = useState({
 		$id: uuid(),
 	});
-	const [ state, setState ] = useState({
+	const [ state, setState ] = useState(sync ?? {
 		$id: uuid(),
 	});
+
+	useEffect(() => {
+		console.log(23456, sync);
+		setState(sync);
+
+		if(onUpdate) {
+			onUpdate(sync);
+		}
+	}, [ sync ]);
 
 	useEffect(() => {
 		if(!schema) return;
@@ -23,7 +37,7 @@ export function useForm(schema, { onUpdate, onValidate, onSubmit } = {}) {
 					recurser(subField, data);
 				}
 			} else {
-				data[ field.name ] = field.state;
+				data[ field.name ] = state[ field.name ] ?? field.state;
 			}
 
 			return data;
@@ -33,6 +47,10 @@ export function useForm(schema, { onUpdate, onValidate, onSubmit } = {}) {
 
 		setState(next);
 		setLookup(nextRepo);
+
+		if(onInit) {
+			onInit(next, schema);
+		}
 	}, [ schema ]);
 
 	const update = (name, value) => {

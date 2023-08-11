@@ -1,20 +1,11 @@
 import React, { useState } from "react";
 import { Dialog } from "@headlessui/react";
-import { useForm } from "../../../../../@form/react/useForm.js";
-import { BsSliders, BsPlay, BsFillPrinterFill } from "react-icons/bs";
+import { BsSliders, BsPlay } from "react-icons/bs";
+import { NominationForm } from "./NominationForm.jsx";
 
 export function NominatorBar({ data, update }) {
 	const { tessellatorData, nominatorData } = data;
 	const { nominatorDispatch, nominatorDispatchAsync } = update;
-
-	const form = useForm(nominatorDispatch?.form, {
-		onUpdate: next => console.log("NEXT", next),
-		onValidate: (name, isValid) => console.log("VALIDATE", name, isValid),
-		onSubmit: (isValid, data) => console.log("SUBMIT", isValid, data),
-	});
-	const { id: formId, state, lookup, update: formUpdate, validate, submit } = form;
-
-	console.log(state);
 
 	const [ isOpen, setIsOpen ] = useState(false);
 	const openModal = () => setIsOpen(true);
@@ -54,11 +45,14 @@ export function NominatorBar({ data, update }) {
 						<Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
 							Nomination Form
 						</Dialog.Title>
+
 						<div className="mt-2">
-							<p className="text-sm text-gray-500">
-								Create a nomination form for the pattern.
-							</p>
+							<NominationForm
+								data={ { tessellatorData, nominatorData } }
+								update={ { nominatorDispatch, nominatorDispatchAsync } }
+							/>
 						</div>
+
 						<div className="mt-4">
 							<button
 								type="button"

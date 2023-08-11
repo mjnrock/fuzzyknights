@@ -50,7 +50,7 @@ export const Selectors = {
 };
 
 export const Templates = {
-	SimpleForm: ({ label, fields, ...args }) => ({
+	SimpleForm: ({ label, fields, ...args } = {}) => ({
 		id: uuid(),
 		type: EnumFieldType.FORM,
 		name: "@form",
@@ -72,7 +72,7 @@ export const Templates = {
 	}),
 };
 
-export const State = ({ name, label, state = [], ...args }) => ({
+export const State = ({ name, label, state = [], ...args } = {}) => ({
 	id: uuid(),
 	type: EnumFieldType.FORM,
 	name,
@@ -83,7 +83,7 @@ export const State = ({ name, label, state = [], ...args }) => ({
 	...args,
 });
 
-export const Reducers = ({ }) => ({
+export const Reducers = ({ } = {}) => ({
 	setName: (form, name) => ({ ...form, name }),
 	setLabel: (form, label) => ({ ...form, meta: { ...form.meta, label } }),
 	setMeta: (form, meta = {}) => ({ ...form, meta }),

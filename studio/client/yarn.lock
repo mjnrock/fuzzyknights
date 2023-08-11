@@ -1740,10 +1740,10 @@
   resolved "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@lespantsfancy/chord@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@lespantsfancy/chord/-/chord-0.2.2.tgz#b88030cf2c6cc26755ad2fa85d98870071b91554"
-  integrity sha512-+fc5Dxfrard7cgxFRqet7kBJFX33CHdsDp+GeqqmVCIGKs0MR1MFPEmGD38ABmoB20TBeJEzpKEAUNPqW3dMMQ==
+"@lespantsfancy/chord@0.2.5":
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/@lespantsfancy/chord/-/chord-0.2.5.tgz#59ace559b194840bc5ff6ada03920b6c12f71aa8"
+  integrity sha512-4c32jX3nqAa3ZNeNRhx3FEy7vSCeEN9qwRppe+Ec2XXs10/DQqiNr9FLdxAkpvqv1f5iDZL4fp8Y8RORei3JIw==
   dependencies:
     is-base64 "^1.1.0"
     uuid "^9.0.0"

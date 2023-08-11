@@ -10,7 +10,7 @@ export const Selectors = {
 	getType: (state) => state.type,
 };
 
-export const State = ({ id, type = EnumFieldType.ANY, ...args }) => ({
+export const State = ({ id, type = EnumFieldType.ANY, ...args } = {}) => ({
 	id: id ?? uuid(),
 	name: null,
 	type,
@@ -19,7 +19,7 @@ export const State = ({ id, type = EnumFieldType.ANY, ...args }) => ({
 	...args,
 });
 
-export const Reducers = ({ }) => ({
+export const Reducers = ({ } = {}) => ({
 	set(state, next = {}) {
 		return State(next);
 	},
