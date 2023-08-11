@@ -21,13 +21,7 @@ export function Default() {
 					Go to Mapski™ - Viewer
 				</Link>
 				<Link to="/spriteski" className="px-4 py-2 mt-2 font-semibold text-white transition duration-200 bg-orange-500 rounded hover:bg-orange-700" target="_blank" rel="noopener noreferrer">
-					Go to Spriteski™ - Tessellator
-				</Link>
-				<Link to="/$spriteskiNominator" className="px-4 py-2 mt-2 font-semibold text-white transition duration-200 bg-orange-500 rounded hover:bg-orange-700" target="_blank" rel="noopener noreferrer">
-					Go to Spriteski™ - Nominator
-				</Link>
-				<Link to="/$spriteski" className="px-4 py-2 mt-2 font-semibold text-white transition duration-200 bg-orange-500 rounded hover:bg-orange-700" target="_blank" rel="noopener noreferrer">
-					Go to (Beta) Spriteski™
+					Go to Spriteski™
 				</Link>
 				<Link to="/data" className="px-4 py-2 mt-2 font-semibold text-white transition duration-200 bg-purple-500 rounded hover:bg-purple-700" target="_blank" rel="noopener noreferrer">
 					Go to Data
