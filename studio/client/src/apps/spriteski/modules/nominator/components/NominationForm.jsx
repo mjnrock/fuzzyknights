@@ -17,6 +17,7 @@ export function NominationForm({ data, update }) {
 	const { nominatorDispatch } = update;
 
 	const form = useForm(nominatorData?.form?.schema, nominatorData?.form?.data, {
+		onInit: next => nominatorDispatch({ type: "setFormData", data: next }),
 		onUpdate: next => nominatorDispatch({ type: "setFormData", data: next }),
 	});
 
