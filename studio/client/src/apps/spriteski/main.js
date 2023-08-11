@@ -238,8 +238,6 @@ export const Reducers = {
 					const tile = row[ x ];
 					$x = x;
 
-					console.log(x, y, pattern)
-
 					const name = pattern.map(p => {
 						if(p.startsWith("$")) {
 							if(p === "$i") return $i;
