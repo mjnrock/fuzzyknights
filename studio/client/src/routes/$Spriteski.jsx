@@ -48,13 +48,13 @@ export function Spriteski() {
 			<div
 				style={ { gridTemplateColumns: `repeat(${ tessellatorData?.size }, 1fr)`, justifyItems: "center" } }
 				className={ `grid ${ tessellatorData.tiles.length ? "p-2 m-2 border border-solid rounded border-neutral-200 bg-neutral-800" : "" }` }
-				title="There is CSS padding, border, and margin baked into the Tile visual for aesthetics.  The actual Tile is only the tessellation result without said CSS."
+				title="There is CSS padding, border, and margin baked into the Tile visual for aesthetics.  The actual Tile is the space *within* the gray border."
 			>
 				{ tessellatorData.tiles.map((row, y) => (
 					row.map((tile, x) => (
-						<div key={ `${ y }-${ x }` } className="p-1 m-1 border border-solid rounded shadow cursor-pointer border-neutral-200 bg-neutral-50 hover:bg-neutral-200 active:bg-neutral-300">
+						<div key={ `${ y }-${ x }` } className="p-1 m-1 border border-solid rounded shadow cursor-pointer border-neutral-200 bg-neutral-50 hover:bg-sky-200 active:bg-sky-300 hover:border-sky-200 active:border-sky-300">
 							<TileCanvas
-								className="cursor-pointer"
+								className="border border-solid cursor-pointer border-neutral-300 bg-neutral-50"
 								tile={ tile }
 								width={ tile.width }
 								height={ tile.height }
