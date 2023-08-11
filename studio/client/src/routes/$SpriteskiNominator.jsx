@@ -25,11 +25,19 @@ export function Spriteski() {
 		const next = [];
 		const values = value.split("-");
 		for(let i = 0; i < values.length; i++) {
-			const word = values[ i ].trim();
+			let word = values[ i ].trim();
 			if(word.startsWith("{") && word.endsWith("}")) {
 				const variable = word.slice(1, -1).trim();
 
 				next.push(`@${ variable }`);
+			} else if(word.startsWith("@")) {
+				let name = word.slice(1);
+
+				if(name.startsWith("$")) {
+					word = name;
+				}
+
+				next.push(word);
 			} else {
 				next.push(word);
 			}
