@@ -12,7 +12,15 @@ export const Helpers = {
 		calcPattern(phrase) {
 			// split the pattern-phrase into an array of words
 			const pattern = [];
-			const values = phrase.split("-");
+			const values = phrase
+				.split("-")
+				.join(" ")
+				.split(",")
+				.join(" ")
+				.split(";")
+				.join(" ")
+				.split(" ");
+
 			for(let i = 0; i < values.length; i++) {
 				let word = values[ i ].trim();
 				if(word.startsWith("{") && word.endsWith("}")) {
@@ -253,7 +261,7 @@ export const Reducers = {
 						} else {
 							return v;
 						}
-					}).join("-");
+					}).join("-");	//TODO: Allow for custom separators (all will become dashes for now)
 
 					nominations[ name ] = tile;
 					tile.$name = name;
