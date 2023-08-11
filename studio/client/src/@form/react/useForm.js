@@ -11,6 +11,8 @@ export function useForm(schema, { onUpdate, onValidate, onSubmit } = {}) {
 	});
 
 	useEffect(() => {
+		if(!schema) return;
+
 		const nextRepo = {};
 		const recurser = (field, data = {}) => {
 			nextRepo[ field.id ] = field;
@@ -95,7 +97,7 @@ export function useForm(schema, { onUpdate, onValidate, onSubmit } = {}) {
 	};
 
 	return {
-		id: schema.id,
+		id: schema?.id,
 		state,
 		setState,
 		lookup,

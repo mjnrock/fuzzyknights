@@ -41,12 +41,12 @@ export function Spriteski() {
 			/>
 
 			<NominatorBar
-				data={ { nominatorData } }
+				data={ { tessellatorData, nominatorData } }
 				update={ { nominatorDispatch, nominatorDispatchAsync } }
 			/>
 
 			<div
-				style={ { gridTemplateColumns: `repeat(${ tessellatorData.parameters.sw / tessellatorData.parameters.tw }, 1fr)`, justifyItems: "center" } }
+				style={ { gridTemplateColumns: `repeat(${ tessellatorData?.size }, 1fr)`, justifyItems: "center" } }
 				className={ `grid ${ tessellatorData.tiles.length ? "p-2 m-2 border border-solid rounded border-neutral-200 bg-neutral-800" : "" }` }
 				title="There is CSS padding, border, and margin baked into the Tile visual for aesthetics.  The actual Tile is only the tessellation result without said CSS."
 			>

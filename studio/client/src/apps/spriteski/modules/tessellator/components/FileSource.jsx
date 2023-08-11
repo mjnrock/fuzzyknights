@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { BsEye, BsEyeSlash, BsSliders,BsArrowClockwise } from "react-icons/bs";
+import { BsEye, BsEyeSlash, BsUiChecks, BsArrowClockwise } from "react-icons/bs";
 
 export function FileSource({ data, update }) {
 	const canvasRef = useRef(null);
@@ -118,7 +118,7 @@ export function FileSource({ data, update }) {
 						onClick={ e => null }
 						title="Adjust tessellation parameters"
 					>
-						<BsSliders className="text-lg text-neutral-400" />
+						<BsUiChecks className="text-lg text-neutral-400" />
 					</button>
 					<button
 						className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow cursor-pointer text-neutral-400 hover:text-amber-400 border-neutral-200 hover:bg-amber-50 active:bg-amber-100 hover:border-amber-200"
