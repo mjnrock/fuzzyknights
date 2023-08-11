@@ -4,6 +4,8 @@ import Chord from "@lespantsfancy/chord";
 import { EnumFieldType } from "../../@form/EnumFieldType";
 import { LTRTTB } from "./modules/tessellator/data/algorithms/LTRTTB";
 import Form from "./modules/nominator/Form";
+import Base64 from "../../util/Base64";
+import Serialize from "../../util/Serialize";
 
 export const Helpers = {
 	nominator: {
@@ -79,6 +81,37 @@ export const Helpers = {
 					},
 				],
 			};
+		},
+
+		serialize: async (nominations) => {
+			const nextNomination = {};
+
+			for(const name in nominations) {
+				const tile = nominations[ name ];
+				const nextTile = {
+					...tile,
+					data: await Base64.Encode(tile.data),
+				};
+				console.log(nextTile)
+
+				nextNomination[ nextTile.$id ] = nextTile;
+			}
+
+			return Serialize.stringify(nextNomination);
+		},
+		deserialize: async (json) => {
+			const nominations = Serialize.parse(json);
+			const next = {};
+
+			for(let id in nominations) {
+				const tile = nominations[ id ];
+				next[ id ] = {
+					...tile,
+					data: await Base64.Decode(tile.data),
+				};
+			}
+
+			return next;
 		},
 	},
 };
@@ -244,6 +277,27 @@ export const Reducers = {
 	},
 };
 
+const Effects = {
+	nominator: {
+		nominate: [
+			async (state) => {
+				const { nominations } = state;
+
+				let result = await Helpers.nominator.serialize(nominations);
+
+				// invoke a save dialog
+				const blob = new Blob([ result ], { type: "application/json" });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement("a");
+
+				a.href = url;
+				a.download = `${ uuid() }.json`;
+				a.click();
+			},
+		],
+	},
+};
+
 
 export const Nodes = Chord.Node.Node.CreateMany({
 	tessellator: {
@@ -275,6 +329,7 @@ export const Nodes = Chord.Node.Node.CreateMany({
 			nominations: {},
 		},
 		reducers: Reducers.nominator,
+		effects: Effects.nominator,
 	},
 });
 
