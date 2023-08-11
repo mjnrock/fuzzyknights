@@ -13,20 +13,14 @@ const CulledEnumFieldType = {
 };
 
 export function NominationForm({ data, update }) {
-	const { tessellatorData, nominatorData } = data;
-	const { nominatorDispatch, nominatorDispatchAsync } = update;
+	const { nominatorData } = data;
+	const { nominatorDispatch } = update;
 
 	const form = useForm(nominatorData?.form?.schema, nominatorData?.form?.data, {
-		// onInit: next => {
-		// 	nominatorDispatch({ type: "setFormData", data: next });
-		// 	console.log("onInit", next);
-		// },
 		onUpdate: next => nominatorDispatch({ type: "setFormData", data: next }),
-		// onValidate: (name, isValid) => console.log("VALIDATE", name, isValid),
-		// onSubmit: (isValid, data) => console.log("SUBMIT", isValid, data),
 	});
-	const { id: formId, state: formState, setState: setFormState, lookup, update: formUpdate, validate, submit } = form;
 
+	//TODO: Reimplement this using the Flux paradigm
 	const updateFieldType = useCallback((name, type) => {
 		// 	const next = [];
 		// 	const section = fields.state[ 0 ].state;
