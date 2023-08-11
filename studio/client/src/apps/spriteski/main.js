@@ -41,6 +41,26 @@ export const Reducers = {
 			};
 		}
 	},
+	nominator: {
+		setPattern(state, pattern) {
+			return {
+				...state,
+				pattern,
+			};
+		},
+		setPhrase(state, phrase) {
+			return {
+				...state,
+				phrase,
+			};
+		},
+		setForm(state, form) {
+			return {
+				...state,
+				form,
+			};
+		},
+	},
 };
 
 export const Nodes = Chord.Node.Node.CreateMany({
@@ -60,6 +80,14 @@ export const Nodes = Chord.Node.Node.CreateMany({
 			tiles: [],
 		},
 		reducers: Reducers.tessellator,
+	},
+	nominator: {
+		state: {
+			phrase: "entity-{entityType}-{entitySubType}-{state}-{$y}-{$x}",
+			form: null,
+			pattern: null,
+		},
+		reducers: Reducers.nominator,
 	},
 });
 

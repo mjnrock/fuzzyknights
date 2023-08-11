@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { BsEye, BsEyeSlash, BsImage } from "react-icons/bs";
+import { BsEye, BsEyeSlash, BsSliders,BsArrowClockwise } from "react-icons/bs";
 
 export function FileSource({ data, update }) {
 	const canvasRef = useRef(null);
@@ -9,6 +9,7 @@ export function FileSource({ data, update }) {
 
 	const { preview } = tessellatorData;
 
+	/* Dispatch the source image to the tessellator */
 	const handleFile = (e) => {
 		const file = e.target.files[ 0 ];
 		if(!file) {
@@ -37,6 +38,7 @@ export function FileSource({ data, update }) {
 		reader?.readAsDataURL(file);
 	};
 
+	/* Draw the tessellation preview */
 	useEffect(() => {
 		const { source: sourceImage, parameters } = tessellatorData;
 
@@ -94,6 +96,7 @@ export function FileSource({ data, update }) {
 					<canvas
 						ref={ canvasRef }
 						className="p-2 border border-solid rounded shadow-lg cursor-pointer border-neutral-200 hover:bg-neutral-700 active:bg-neutral-600 bg-neutral-800"
+						title="This is only an estimation of the final result. The actual result will be exact to the parameters you set."
 					/>
 					<input
 						type="file"
@@ -102,12 +105,29 @@ export function FileSource({ data, update }) {
 					/>
 				</label>
 
-				<button
-					className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow-lg cursor-pointer border-neutral-200 hover:bg-neutral-50 active:bg-neutral-100 text-neutral-400"
-					onClick={ () => tessellatorDispatch({ type: "togglePreview" }) }
-				>
-					{ preview ? <BsEye className="text-emerald-400" /> : <BsEyeSlash className="text-rose-400" /> }
-				</button>
+				<div className="flex flex-col items-start justify-center gap-2">
+					<button
+						className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow cursor-pointer border-neutral-200 hover:bg-neutral-50 active:bg-neutral-100 text-neutral-400"
+						onClick={ () => tessellatorDispatch({ type: "togglePreview" }) }
+						title={ preview ? "Hide preview" : "Show preview" }
+					>
+						{ preview ? <BsEye className="text-emerald-400" /> : <BsEyeSlash className="text-rose-400" /> }
+					</button>
+					<button
+						className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow cursor-pointer border-neutral-200 hover:bg-neutral-50 active:bg-neutral-100 text-neutral-400"
+						onClick={ e => null }
+						title="Adjust tessellation parameters"
+					>
+						<BsSliders className="text-lg text-neutral-400" />
+					</button>
+					<button
+						className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow cursor-pointer text-neutral-400 hover:text-amber-400 border-neutral-200 hover:bg-amber-50 active:bg-amber-100 hover:border-amber-200"
+						onClick={ e => null }
+						title="Retessellate (use after modifying tessellation parameters)"
+					>
+						<BsArrowClockwise className="text-lg" />
+					</button>
+				</div>
 			</div>
 		</div>
 	);
