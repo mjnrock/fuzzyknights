@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 import Chord from "@lespantsfancy/chord";
 
-import {EnumFieldType} from "../../@form/EnumFieldType";
+import { EnumFieldType } from "../../@form/EnumFieldType";
 import { LTRTTB } from "./modules/tessellator/data/algorithms/LTRTTB";
 
 export const Helpers = {
@@ -10,19 +10,15 @@ export const Helpers = {
 		const pattern = [];
 		const values = phrase.split("-");
 		for(let i = 0; i < values.length; i++) {
-			const word = values[ i ].trim();
+			let word = values[ i ].trim();
 			if(word.startsWith("{") && word.endsWith("}")) {
 				const variable = word.slice(1, -1).trim();
 
-				pattern.push(`@${ variable }`);
-			} else if(word.startsWith("@")) {
-				let name = word.slice(1);
-
-				if(name.startsWith("$")) {
-					word = name;
+				if(variable.startsWith("$")) {
+					pattern.push(variable);
+				} else {
+					pattern.push(`@${ variable }`);
 				}
-
-				pattern.push(word);
 			} else {
 				pattern.push(word);
 			}
@@ -123,6 +119,8 @@ export const Reducers = {
 		},
 		async tessellate(state) {
 			const { source, algorithm, parameters } = state;
+			if(!source) return state;
+
 			const tiles = await algorithm(source, parameters);
 
 			return {

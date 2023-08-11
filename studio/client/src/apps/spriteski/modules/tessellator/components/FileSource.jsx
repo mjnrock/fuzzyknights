@@ -1,13 +1,18 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BsEye, BsEyeSlash, BsUiChecks, BsArrowClockwise } from "react-icons/bs";
+import { Dialog } from "@headlessui/react";
 
 export function FileSource({ data, update }) {
 	const canvasRef = useRef(null);
 
 	const { tessellatorData } = data;
-	const { tessellatorDispatch } = update;
+	const { tessellatorDispatch, tessellatorDispatchAsync } = update;
 
 	const { preview } = tessellatorData;
+
+	const [ isOpen, setIsOpen ] = useState(false);
+	const openModal = () => setIsOpen(true);
+	const closeModal = () => setIsOpen(false);
 
 	/* Dispatch the source image to the tessellator */
 	const handleFile = (e) => {
@@ -90,46 +95,75 @@ export function FileSource({ data, update }) {
 	}, [ tessellatorData.parameters, preview ]);
 
 	return (
-		<div className="flex flex-col items-center justify-center">
-			<div className="flex flex-row items-start justify-center gap-2">
-				<label>
-					<canvas
-						ref={ canvasRef }
-						className="p-2 border border-solid rounded shadow-lg cursor-pointer border-neutral-200 hover:bg-neutral-700 active:bg-neutral-600 bg-neutral-800"
-						title="This is only an estimation of the final result. The actual result will be exact to the parameters you set."
-					/>
-					<input
-						type="file"
-						className="hidden"
-						onChange={ handleFile }
-					/>
-				</label>
+		<>
+			<div className="flex flex-col items-center justify-center">
+				<div className="flex flex-row items-start justify-center gap-2">
+					<label>
+						<canvas
+							ref={ canvasRef }
+							className="p-2 border border-solid rounded shadow-lg cursor-pointer border-neutral-200 hover:bg-neutral-700 active:bg-neutral-600 bg-neutral-800"
+							title="This is only an estimation of the final result. The actual result will be exact to the parameters you set."
+						/>
+						<input
+							type="file"
+							className="hidden"
+							onChange={ handleFile }
+						/>
+					</label>
 
-				<div className="flex flex-col items-start justify-center gap-2">
-					<button
-						className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow cursor-pointer border-neutral-200 hover:bg-neutral-50 active:bg-neutral-100 text-neutral-400"
-						onClick={ () => tessellatorDispatch({ type: "togglePreview" }) }
-						title={ preview ? "Hide preview" : "Show preview" }
-					>
-						{ preview ? <BsEye className="text-emerald-400" /> : <BsEyeSlash className="text-rose-400" /> }
-					</button>
-					<button
-						className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow cursor-pointer border-neutral-200 hover:bg-neutral-50 active:bg-neutral-100 text-neutral-400"
-						onClick={ e => null }
-						title="Adjust tessellation parameters"
-					>
-						<BsUiChecks className="text-lg text-neutral-400" />
-					</button>
-					<button
-						className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow cursor-pointer text-neutral-400 hover:text-amber-400 border-neutral-200 hover:bg-amber-50 active:bg-amber-100 hover:border-amber-200"
-						onClick={ e => null }
-						title="Retessellate (use after modifying tessellation parameters)"
-					>
-						<BsArrowClockwise className="text-lg" />
-					</button>
+					<div className="flex flex-col items-start justify-center gap-2">
+						<button
+							className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow cursor-pointer border-neutral-200 hover:bg-neutral-50 active:bg-neutral-100 text-neutral-400"
+							onClick={ () => tessellatorDispatch({ type: "togglePreview" }) }
+							title={ preview ? "Hide preview" : "Show preview" }
+						>
+							{ preview ? <BsEye className="text-emerald-400" /> : <BsEyeSlash className="text-rose-400" /> }
+						</button>
+						<button
+							className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow cursor-pointer border-neutral-200 hover:bg-neutral-50 active:bg-neutral-100 text-neutral-400"
+							onClick={ openModal }
+							title="Adjust tessellation parameters"
+						>
+							<BsUiChecks className="text-lg text-neutral-400" />
+						</button>
+						<button
+							className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow cursor-pointer text-neutral-400 hover:text-amber-400 border-neutral-200 hover:bg-amber-50 active:bg-amber-100 hover:border-amber-200"
+							onClick={ e => tessellatorDispatchAsync({ type: "tessellate" }) }
+							title="Retessellate (use after modifying tessellation parameters)"
+						>
+							<BsArrowClockwise className="text-lg" />
+						</button>
+					</div>
 				</div>
 			</div>
-		</div>
+
+
+			<Dialog as="div" open={ isOpen } onClose={ closeModal } className="fixed inset-0 z-10 overflow-y-auto">
+				<div className="min-h-screen px-4 text-center">
+					<Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+					<span className="inline-block h-screen align-middle" aria-hidden="true">&#8203;</span>
+					<div className="inline-block w-full max-w-md p-4 my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded shadow-xl">
+						<Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+							Tessellation Parameters
+						</Dialog.Title>
+						<div className="mt-2">
+							<p className="text-sm text-gray-500">
+								Make a tessellation configuration form here.
+							</p>
+						</div>
+						<div className="mt-4">
+							<button
+								type="button"
+								className="inline-flex justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 border border-transparent rounded hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
+								onClick={ closeModal }
+							>
+								Close
+							</button>
+						</div>
+					</div>
+				</div>
+			</Dialog>
+		</>
 	);
 };
 

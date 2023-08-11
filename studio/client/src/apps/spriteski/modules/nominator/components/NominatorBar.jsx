@@ -52,11 +52,11 @@ export function NominatorBar({ data, update }) {
 					<span className="inline-block h-screen align-middle" aria-hidden="true">&#8203;</span>
 					<div className="inline-block w-full max-w-md p-4 my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded shadow-xl">
 						<Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-							Modal Title
+							Nomination Form
 						</Dialog.Title>
 						<div className="mt-2">
 							<p className="text-sm text-gray-500">
-								Put Form Here
+								Create a nomination form for the pattern.
 							</p>
 						</div>
 						<div className="mt-4">
