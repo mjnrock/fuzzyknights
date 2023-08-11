@@ -1,27 +1,11 @@
 import { useEffect } from "react";
 import Chord from "@lespantsfancy/chord";
 
-import { Reducers, Nodes } from "../apps/spriteski/main.js";
+import { Nodes } from "../apps/spriteski/main.js";
 
 import { FileSource } from "../apps/spriteski/modules/tessellator/components/FileSource.jsx";
 import { TileCanvas } from "../apps/spriteski/modules/tessellator/components/TileCanvas.jsx";
 import { NominatorBar } from "../apps/spriteski/modules/nominator/components/NominatorBar.jsx";
-
-// const patternize = (phrase, tiles) => {
-// 	// phrase = [ a, b, c..., n ]
-// 	console.log(phrase);
-// 	console.log(tiles);
-// };
-// const form = useForm(fields, {
-// 	onUpdate: next => console.log("NEXT", next),
-// 	onValidate: (name, isValid) => console.log("VALIDATE", name, isValid),
-// 	onSubmit: (state) => {
-// 		const phrase = Object.values(state).map(value => eval(value));
-// 		const result = patternize(phrase, tiles);
-
-// 		console.log(result);
-// 	},
-// });
 
 export function Spriteski() {
 	const { state: tessellatorData, dispatch: tessellatorDispatch, dispatchAsync: tessellatorDispatchAsync } = Chord.Node.React.useNode(Nodes.tessellator);

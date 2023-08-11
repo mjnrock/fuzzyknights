@@ -16,13 +16,15 @@ export function NominationForm({ data, update }) {
 	const { tessellatorData, nominatorData } = data;
 	const { nominatorDispatch, nominatorDispatchAsync } = update;
 
-	console.log("NominationForm", nominatorData.form);
-	const form = useForm(nominatorData?.form?.schema, {
-		// onInit: next => nominatorDispatch({ type: "setFormData", data: next }),
+	const form = useForm(nominatorData?.form?.schema, nominatorData?.form?.data, {
+		// onInit: next => {
+		// 	nominatorDispatch({ type: "setFormData", data: next });
+		// 	console.log("onInit", next);
+		// },
 		onUpdate: next => nominatorDispatch({ type: "setFormData", data: next }),
 		// onValidate: (name, isValid) => console.log("VALIDATE", name, isValid),
 		// onSubmit: (isValid, data) => console.log("SUBMIT", isValid, data),
-	}, nominatorData?.form?.data);
+	});
 	const { id: formId, state: formState, setState: setFormState, lookup, update: formUpdate, validate, submit } = form;
 
 	const updateFieldType = useCallback((name, type) => {
@@ -59,8 +61,6 @@ export function NominationForm({ data, update }) {
 		// 	});
 		// }, [ fields ]);
 	}, []);
-
-	console.log("NominationForm", form);
 
 	return (
 		<>

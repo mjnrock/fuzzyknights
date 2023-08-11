@@ -7,7 +7,7 @@ import EnumFieldType from "../EnumFieldType";
  * within this hook.  As such, use when React alone is sufficient
  * to manage the form state (i.e. no external users)
  */
-export function useForm(schema, { onInit, onUpdate, onValidate, onSubmit } = {}, sync = {}) {
+export function useForm(schema, sync, { onInit, onUpdate, onValidate, onSubmit } = {}) {
 	const [ lookup, setLookup ] = useState({
 		$id: uuid(),
 	});
@@ -16,7 +16,6 @@ export function useForm(schema, { onInit, onUpdate, onValidate, onSubmit } = {},
 	});
 
 	useEffect(() => {
-		console.log(23456, sync);
 		setState(sync);
 
 		if(onUpdate) {
@@ -26,6 +25,7 @@ export function useForm(schema, { onInit, onUpdate, onValidate, onSubmit } = {},
 
 	useEffect(() => {
 		if(!schema) return;
+		if(!schema?.state?.[ 0 ]?.state) return;
 
 		const nextRepo = {};
 		const recurser = (field, data = {}) => {

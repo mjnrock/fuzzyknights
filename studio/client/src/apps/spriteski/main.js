@@ -191,8 +191,6 @@ export const Reducers = {
 			next.pattern = pattern;
 			next.form.schema = Helpers.nominator.calcFields(pattern);
 
-			console.log(next)
-
 			return next;
 		},
 		setForm(state, form) {
@@ -228,7 +226,6 @@ export const Reducers = {
 			const { data } = form;
 			const nominations = {};
 
-			console.log(tiles, phrase, form, data, pattern);
 			let $i = 0,
 				$x = 0,
 				$y = 0;
@@ -267,8 +264,6 @@ export const Reducers = {
 				}
 			}
 
-			console.log(nominations)
-
 			return {
 				...state,
 				nominations,
@@ -280,19 +275,20 @@ export const Reducers = {
 const Effects = {
 	nominator: {
 		nominate: [
+			//IDEA: Create a JSON file from the nominations
 			async (state) => {
-				const { nominations } = state;
+				// const { nominations } = state;
 
-				let result = await Helpers.nominator.serialize(nominations);
+				// let result = await Helpers.nominator.serialize(nominations);
 
-				// invoke a save dialog
-				const blob = new Blob([ result ], { type: "application/json" });
-				const url = URL.createObjectURL(blob);
-				const a = document.createElement("a");
+				// // invoke a save dialog
+				// const blob = new Blob([ result ], { type: "application/json" });
+				// const url = URL.createObjectURL(blob);
+				// const a = document.createElement("a");
 
-				a.href = url;
-				a.download = `${ uuid() }.json`;
-				a.click();
+				// a.href = url;
+				// a.download = `${ uuid() }.json`;
+				// a.click();
 			},
 		],
 	},
@@ -330,6 +326,12 @@ export const Nodes = Chord.Node.Node.CreateMany({
 		},
 		reducers: Reducers.nominator,
 		effects: Effects.nominator,
+
+		$run: true,
+		$init: (self) => {
+			//NOTE: Since setPhrase also kicks off the pattern and form process, invoke it here to "seed" that behavior (kind of a hack)
+			self.dispatch("setPhrase", self.state.phrase);
+		},
 	},
 });
 
