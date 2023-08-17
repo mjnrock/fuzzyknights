@@ -54,6 +54,7 @@ export function NominationForm({ data, update }) {
 
 	//FIXME: The fundamental problem is the `useForm` hook.  Move the form manipulation into state management and dispatch accordingly.
 	//NOTE: This is not a trivial transfer -- update,validate,submit and onInit,onUpdate,onValidate,onSubmit are all callbacks that need to be handled.
+	//NOTE: useEffect on data changes at first glance feels like the easy target, but that causes a loop from the event listener -- if easily solutionable, it's the best option.
 
 	return (
 		<>
