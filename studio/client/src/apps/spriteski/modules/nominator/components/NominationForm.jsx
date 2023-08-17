@@ -21,41 +21,39 @@ export function NominationForm({ data, update }) {
 		onUpdate: next => nominatorDispatch({ type: "setFormData", data: next }),
 	});
 
-	//TODO: Reimplement this using the Flux paradigm
-	const updateFieldType = useCallback((name, type) => {
-		// 	const next = [];
-		// 	const section = fields.state[ 0 ].state;
-		// 	for(let field of section) {
-		// 		if(field.name === name) {
-		// 			let nextField = {
-		// 				...field,
-		// 				state: null,
-		// 				type,
-		// 			};
+	// const updateFieldType = useCallback((name, type) => {
+	// 	const next = [];
+	// 	const fields = nominatorData?.form?.schema.state[ 0 ].state;
+	// 	for(let field of fields) {
+	// 		if(field.name === name) {
+	// 			let nextField = {
+	// 				...field,
+	// 				state: null,
+	// 				type,
+	// 			};
 
-		// 			if(type === EnumFieldType.ENUM) {
-		// 				nextField.meta.options = [];
-		// 			} else if(type === EnumFieldType.FUNCTION) {
-		// 				nextField.state = `({ $x, $y, ...rest }) => null`;
-		// 			}
+	// 			if(type === EnumFieldType.ENUM) {
+	// 				nextField.meta.options = [];
+	// 			} else if(type === EnumFieldType.FUNCTION) {
+	// 				nextField.state = `({ $x, $y, ...rest }) => null`;
+	// 			}
 
-		// 			next.push(nextField);
-		// 		} else {
-		// 			next.push(field);
-		// 		}
-		// 	}
+	// 			console.log(field)
+	// 			console.log(nextField)
 
-		// 	setFields({
-		// 		...fields,
-		// 		state: [
-		// 			{
-		// 				...fields.state[ 0 ],
-		// 				state: next,
-		// 			},
-		// 		],
-		// 	});
-		// }, [ fields ]);
-	}, []);
+	// 			next.push(nextField);
+	// 		} else {
+	// 			next.push(field);
+	// 		}
+	// 	}
+
+	// 	form.update(next);
+	// }, [ nominatorData?.form?.schema ]);
+
+	// console.log(form.state)
+
+	//FIXME: The fundamental problem is the `useForm` hook.  Move the form manipulation into state management and dispatch accordingly.
+	//NOTE: This is not a trivial transfer -- update,validate,submit and onInit,onUpdate,onValidate,onSubmit are all callbacks that need to be handled.
 
 	return (
 		<>
@@ -84,7 +82,7 @@ export function NominationForm({ data, update }) {
 							<select
 								className="p-2 border border-solid rounded border-neutral-200 hover:bg-neutral-50"
 								onChange={ e => {
-									updateFieldType(field.name, e.target.value);
+									nominatorDispatch({ type: "updateFieldType", data: { id: field.id, type: e.target.value } });
 								} }
 							>
 								{

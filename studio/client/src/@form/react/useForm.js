@@ -53,26 +53,37 @@ export function useForm(schema, sync, { onInit, onUpdate, onValidate, onSubmit }
 		}
 	}, [ schema ]);
 
-	const update = (name, value) => {
-		if(!(name in state)) {
-			console.warn(`Field ${ name } does not exist.`);
-			return;
-		}
+	const update = (name, value, suppress = false) => {
+		let next = { ...state };
+		if(Array.isArray(name)) {
+			for(const field of name) {
+				console.log(field)
+				next[ field?.name ] = update(field?.name, field?.state, true);
+			}
+		} else if(typeof name === "object") {
+			for(const [ key, value ] of Object.entries(name)) {
+				next[ key ] = update(key, value, true);
+			}
+		} else {
+			if(!(name in state)) {
+				console.warn(`Field ${ name } does not exist.`);
+				return;
+			}
 
-		if(validate(name, value) === false) {
-			return;
-		}
+			if(validate(name, value) === false) {
+				return;
+			}
 
-		const next = {
-			...state,
-			[ name ]: value,
-		};
+			next[ name ] = value;
+		}
 
 		setState(next);
 
-		if(onUpdate) {
+		if(!suppress && onUpdate) {
 			onUpdate(next);
 		}
+
+		return next;
 	};
 
 	const validate = (name, value) => {
@@ -85,7 +96,7 @@ export function useForm(schema, sync, { onInit, onUpdate, onValidate, onSubmit }
 		const field = lookup[ id ];
 
 		let isValid = true;
-		if(field.validation) {
+		if(field?.validation) {
 			const { required, validator, regex, min, max } = field.validation;
 
 			if(validator) {

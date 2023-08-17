@@ -100,29 +100,22 @@ export const Reducers = ({ } = {}) => ({
 	},
 	setFieldState: (form, fieldId, state) => {
 		const next = { ...form };
-		const findField = (state) => {
-			if(!state) return null;
-
-			const field = state.find((s) => s.id === fieldId);
-
-			if(field) return field;
-
-			for(const section of state) {
-				const field = findField(section.state);
-
-				if(field) return field;
-
-				continue;
-			}
-
-			return null;
-		};
-
-		const field = findField(next.state);
+		const field = Helpers.findField(next, fieldId);
 
 		if(!field) return next;
 
 		field.state = state;
+
+		return next;
+	},
+	changeFieldType: (form, fieldId, type, state) => {
+		const next = { ...form };
+		const field = Helpers.findField(next, fieldId);
+
+		if(!field) return next;
+
+		field.type = type;
+		field.state = state ?? field.state;
 
 		return next;
 	},

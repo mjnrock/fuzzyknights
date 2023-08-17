@@ -9,6 +9,23 @@ import Serialize from "../../util/Serialize";
 
 export const Helpers = {
 	nominator: {
+		getFormData(state, schema) {
+			const recurser = (field, data = {}) => {
+				if(field.type === EnumFieldType.FORM || field.type === EnumFieldType.SECTION) {
+					for(const subField of field.state) {
+						recurser(subField, data);
+					}
+				} else {
+					data[ field.name ] = state[ field.name ] ?? field.state;
+				}
+
+				return data;
+			};
+
+			const next = recurser(schema);
+
+			return next;
+		},
 		calcPattern(phrase) {
 			// split the pattern-phrase into an array of words
 			const pattern = [];
@@ -208,12 +225,25 @@ export const Reducers = {
 			};
 		},
 
-		setFields(state, fields) {
+		updateFieldType(state, { id, type }) {
 			const { form } = state;
+			const field = Form.Helpers.findField(form.schema, id);
+
+			let fieldState = field.state;
+			if(type === EnumFieldType.FUNCTION) {
+				field.state = `({ $x, $y, $i, ...args }) => {
+					return;
+				}`;
+			} else if(type === EnumFieldType.ENUM) {
+				field.meta.options = [];
+			}
 
 			return {
 				...state,
-				form: Form.Reducers().setSectionState(form, form.state[ 0 ].id, fields),
+				form: {
+					...form,
+					schema: Form.Reducers().changeFieldType(form.schema, id, type),
+				},
 			};
 		},
 		setFormData(state, data) {
@@ -335,8 +365,9 @@ export const Nodes = Chord.Node.Node.CreateMany({
 
 		$run: true,
 		$init: (self) => {
-			//NOTE: Since setPhrase also kicks off the pattern and form process, invoke it here to "seed" that behavior (kind of a hack)
+			//NOTE: Since setPhrase also kicks off the pattern and form process, invoke it here to seed with that behavior
 			self.dispatch("setPhrase", self.state.phrase);
+			self.dispatch("setFormData", Helpers.nominator.getFormData(self.state, self.state.form.schema));
 		},
 	},
 });
