@@ -29,8 +29,8 @@ export const Helpers = {
 		calcFields: (state) => {
 			// use the pattern array to create a Field array
 			const next = [];
-			for(const key in state.parameters) {
-				const value = state.parameters[ key ];
+			for(const key in state.form.data) {
+				const value = state.form.data[ key ];
 
 				next.push({
 					id: uuid(),
@@ -190,28 +190,6 @@ export const Helpers = {
 
 export const Reducers = {
 	tessellator: {
-		setParameter(state, [ name, value ]) {
-			const { parameters } = state;
-
-			return {
-				...state,
-				parameters: {
-					...parameters,
-					[ name ]: value,
-				},
-			};
-		},
-		setParameters(state, data = {}) {
-			const { parameters } = state;
-
-			return {
-				...state,
-				parameters: {
-					...parameters,
-					...data,
-				},
-			};
-		},
 		togglePreview(state) {
 			return {
 				...state,
@@ -219,8 +197,8 @@ export const Reducers = {
 			};
 		},
 		setSize(state) {
-			const { parameters, source } = state;
-			const { tw } = parameters;
+			const { source } = state;
+			const { tw } = state.form.data;
 
 			return {
 				...state,
@@ -239,7 +217,7 @@ export const Reducers = {
 			return {
 				...state,
 				source: canvas,
-				size: Math.ceil(source.width / state.parameters.tw),
+				size: Math.ceil(source.width / state.form.data.tw),
 			};
 		},
 		setFormData(state, data) {
@@ -279,10 +257,10 @@ export const Reducers = {
 			};
 		},
 		async tessellate(state) {
-			const { source, algorithm, parameters } = state;
+			const { source, algorithm } = state;
 			if(!source) return state;
 
-			const tiles = await algorithm(source, parameters);
+			const tiles = await algorithm(source, state.form.data);
 
 			return {
 				...state,
@@ -439,11 +417,6 @@ const Effects = {
 				});
 			},
 		],
-		updateFieldValues: [
-			function (state) {
-				this.dispatch("setParameters", state.form.data);
-			},
-		],
 	},
 	nominator: {
 		nominate: [
@@ -476,15 +449,14 @@ export const Nodes = Chord.Node.Node.CreateMany({
 			size: 4,
 			form: {
 				schema: Form.Templates.SimpleForm(),
-				data: {},
-			},
-			parameters: {
-				tw: 64,
-				th: 64,
-				sx: 0,
-				sy: 0,
-				sw: null,
-				sh: null,
+				data: {
+					tw: 64,
+					th: 64,
+					sx: 0,
+					sy: 0,
+					sw: null,
+					sh: null,
+				},
 			},
 			tiles: [],
 		},

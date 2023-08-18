@@ -46,7 +46,8 @@ export function FileSource({ data, update }) {
 
 	/* Draw the tessellation preview */
 	useEffect(() => {
-		const { source: sourceImage, parameters } = tessellatorData;
+		const { source: sourceImage } = tessellatorData;
+		const parameters = tessellatorData?.form?.data;
 
 		if(!sourceImage) {
 			// Draw the text "Please select a file" on the canvas
