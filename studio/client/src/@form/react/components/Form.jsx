@@ -1,17 +1,16 @@
 import { Field } from "./Field.jsx";
 import React from "react";
 
-export function Form({ renderSection, renderField, form }) {
-	const { state, lookup, update, validate, submit } = form;
-
+export function Form({ renderSection, renderField, form, dispatch }) {
 	return (
 		<>
-			{ lookup?.[ form.id ]?.state?.map((field) => (
+			{ form?.schema?.state?.map((field) => (
 				<Field
 					key={ field.id }
 					field={ field }
 					ctx={{
-						...form,
+						form,
+						dispatch,
 						renderField,
 						renderSection,
 					}}

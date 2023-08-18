@@ -4,13 +4,91 @@ import Chord from "@lespantsfancy/chord";
 import { EnumFieldType } from "../../@form/EnumFieldType";
 import { LTRTTB } from "./modules/tessellator/data/algorithms/LTRTTB";
 import Form from "./modules/nominator/Form";
+import Base64 from "../../util/Base64";
+import Serialize from "../../util/Serialize";
 
 export const Helpers = {
+	tessellator: {
+		getFormData(state, schema) {
+			const recurser = (field, data = {}) => {
+				if(field.type === EnumFieldType.FORM || field.type === EnumFieldType.SECTION) {
+					for(const subField of field.state) {
+						recurser(subField, data);
+					}
+				} else {
+					data[ field.name ] = state?.form?.data?.[ field.name ] ?? field.state;
+				}
+
+				return data;
+			};
+
+			console.log(schema)
+			console.log(schema.state)
+
+			const next = recurser(schema);
+
+			return next;
+		},
+		calcFields: (state) => {
+			// use the pattern array to create a Field array
+			const next = [];
+			for(const key in state.parameters) {
+				const value = state.parameters[ key ];
+
+				next.push({
+					id: uuid(),
+					type: EnumFieldType.NUMBER,
+					name: key,
+					meta: {
+						label: key,
+					},
+					state: +value,
+				});
+			}
+
+			return {
+				id: uuid(),
+				type: EnumFieldType.FORM,
+				name: "@root",
+				state: [
+					{
+						id: uuid(),
+						type: EnumFieldType.SECTION,
+						name: "@section",
+						meta: {
+							isVirtual: false,
+						},
+						state: next,
+					},
+				],
+			};
+		},
+	},
 	nominator: {
+		getFormData(state, schema) {
+			const recurser = (field, data = {}) => {
+				if(field.type === EnumFieldType.FORM || field.type === EnumFieldType.SECTION) {
+					for(const subField of field.state) {
+						recurser(subField, data);
+					}
+				} else {
+					data[ field.name ] = state?.form?.data?.[ field.name ] ?? field.state;
+				}
+
+				return data;
+			};
+
+			const next = recurser(schema);
+
+			return next;
+		},
 		calcPattern(phrase) {
 			// split the pattern-phrase into an array of words
 			const pattern = [];
 			const values = phrase.split("-");
+
+			//FIXME: Hard-coded words don't appear to be working -- perhaps the value isn't making it into the form (which is the only source of data)?
+
 			for(let i = 0; i < values.length; i++) {
 				let word = values[ i ].trim();
 				if(word.startsWith("{") && word.endsWith("}")) {
@@ -80,11 +158,64 @@ export const Helpers = {
 				],
 			};
 		},
+
+		serialize: async (nominations) => {
+			const nextNomination = {};
+
+			for(const name in nominations) {
+				const tile = nominations[ name ];
+				const nextTile = {
+					...tile,
+					data: await Base64.Encode(tile.data),
+				};
+				console.log(nextTile)
+
+				nextNomination[ nextTile.$id ] = nextTile;
+			}
+
+			return Serialize.stringify(nextNomination);
+		},
+		deserialize: async (json) => {
+			const nominations = Serialize.parse(json);
+			const next = {};
+
+			for(let id in nominations) {
+				const tile = nominations[ id ];
+				next[ id ] = {
+					...tile,
+					data: await Base64.Decode(tile.data),
+				};
+			}
+
+			return next;
+		},
 	},
 };
 
 export const Reducers = {
 	tessellator: {
+		setParameter(state, [ name, value ]) {
+			const { parameters } = state;
+
+			return {
+				...state,
+				parameters: {
+					...parameters,
+					[ name ]: value,
+				},
+			};
+		},
+		setParameters(state, data = {}) {
+			const { parameters } = state;
+
+			return {
+				...state,
+				parameters: {
+					...parameters,
+					...data,
+				},
+			};
+		},
 		togglePreview(state) {
 			return {
 				...state,
@@ -113,10 +244,41 @@ export const Reducers = {
 				...state,
 				source: canvas,
 				size: Math.ceil(source.width / state.parameters.tw),
-				parameters: {
-					...state.parameters,
-					sw: canvas.width,
-					sh: canvas.height,
+			};
+		},
+		setFormData(state, data) {
+			const { form } = state;
+
+			return {
+				...state,
+				form: {
+					...form,
+					data,
+				},
+			};
+		},
+		setFormSchema(state, schema) {
+			const { form } = state;
+
+			return {
+				...state,
+				form: {
+					...form,
+					schema,
+				},
+			};
+		},
+		updateFieldValues(state, [ name, value ]) {
+			const { form } = state;
+
+			return {
+				...state,
+				form: {
+					...form,
+					data: {
+						...form.data,
+						[ name ]: value,
+					},
 				},
 			};
 		},
@@ -157,8 +319,7 @@ export const Reducers = {
 			let pattern = Helpers.nominator.calcPattern(phrase);
 			next.pattern = pattern;
 			next.form.schema = Helpers.nominator.calcFields(pattern);
-
-			console.log(next)
+			next.form.data = Helpers.nominator.getFormData(next, next.form.schema);
 
 			return next;
 		},
@@ -169,12 +330,30 @@ export const Reducers = {
 			};
 		},
 
-		setFields(state, fields) {
+		updateFieldType(state, { id, type }) {
 			const { form } = state;
+			const field = Form.Helpers.findField(form.schema, id);
+
+			if(!field) return state;
+
+			field.type = type;
+
+			if(type === EnumFieldType.FUNCTION) {
+				field.state = `({ $x, $y, $i, ...args }) => {\r\n\treturn Date.now();\r\n}`;
+			} else if(type === EnumFieldType.ENUM) {
+				field.meta.options = [];
+			}
+
 
 			return {
 				...state,
-				form: Form.Reducers().setSectionState(form, form.state[ 0 ].id, fields),
+				form: {
+					schema: Form.Reducers().replaceField(form.schema, id, field),
+					data: {
+						...form.data,
+						[ field.name ]: field.state,
+					},
+				},
 			};
 		},
 		setFormData(state, data) {
@@ -188,6 +367,20 @@ export const Reducers = {
 				},
 			};
 		},
+		updateFieldValues(state, [ name, value ]) {
+			const { form } = state;
+
+			return {
+				...state,
+				form: {
+					...form,
+					data: {
+						...form.data,
+						[ name ]: value,
+					},
+				},
+			};
+		},
 
 
 		nominate(state, tiles) {
@@ -195,7 +388,6 @@ export const Reducers = {
 			const { data } = form;
 			const nominations = {};
 
-			console.log(tiles, phrase, form, data, pattern);
 			let $i = 0,
 				$x = 0,
 				$y = 0;
@@ -208,8 +400,6 @@ export const Reducers = {
 					const tile = row[ x ];
 					$x = x;
 
-					console.log(x, y, pattern)
-
 					const name = pattern.map(p => {
 						if(p.startsWith("$")) {
 							if(p === "$i") return $i;
@@ -218,14 +408,16 @@ export const Reducers = {
 						}
 
 						const entry = data?.[ p ];
-						const v = entry?.startsWith("({") ? eval(entry)?.toString() : entry?.toString();
+						console.log(data)
+						console.log($x, $y, $i, entry)
+						const v = entry?.startsWith("({") ? eval(entry) : entry?.toString();
 
 						if(typeof v === "function") {
 							return v({ $i, $x, $y, tile });
 						} else {
 							return v;
 						}
-					}).join("-");
+					}).join("-");	//TODO: Allow for custom separators (all will become dashes for now)
 
 					nominations[ name ] = tile;
 					tile.$name = name;
@@ -234,13 +426,49 @@ export const Reducers = {
 				}
 			}
 
-			console.log(nominations)
-
 			return {
 				...state,
 				nominations,
 			};
 		}
+	},
+};
+
+const Effects = {
+	tessellator: {
+		setSource: [
+			function (state) {
+				this.dispatch("setFormData", {
+					...state.form.data,
+					sw: state.source.width,
+					sh: state.source.height,
+				});
+			},
+		],
+		updateFieldValues: [
+			function (state) {
+				this.dispatch("setParameters", state.form.data);
+			},
+		],
+	},
+	nominator: {
+		nominate: [
+			//IDEA: Create a JSON file from the nominations
+			async (state) => {
+				// const { nominations } = state;
+
+				// let result = await Helpers.nominator.serialize(nominations);
+
+				// // invoke a save dialog
+				// const blob = new Blob([ result ], { type: "application/json" });
+				// const url = URL.createObjectURL(blob);
+				// const a = document.createElement("a");
+
+				// a.href = url;
+				// a.download = `${ uuid() }.json`;
+				// a.click();
+			},
+		],
 	},
 };
 
@@ -252,6 +480,10 @@ export const Nodes = Chord.Node.Node.CreateMany({
 			preview: true,
 			algorithm: LTRTTB,
 			size: 4,
+			form: {
+				schema: Form.Templates.SimpleForm(),
+				data: {},
+			},
 			parameters: {
 				tw: 64,
 				th: 64,
@@ -263,6 +495,13 @@ export const Nodes = Chord.Node.Node.CreateMany({
 			tiles: [],
 		},
 		reducers: Reducers.tessellator,
+		effects: Effects.tessellator,
+
+		$run: true,
+		$init: (self) => {
+			self.dispatch("setFormSchema", Helpers.tessellator.calcFields(self.state));
+			self.dispatch("setFormData", Helpers.tessellator.getFormData(self.state, self.state.form.schema));
+		},
 	},
 	nominator: {
 		state: {
@@ -275,6 +514,14 @@ export const Nodes = Chord.Node.Node.CreateMany({
 			nominations: {},
 		},
 		reducers: Reducers.nominator,
+		effects: Effects.nominator,
+
+		$run: true,
+		$init: (self) => {
+			//NOTE: Since setPhrase also kicks off the pattern and form process, invoke it here to seed with that behavior
+			self.dispatch("setPhrase", self.state.phrase);
+			self.dispatch("setFormData", Helpers.nominator.getFormData(self.state, self.state.form.schema));
+		},
 	},
 });
 

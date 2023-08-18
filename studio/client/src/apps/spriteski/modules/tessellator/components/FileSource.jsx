@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { BsEye, BsEyeSlash, BsUiChecks, BsArrowClockwise } from "react-icons/bs";
 import { Dialog } from "@headlessui/react";
+import { AlgorithmForm } from "./AlgorithmForm";
 
 export function FileSource({ data, update }) {
 	const canvasRef = useRef(null);
 
-	const { tessellatorData } = data;
-	const { tessellatorDispatch, tessellatorDispatchAsync } = update;
+	const { tessellatorData, nominatorData } = data;
+	const { tessellatorDispatch, tessellatorDispatchAsync, nominatorDispatch } = update;
 
 	const { preview } = tessellatorData;
 
@@ -147,9 +148,10 @@ export function FileSource({ data, update }) {
 							Tessellation Parameters
 						</Dialog.Title>
 						<div className="mt-2">
-							<p className="text-sm text-gray-500">
-								Make a tessellation configuration form here.
-							</p>
+							<AlgorithmForm
+								data={ { tessellatorData, nominatorData } }
+								update={ { nominatorDispatch, tessellatorDispatch } }
+							/>
 						</div>
 						<div className="mt-4">
 							<button

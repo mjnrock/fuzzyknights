@@ -5,22 +5,15 @@ import { Form } from "../../../../../@form/react/components/Form.jsx";
 import { Field } from "../../../../../@form/react/components/Field.jsx";
 import { debounce } from "../../../../../util/debounce.js";
 
-const CulledEnumFieldType = {
-	TEXT: EnumFieldType.TEXT,
-	NUMBER: EnumFieldType.NUMBER,
-	// ENUM: EnumFieldType.ENUM,
-	FUNCTION: EnumFieldType.FUNCTION,
-};
-
-export function NominationForm({ data, update }) {
-	const { nominatorData } = data;
-	const { nominatorDispatch } = update;
+export function AlgorithmForm({ data, update }) {
+	const { tessellatorData, nominatorData } = data;
+	const { tessellatorDispatch, nominatorDispatch } = update;
 
 	return (
 		<>
 			<Form
-				form={ nominatorData?.form }
-				dispatch={ nominatorDispatch }
+				form={ tessellatorData?.form }
+				dispatch={ tessellatorDispatch }
 				renderField={ ({ children, field, value, ctx, jsx: Component, ...props }) => {
 					const { dispatch } = ctx;
 
@@ -41,24 +34,6 @@ export function NominationForm({ data, update }) {
 					return (
 						<div className="flex flex-col gap-2 m-2">
 							<div>{ field.meta.label }</div>
-
-							<select
-								className="p-2 border border-solid rounded border-neutral-200 hover:bg-neutral-50"
-								defaultValue={ field.type }
-								onChange={ e => {
-									nominatorDispatch({ type: "updateFieldType", data: { id: field.id, type: e.target.value } });
-								} }
-							>
-								{
-									Object.entries(CulledEnumFieldType).map(([ key, value ]) => (
-										<option
-											key={ key }
-											value={ value }
-										>{ key }</option>
-									))
-								}
-							</select>
-
 							<Component
 								key={ field.id }
 								className="p-2 border border-solid rounded border-neutral-200 hover:bg-neutral-50"
@@ -66,7 +41,7 @@ export function NominationForm({ data, update }) {
 								value={ value ?? field.state ?? "" }
 								ctx={ {
 									...ctx,
-									dispatch: debounce(dispatch, 50),
+									dispatch: debounce(dispatch, 25),
 								} }
 								{ ...props }
 							/>
@@ -92,4 +67,4 @@ export function NominationForm({ data, update }) {
 	);
 };
 
-export default NominationForm;
+export default AlgorithmForm;

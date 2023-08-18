@@ -27,6 +27,14 @@ export function NominatorBar({ data, update }) {
 					placeholder="Naming Pattern"
 					value={ nominatorData.phrase }
 					onChange={ e => nominatorDispatch({ type: "setPhrase", data: e.target.value }) }
+					onKeyDown={ e=> {
+						if(e.ctrlKey && e.code === "Space") {
+							openModal();
+						} else if(e.ctrlKey && e.key === "Enter") {
+							nominatorDispatch({ type: "nominate", data: tessellatorData.tiles });
+						}
+					}}
+					title="For now, only hyphen (-) separators are properly supported.  Press CTRL+SPACE to open the nomination form, and CTRL+ENTER to apply the naming pattern to the respective tiles."
 				/>
 				<button
 					className="flex flex-col items-center justify-center p-4 border border-solid rounded shadow cursor-pointer text-neutral-400 hover:text-emerald-400 border-neutral-200 hover:bg-emerald-50 active:bg-emerald-100 hover:border-emerald-200"

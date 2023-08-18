@@ -50,7 +50,7 @@ export const Selectors = {
 };
 
 export const Templates = {
-	SimpleForm: ({ label, fields, ...args } = {}) => ({
+	SimpleForm: ({ label, fields = [], ...args } = {}) => ({
 		id: uuid(),
 		type: EnumFieldType.FORM,
 		name: "@form",
@@ -100,25 +100,7 @@ export const Reducers = ({ } = {}) => ({
 	},
 	setFieldState: (form, fieldId, state) => {
 		const next = { ...form };
-		const findField = (state) => {
-			if(!state) return null;
-
-			const field = state.find((s) => s.id === fieldId);
-
-			if(field) return field;
-
-			for(const section of state) {
-				const field = findField(section.state);
-
-				if(field) return field;
-
-				continue;
-			}
-
-			return null;
-		};
-
-		const field = findField(next.state);
+		const field = Helpers.findField(next, fieldId);
 
 		if(!field) return next;
 
@@ -126,6 +108,38 @@ export const Reducers = ({ } = {}) => ({
 
 		return next;
 	},
+	changeFieldType: (form, fieldId, type, state) => {
+		const next = { ...form };
+		const field = Helpers.findField(next, fieldId);
+
+		if(!field) return next;
+
+		field.type = type;
+		field.state = state ?? field.state;
+
+		return next;
+	},
+	replaceField: (form, fieldId, field) => {
+		const next = { ...form };
+		const replaceField = (state) => {
+			if(!state) return null;
+
+			const index = state.findIndex((s) => s.id === fieldId);
+
+			if(index !== -1) {
+				state.splice(index, 1, field);
+				return;
+			}
+
+			for(const section of state) {
+				replaceField(section.state);
+			}
+		};
+
+		replaceField(next.state);
+
+		return next;
+	}
 });
 
 export default {

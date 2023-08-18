@@ -1,5 +1,5 @@
 export function FieldInput({ field, value, ctx, ...props }) {
-	const { lookup, update, validate, submit } = ctx;
+	const { dispatch } = ctx;
 	const { id, type, name } = field;
 
 	return (
@@ -8,9 +8,10 @@ export function FieldInput({ field, value, ctx, ...props }) {
 			name={ name }
 			type={ type }
 			value={ value }
-			onChange={ e => {
-				update(name, e.target.value);
-			} }
+			onChange={ type === "number" ?
+				e => dispatch({ type: "updateFieldValues", data: [ name, +e.target.value ] })
+				: e => dispatch({ type: "updateFieldValues", data: [ name, e.target.value ] })
+			}
 			{ ...field?.html }
 			{ ...props }
 		/>
