@@ -20,8 +20,8 @@ export function Spriteski() {
 	return (
 		<div className="m-2">
 			<FileSource
-				data={ { tessellatorData } }
-				update={ { tessellatorDispatch, tessellatorDispatchAsync } }
+				data={ { tessellatorData, nominatorData } }
+				update={ { nominatorDispatch, tessellatorDispatch, tessellatorDispatchAsync } }
 			/>
 
 			<NominatorBar

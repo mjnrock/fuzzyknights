@@ -50,7 +50,7 @@ export const Selectors = {
 };
 
 export const Templates = {
-	SimpleForm: ({ label, fields, ...args } = {}) => ({
+	SimpleForm: ({ label, fields = [], ...args } = {}) => ({
 		id: uuid(),
 		type: EnumFieldType.FORM,
 		name: "@form",

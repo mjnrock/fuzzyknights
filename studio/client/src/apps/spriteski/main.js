@@ -8,6 +8,62 @@ import Base64 from "../../util/Base64";
 import Serialize from "../../util/Serialize";
 
 export const Helpers = {
+	tessellator: {
+		getFormData(state, schema) {
+			const recurser = (field, data = {}) => {
+				if(field.type === EnumFieldType.FORM || field.type === EnumFieldType.SECTION) {
+					for(const subField of field.state) {
+						recurser(subField, data);
+					}
+				} else {
+					data[ field.name ] = state?.form?.data?.[ field.name ] ?? field.state;
+				}
+
+				return data;
+			};
+
+			console.log(schema)
+			console.log(schema.state)
+
+			const next = recurser(schema);
+
+			return next;
+		},
+		calcFields: (state) => {
+			// use the pattern array to create a Field array
+			const next = [];
+			for(const key in state.parameters) {
+				const value = state.parameters[ key ];
+
+				next.push({
+					id: uuid(),
+					type: EnumFieldType.NUMBER,
+					name: key,
+					meta: {
+						label: key,
+					},
+					state: +value,
+				});
+			}
+
+			return {
+				id: uuid(),
+				type: EnumFieldType.FORM,
+				name: "@root",
+				state: [
+					{
+						id: uuid(),
+						type: EnumFieldType.SECTION,
+						name: "@section",
+						meta: {
+							isVirtual: false,
+						},
+						state: next,
+					},
+				],
+			};
+		},
+	},
 	nominator: {
 		getFormData(state, schema) {
 			const recurser = (field, data = {}) => {
@@ -16,7 +72,7 @@ export const Helpers = {
 						recurser(subField, data);
 					}
 				} else {
-					data[ field.name ] = state[ field.name ] ?? field.state;
+					data[ field.name ] = state?.form?.data?.[ field.name ] ?? field.state;
 				}
 
 				return data;
@@ -29,14 +85,9 @@ export const Helpers = {
 		calcPattern(phrase) {
 			// split the pattern-phrase into an array of words
 			const pattern = [];
-			const values = phrase
-				.split("-")
-				.join(" ")
-				.split(",")
-				.join(" ")
-				.split(";")
-				.join(" ")
-				.split(" ");
+			const values = phrase.split("-");
+
+			//FIXME: Hard-coded words don't appear to be working -- perhaps the value isn't making it into the form (which is the only source of data)?
 
 			for(let i = 0; i < values.length; i++) {
 				let word = values[ i ].trim();
@@ -143,6 +194,28 @@ export const Helpers = {
 
 export const Reducers = {
 	tessellator: {
+		setParameter(state, [ name, value ]) {
+			const { parameters } = state;
+
+			return {
+				...state,
+				parameters: {
+					...parameters,
+					[ name ]: value,
+				},
+			};
+		},
+		setParameters(state, data = {}) {
+			const { parameters } = state;
+
+			return {
+				...state,
+				parameters: {
+					...parameters,
+					...data,
+				},
+			};
+		},
 		togglePreview(state) {
 			return {
 				...state,
@@ -171,10 +244,41 @@ export const Reducers = {
 				...state,
 				source: canvas,
 				size: Math.ceil(source.width / state.parameters.tw),
-				parameters: {
-					...state.parameters,
-					sw: canvas.width,
-					sh: canvas.height,
+			};
+		},
+		setFormData(state, data) {
+			const { form } = state;
+
+			return {
+				...state,
+				form: {
+					...form,
+					data,
+				},
+			};
+		},
+		setFormSchema(state, schema) {
+			const { form } = state;
+
+			return {
+				...state,
+				form: {
+					...form,
+					schema,
+				},
+			};
+		},
+		updateFieldValues(state, [ name, value ]) {
+			const { form } = state;
+
+			return {
+				...state,
+				form: {
+					...form,
+					data: {
+						...form.data,
+						[ name ]: value,
+					},
 				},
 			};
 		},
@@ -215,6 +319,7 @@ export const Reducers = {
 			let pattern = Helpers.nominator.calcPattern(phrase);
 			next.pattern = pattern;
 			next.form.schema = Helpers.nominator.calcFields(pattern);
+			next.form.data = Helpers.nominator.getFormData(next, next.form.schema);
 
 			return next;
 		},
@@ -303,6 +408,8 @@ export const Reducers = {
 						}
 
 						const entry = data?.[ p ];
+						console.log(data)
+						console.log($x, $y, $i, entry)
 						const v = entry?.startsWith("({") ? eval(entry) : entry?.toString();
 
 						if(typeof v === "function") {
@@ -328,6 +435,22 @@ export const Reducers = {
 };
 
 const Effects = {
+	tessellator: {
+		setSource: [
+			function (state) {
+				this.dispatch("setFormData", {
+					...state.form.data,
+					sw: state.source.width,
+					sh: state.source.height,
+				});
+			},
+		],
+		updateFieldValues: [
+			function (state) {
+				this.dispatch("setParameters", state.form.data);
+			},
+		],
+	},
 	nominator: {
 		nominate: [
 			//IDEA: Create a JSON file from the nominations
@@ -357,6 +480,10 @@ export const Nodes = Chord.Node.Node.CreateMany({
 			preview: true,
 			algorithm: LTRTTB,
 			size: 4,
+			form: {
+				schema: Form.Templates.SimpleForm(),
+				data: {},
+			},
 			parameters: {
 				tw: 64,
 				th: 64,
@@ -368,6 +495,13 @@ export const Nodes = Chord.Node.Node.CreateMany({
 			tiles: [],
 		},
 		reducers: Reducers.tessellator,
+		effects: Effects.tessellator,
+
+		$run: true,
+		$init: (self) => {
+			self.dispatch("setFormSchema", Helpers.tessellator.calcFields(self.state));
+			self.dispatch("setFormData", Helpers.tessellator.getFormData(self.state, self.state.form.schema));
+		},
 	},
 	nominator: {
 		state: {
