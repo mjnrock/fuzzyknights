@@ -229,17 +229,25 @@ export const Reducers = {
 			const { form } = state;
 			const field = Form.Helpers.findField(form.schema, id);
 
+			if(!field) return state;
+
+			field.type = type;
+
 			if(type === EnumFieldType.FUNCTION) {
 				field.state = `({ $x, $y, $i, ...args }) => {\r\n\treturn Date.now();\r\n}`;
 			} else if(type === EnumFieldType.ENUM) {
 				field.meta.options = [];
 			}
 
+
 			return {
 				...state,
 				form: {
-					...form,
-					schema: Form.Reducers().changeFieldType(form.schema, id, type),
+					schema: Form.Reducers().replaceField(form.schema, id, field),
+					data: {
+						...form.data,
+						[ field.name ]: field.state,
+					},
 				},
 			};
 		},
@@ -251,6 +259,20 @@ export const Reducers = {
 				form: {
 					...form,
 					data,
+				},
+			};
+		},
+		updateFieldValues(state, [ name, value ]) {
+			const { form } = state;
+
+			return {
+				...state,
+				form: {
+					...form,
+					data: {
+						...form.data,
+						[ name ]: value,
+					},
 				},
 			};
 		},
@@ -281,7 +303,7 @@ export const Reducers = {
 						}
 
 						const entry = data?.[ p ];
-						const v = entry?.startsWith("({") ? eval(entry): entry?.toString();
+						const v = entry?.startsWith("({") ? eval(entry) : entry?.toString();
 
 						if(typeof v === "function") {
 							return v({ $i, $x, $y, tile });

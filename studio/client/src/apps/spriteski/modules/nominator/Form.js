@@ -119,6 +119,27 @@ export const Reducers = ({ } = {}) => ({
 
 		return next;
 	},
+	replaceField: (form, fieldId, field) => {
+		const next = { ...form };
+		const replaceField = (state) => {
+			if(!state) return null;
+
+			const index = state.findIndex((s) => s.id === fieldId);
+
+			if(index !== -1) {
+				state.splice(index, 1, field);
+				return;
+			}
+
+			for(const section of state) {
+				replaceField(section.state);
+			}
+		};
+
+		replaceField(next.state);
+
+		return next;
+	}
 });
 
 export default {

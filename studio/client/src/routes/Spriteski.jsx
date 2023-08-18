@@ -7,8 +7,6 @@ import { FileSource } from "../apps/spriteski/modules/tessellator/components/Fil
 import { TileCanvas } from "../apps/spriteski/modules/tessellator/components/TileCanvas.jsx";
 import { NominatorBar } from "../apps/spriteski/modules/nominator/components/NominatorBar.jsx";
 
-//FIXME: Currently you *must* open the Form Dialog after changing the pattern before nominating
-
 export function Spriteski() {
 	const { state: tessellatorData, dispatch: tessellatorDispatch, dispatchAsync: tessellatorDispatchAsync } = Chord.Node.React.useNode(Nodes.tessellator);
 	const { state: nominatorData, dispatch: nominatorDispatch, dispatchAsync: nominatorDispatchAsync } = Chord.Node.React.useNode(Nodes.nominator);

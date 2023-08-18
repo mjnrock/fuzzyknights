@@ -1,34 +1,25 @@
-import { Listbox } from "@headlessui/react";
-
-export function FieldEnum({ field, ctx, ...props }) {
-	const { state, lookup, update, validate, submit } = ctx;
-	const { id, type, name, meta: { options } } = field;
-
-	const value = state[ name ];
+export function FieldEnum({ field, value, ctx, ...props }) {
+	const { dispatch } = ctx;
+	const { id, type, name } = field;
+	const { options } = field?.meta ?? [];
 
 	return (
-		<Listbox
-			value={ value }
-			onChange={ next => update(name, next) }
+		<select
+			className="p-2 border border-solid rounded border-neutral-200 hover:bg-neutral-50"
+			defaultValue={ field.type }
+			onChange={ e => {
+				dispatch({ type: "updateFieldValues", data: [ name, e.target.value ] });
+			} }
 		>
-			<Listbox.Button
-				className={ `bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm` }
-			>
-				{ value ?? "Select an enumeration" }
-			</Listbox.Button>
-
-			<Listbox.Options>
-				{ options.map((option) => (
-					<Listbox.Option
-						key={ option }
-						className={ ({ active }) => `${ active ? 'text-white bg-blue-600' : 'text-gray-900' } cursor-default select-none relative py-2 pl-10 pr-4` }
-						value={ option }
-					>
-						{ option }
-					</Listbox.Option>
-				)) }
-			</Listbox.Options>
-		</Listbox>
+			{
+				options.map((value) => (
+					<option
+						key={ value }
+						value={ value }
+					>{ value }</option>
+				))
+			}
+		</select>
 	)
 };
 
