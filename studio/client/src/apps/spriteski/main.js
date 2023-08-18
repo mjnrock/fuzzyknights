@@ -22,9 +22,6 @@ export const Helpers = {
 				return data;
 			};
 
-			console.log(schema)
-			console.log(schema.state)
-
 			const next = recurser(schema);
 
 			return next;
@@ -168,7 +165,6 @@ export const Helpers = {
 					...tile,
 					data: await Base64.Encode(tile.data),
 				};
-				console.log(nextTile)
 
 				nextNomination[ nextTile.$id ] = nextTile;
 			}
@@ -408,8 +404,6 @@ export const Reducers = {
 						}
 
 						const entry = data?.[ p ];
-						console.log(data)
-						console.log($x, $y, $i, entry)
 						const v = entry?.startsWith("({") ? eval(entry) : entry?.toString();
 
 						if(typeof v === "function") {
