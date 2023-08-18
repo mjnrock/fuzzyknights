@@ -190,10 +190,10 @@ export const Helpers = {
 
 export const Reducers = {
 	tessellator: {
-		togglePreview(state) {
+		togglePreview(state, value) {
 			return {
 				...state,
-				preview: !state.preview,
+				preview: value ?? !state.preview,
 			};
 		},
 		setSize(state) {
