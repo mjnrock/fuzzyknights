@@ -362,7 +362,7 @@ export const Reducers = {
 			const { data } = form;
 			const nominations = {};
 			
-			if(!Object.values(data).every(v => !!v)) return state;
+			// if(!Object.values(data).every(v => !!v)) return state;
 
 			let $i = 0,
 				$x = 0,

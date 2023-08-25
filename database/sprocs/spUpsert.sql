@@ -57,6 +57,21 @@ BEGIN
     DECLARE @Id INT, @Total INT
     SELECT @Id = MIN(Id), @Total = MAX(Id) FROM #ParsedData
 
+    -- Dynamic create the ##ReturnTable table base on information schema
+    DECLARE @ReturnTable NVARCHAR(MAX) = 'CREATE TABLE ##ReturnTable ('
+    SELECT @ReturnTable += CASE 
+                            WHEN COLUMN_NAME = 'Base64' THEN 'Base64 NVARCHAR(MAX), '
+                            WHEN COLUMN_NAME = 'UUID' THEN 'UUID UNIQUEIDENTIFIER, '
+                            WHEN COLUMN_NAME IN ('Tags', 'Meta') THEN COLUMN_NAME + ' NVARCHAR(MAX), '
+                            ELSE COLUMN_NAME + ' NVARCHAR(MAX), '
+                            END
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_NAME = @Table
+        AND TABLE_SCHEMA = @Schema
+    ORDER BY ORDINAL_POSITION
+    SET @ReturnTable = LEFT(@ReturnTable, LEN(@ReturnTable) - 1) + ')'
+    EXEC sp_executesql @ReturnTable
+
     WHILE @Id <= @Total
     BEGIN
         BEGIN TRY
@@ -112,7 +127,10 @@ BEGIN
             '
 
             -- Execute the dynamic SQL
+            INSERT INTO ##ReturnTable
             EXEC sp_executesql @SQL, N'@Id INT', @Id
+
+            
         END TRY
         BEGIN CATCH
             -- Log error for investigation
@@ -122,7 +140,11 @@ BEGIN
         SET @Id = @Id + 1
     END
 
+    -- Return the results
+    SELECT * FROM ##ReturnTable
+
     -- Drop the temp tables
     DROP TABLE #Base64Data
     DROP TABLE #ParsedData
+    DROP TABLE ##ReturnTable
 END
