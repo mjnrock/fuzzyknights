@@ -362,6 +362,7 @@ export const Reducers = {
 			const { data } = form;
 			const nominations = {};
 			
+			//TODO: Implement after sql testing is done
 			// if(!Object.values(data).every(v => !!v)) return state;
 
 			let $i = 0,

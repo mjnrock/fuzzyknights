@@ -11,6 +11,7 @@ import { NominatorBar } from "../apps/spriteski/modules/nominator/components/Nom
 import SqlHelper from "../lib/SqlHelper.js";
 import Base64 from "../util/Base64.js";
 import clone from "../util/clone.js";
+import { TextureViewer } from "../apps/spriteski/modules/nominator/components/TextureViewer.jsx";
 
 setTimeout(() => {
 }, 500);
@@ -69,6 +70,11 @@ export function Spriteski() {
 			/>
 
 			<NominatorBar
+				data={ { tessellatorData, nominatorData } }
+				update={ { nominatorDispatch, nominatorDispatchAsync } }
+			/>
+
+			<TextureViewer
 				data={ { tessellatorData, nominatorData } }
 				update={ { nominatorDispatch, nominatorDispatchAsync } }
 			/>
