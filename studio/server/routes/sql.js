@@ -25,6 +25,7 @@ export function main(wd) {
 							params = {},
 						} = req.body;
 
+						await sql.connect();
 						const result = await sql.exec(sproc, params);
 
 						res.json(result);
@@ -45,6 +46,7 @@ export function main(wd) {
 							params = [],
 						} = req.body;
 
+						await sql.connect();
 						const result = await sql.query(query, params);
 
 						res.json(result);
@@ -65,6 +67,7 @@ export function main(wd) {
 							params = [],
 						} = req.body;
 
+						await sql.connect();
 						const result = await sql.tvf(name, params);
 
 						console.log(result)

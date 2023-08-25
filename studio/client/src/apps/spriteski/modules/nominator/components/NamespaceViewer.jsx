@@ -34,7 +34,7 @@ export const NamespaceViewer = ({ data, selected, onNamespaceSelect }) => {
 
 		return (
 			<>
-				{parts.join("-")}-<span className={isBold ? "text-sky-500 font-bold" : ""}>{lastPart}</span>
+				{parts.join("-")}-<span className={"text-sky-500 " + (isBold ? "font-bold" : "")}>{lastPart}</span>
 			</>
 		);
 	};

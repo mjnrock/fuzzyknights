@@ -32,18 +32,10 @@ export class SqlExecutor {
 	}
 
 	async connect() {
-		if(this.pool.connected || this.pool.connecting) {
-			return;
-		}
-
-		return this.pool.connect();
+		return await this.pool.connect();
 	}
 	async disconnect() {
-		if(this.pool.connected || this.pool.connecting) {
-			return this.pool.close();
-		}
-
-		return;
+		return await this.pool.close();
 	}
 
 	sanitizeValue(value, useExplicitTyping = false) {
