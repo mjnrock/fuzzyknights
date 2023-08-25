@@ -53,7 +53,8 @@ export const TextureViewer = ({ data, update }) => {
 			<NamespaceViewer
 				data={ namespaces }
 				selected={ namespace }
-				onNamespaceSelect={ setNamespace }
+				onSelect={ setNamespace }
+				// onHover={ console.log }
 			/>
 
 			<div className="grid grid-cols-8">
