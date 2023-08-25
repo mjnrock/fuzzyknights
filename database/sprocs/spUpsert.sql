@@ -46,69 +46,83 @@ BEGIN
             (@JSON)
     END
 
-    -- Here we start the dynamic SQL
-    DECLARE @SQL NVARCHAR(MAX)
-    DECLARE @PKColumn NVARCHAR(255)
-    DECLARE @Columns NVARCHAR(MAX) = ''
-    DECLARE @InsertColumns NVARCHAR(MAX) = ''
-    DECLARE @UpdateColumns NVARCHAR(MAX) = ''
+    SELECT Id, Base64
+    INTO #Base64Data
+    FROM #ParsedData
+    CROSS APPLY OPENJSON(JSONData)
+    WITH (
+        Base64 NVARCHAR(MAX) '$.Base64'
+    );
 
-    -- Assuming PK is always first column in INFORMATION_SCHEMA.COLUMNS for the table
-    SELECT TOP 1
-        @PKColumn = COLUMN_NAME
-    FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_NAME = @Table
-        AND TABLE_SCHEMA = @Schema
-    ORDER BY ORDINAL_POSITION
+    DECLARE @Id INT, @Total INT
+    SELECT @Id = MIN(Id), @Total = MAX(Id) FROM #ParsedData
 
-    SELECT
-        @Columns += CASE 
-                    WHEN COLUMN_NAME = 'Base64' THEN 'Base64Data.Base64, '
-                    WHEN COLUMN_NAME = 'UUID' THEN 'ISNULL(JSON_VALUE(JSONData, ''$.UUID''), NEWID()) as UUID, '
-                    WHEN COLUMN_NAME IN ('Tags', 'Meta') THEN 'JSON_QUERY(JSONData, ''$.' + COLUMN_NAME + ''') as ' + COLUMN_NAME + ', '
-                    ELSE 'JSON_VALUE(JSONData, ''$.' + COLUMN_NAME + ''') as ' + COLUMN_NAME + ', '
-                    END,
-        @InsertColumns += CASE WHEN COLUMN_NAME <> @PKColumn THEN COLUMN_NAME + ', ' ELSE '' END,
-        @UpdateColumns += CASE WHEN COLUMN_NAME <> @PKColumn THEN COLUMN_NAME + ' = Source.' + COLUMN_NAME + ', ' ELSE '' END
-    FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE
-        TABLE_NAME = @Table
-        AND TABLE_SCHEMA = @Schema
+    WHILE @Id <= @Total
+    BEGIN
+        BEGIN TRY
+            -- Here we start the dynamic SQL
+            DECLARE @SQL NVARCHAR(MAX)
+            DECLARE @PKColumn NVARCHAR(255)
+            DECLARE @Columns NVARCHAR(MAX) = ''
+            DECLARE @InsertColumns NVARCHAR(MAX) = ''
+            DECLARE @UpdateColumns NVARCHAR(MAX) = ''
 
-    -- Trim trailing commas and spaces
-    SET @Columns = LEFT(@Columns, LEN(@Columns) - 1)
-    SET @InsertColumns = LEFT(@InsertColumns, LEN(@InsertColumns) - 1)
-    SET @UpdateColumns = LEFT(@UpdateColumns, LEN(@UpdateColumns) - 1)
+            -- Assuming PK is always first column in INFORMATION_SCHEMA.COLUMNS for the table
+            SELECT TOP 1
+                @PKColumn = COLUMN_NAME
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_NAME = @Table
+                AND TABLE_SCHEMA = @Schema
+            ORDER BY ORDINAL_POSITION
 
-    SET @SQL = N'
-        SELECT Id, Base64
-        INTO #Base64Data
-        FROM #ParsedData
-        CROSS APPLY OPENJSON(JSONData)
-        WITH (
-            Base64 NVARCHAR(MAX) ''$.Base64''
-        );
+            SELECT
+                @Columns += CASE 
+                            WHEN COLUMN_NAME = 'Base64' THEN 'Base64Data.Base64, '
+                            WHEN COLUMN_NAME = 'UUID' THEN 'ISNULL(JSON_VALUE(JSONData, ''$.UUID''), NEWID()) as UUID, '
+                            WHEN COLUMN_NAME IN ('Tags', 'Meta') THEN 'JSON_QUERY(JSONData, ''$.' + COLUMN_NAME + ''') as ' + COLUMN_NAME + ', '
+                            ELSE 'JSON_VALUE(JSONData, ''$.' + COLUMN_NAME + ''') as ' + COLUMN_NAME + ', '
+                            END,
+                @InsertColumns += CASE WHEN COLUMN_NAME <> @PKColumn THEN COLUMN_NAME + ', ' ELSE '' END,
+                @UpdateColumns += CASE WHEN COLUMN_NAME <> @PKColumn THEN COLUMN_NAME + ' = Source.' + COLUMN_NAME + ', ' ELSE '' END
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE
+                TABLE_NAME = @Table
+                AND TABLE_SCHEMA = @Schema
 
-        MERGE INTO ' + @Schema + '.' + @Table + ' AS Target
-        USING (
-            SELECT ' + @Columns + ' 
-            FROM #ParsedData
-            INNER JOIN #Base64Data AS Base64Data ON #ParsedData.Id = Base64Data.Id
-        ) AS Source
-        ON Target.' + @PKColumn + ' = Source.' + @PKColumn + '
-        WHEN MATCHED THEN 
-            UPDATE SET ' + @UpdateColumns + '
-        WHEN NOT MATCHED THEN 
-            INSERT (' + @InsertColumns + ') 
-            VALUES (Source.' + REPLACE(@InsertColumns, ',', ', Source.') + ')
-        OUTPUT inserted.*;
+            -- Trim trailing commas and spaces
+            SET @Columns = LEFT(@Columns, LEN(@Columns) - 1)
+            SET @InsertColumns = LEFT(@InsertColumns, LEN(@InsertColumns) - 1)
+            SET @UpdateColumns = LEFT(@UpdateColumns, LEN(@UpdateColumns) - 1)
 
-        DROP TABLE #Base64Data;
-    '
+            SET @SQL = N'
+                MERGE INTO ' + @Schema + '.' + @Table + ' AS Target
+                USING (
+                    SELECT ' + @Columns + ' 
+                    FROM #ParsedData
+                    INNER JOIN #Base64Data AS Base64Data ON #ParsedData.Id = Base64Data.Id
+                    WHERE #ParsedData.Id = @Id
+                ) AS Source
+                ON Target.' + @PKColumn + ' = Source.' + @PKColumn + '
+                WHEN MATCHED THEN 
+                    UPDATE SET ' + @UpdateColumns + '
+                WHEN NOT MATCHED THEN 
+                    INSERT (' + @InsertColumns + ') 
+                    VALUES (Source.' + REPLACE(@InsertColumns, ',', ', Source.') + ')
+                OUTPUT inserted.*;
+            '
 
-    -- Execute the dynamic SQL
-    EXEC sp_executesql @SQL
+            -- Execute the dynamic SQL
+            EXEC sp_executesql @SQL, N'@Id INT', @Id
+        END TRY
+        BEGIN CATCH
+            -- Log error for investigation
+            PRINT 'Error for Id ' + CAST(@Id AS NVARCHAR) + ': ' + ERROR_MESSAGE()
+        END CATCH
 
-    -- Drop the temp table
+        SET @Id = @Id + 1
+    END
+
+    -- Drop the temp tables
+    DROP TABLE #Base64Data
     DROP TABLE #ParsedData
 END
