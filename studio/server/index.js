@@ -24,8 +24,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Enabling CORS
 app.use(cors());
-// Enabling JSON parsing
-app.use(express.json());
+
+// Set a large payload limit for JSON and URL-encoded payloads
+const largePayloadLimit = "1gb";
+app.use(express.json({ limit: largePayloadLimit }));
+app.use(express.urlencoded({ limit: largePayloadLimit, extended: true }));
 
 app.use("/sql", sqlRouter(__dirname));
 app.use("/fs", fsRouter(__dirname));

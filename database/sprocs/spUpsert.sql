@@ -3,14 +3,14 @@ GO
 
 CREATE PROCEDURE DotF.spUpsert
     @Schema VARCHAR(255) = 'DotF',
-    @Target VARCHAR(255),
+    @Table VARCHAR(255),
     @JSON NVARCHAR(MAX)
 AS
 BEGIN
     -- Check if table exists
     IF NOT EXISTS (SELECT 1
     FROM INFORMATION_SCHEMA.TABLES
-    WHERE TABLE_NAME = @Target AND TABLE_SCHEMA = @Schema)
+    WHERE TABLE_NAME = @Table AND TABLE_SCHEMA = @Schema)
     BEGIN
         RAISERROR('Table does not exist.', 16, 1)
         RETURN
@@ -27,7 +27,8 @@ BEGIN
     -- Create a temp table to parse the JSON to
     CREATE TABLE #ParsedData
     (
-        Data NVARCHAR(MAX)
+        Id INT IDENTITY(1, 1),
+        JSONData NVARCHAR(MAX)
     )
 
     -- Add the JSON data to the table
@@ -40,7 +41,7 @@ BEGIN
     ELSE
     BEGIN
         INSERT INTO #ParsedData
-            (Data)
+            (JSONData)
         VALUES
             (@JSON)
     END
@@ -56,21 +57,22 @@ BEGIN
     SELECT TOP 1
         @PKColumn = COLUMN_NAME
     FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_NAME = @Target
+    WHERE TABLE_NAME = @Table
         AND TABLE_SCHEMA = @Schema
     ORDER BY ORDINAL_POSITION
 
     SELECT
         @Columns += CASE 
-                    WHEN COLUMN_NAME = 'UUID' THEN 'ISNULL(JSON_VALUE(Data, ''$.UUID''), NEWID()) as UUID, '
-                    WHEN COLUMN_NAME IN ('Data', 'Tags', 'Meta') THEN 'JSON_QUERY(Data, ''$.' + COLUMN_NAME + ''') as ' + COLUMN_NAME + ', '
-                    ELSE 'JSON_VALUE(Data, ''$.' + COLUMN_NAME + ''') as ' + COLUMN_NAME + ', '
+                    WHEN COLUMN_NAME = 'Base64' THEN 'Base64Data.Base64, '
+                    WHEN COLUMN_NAME = 'UUID' THEN 'ISNULL(JSON_VALUE(JSONData, ''$.UUID''), NEWID()) as UUID, '
+                    WHEN COLUMN_NAME IN ('Tags', 'Meta') THEN 'JSON_QUERY(JSONData, ''$.' + COLUMN_NAME + ''') as ' + COLUMN_NAME + ', '
+                    ELSE 'JSON_VALUE(JSONData, ''$.' + COLUMN_NAME + ''') as ' + COLUMN_NAME + ', '
                     END,
         @InsertColumns += CASE WHEN COLUMN_NAME <> @PKColumn THEN COLUMN_NAME + ', ' ELSE '' END,
         @UpdateColumns += CASE WHEN COLUMN_NAME <> @PKColumn THEN COLUMN_NAME + ' = Source.' + COLUMN_NAME + ', ' ELSE '' END
     FROM INFORMATION_SCHEMA.COLUMNS
     WHERE
-        TABLE_NAME = @Target
+        TABLE_NAME = @Table
         AND TABLE_SCHEMA = @Schema
 
     -- Trim trailing commas and spaces
@@ -79,10 +81,19 @@ BEGIN
     SET @UpdateColumns = LEFT(@UpdateColumns, LEN(@UpdateColumns) - 1)
 
     SET @SQL = N'
-        MERGE INTO ' + @Schema + '.' + @Target + ' AS Target
+        SELECT Id, Base64
+        INTO #Base64Data
+        FROM #ParsedData
+        CROSS APPLY OPENJSON(JSONData)
+        WITH (
+            Base64 NVARCHAR(MAX) ''$.Base64''
+        );
+
+        MERGE INTO ' + @Schema + '.' + @Table + ' AS Target
         USING (
             SELECT ' + @Columns + ' 
             FROM #ParsedData
+            INNER JOIN #Base64Data AS Base64Data ON #ParsedData.Id = Base64Data.Id
         ) AS Source
         ON Target.' + @PKColumn + ' = Source.' + @PKColumn + '
         WHEN MATCHED THEN 
@@ -91,6 +102,8 @@ BEGIN
             INSERT (' + @InsertColumns + ') 
             VALUES (Source.' + REPLACE(@InsertColumns, ',', ', Source.') + ')
         OUTPUT inserted.*;
+
+        DROP TABLE #Base64Data;
     '
 
     -- Execute the dynamic SQL

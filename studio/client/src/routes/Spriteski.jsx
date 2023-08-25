@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import crypto from "crypto-js";
+import { useState, useEffect } from "react";
 import Chord from "@lespantsfancy/chord";
 
 import { Nodes } from "../apps/spriteski/main.js";
@@ -6,6 +7,13 @@ import { Nodes } from "../apps/spriteski/main.js";
 import { FileSource } from "../apps/spriteski/modules/tessellator/components/FileSource.jsx";
 import { TileCanvas } from "../apps/spriteski/modules/tessellator/components/TileCanvas.jsx";
 import { NominatorBar } from "../apps/spriteski/modules/nominator/components/NominatorBar.jsx";
+
+import SqlHelper from "../lib/SqlHelper.js";
+import Base64 from "../util/Base64.js";
+import clone from "../util/clone.js";
+
+setTimeout(() => {
+}, 500);
 
 export function Spriteski() {
 	const { state: tessellatorData, dispatch: tessellatorDispatch, dispatchAsync: tessellatorDispatchAsync } = Chord.Node.React.useNode(Nodes.tessellator);
@@ -16,6 +24,42 @@ export function Spriteski() {
 			tessellatorDispatchAsync({ type: "tessellate" });
 		}
 	}, [ tessellatorData.source ]);
+
+	const [ hasSent, setHasSent ] = useState(false);
+	useEffect(() => {
+		async function save() {
+			if(Object.keys(nominatorData.nominations).length && !hasSent) {
+				const values = [];
+				for(const value of clone(Object.values(nominatorData.nominations))) {
+					let next = {
+						UUID: value.$id,
+						Name: value.$name,
+						Tags: value.$tags,
+						Base64: await Base64.Encode(value.data),
+						Width: value.width,
+						Height: value.height,
+						NamespaceID: 1,
+					};
+
+					next.Hash = crypto.SHA256(next.Base64).toString();
+
+					values.push(next);
+				}
+
+				SqlHelper.exec(`DotF.spUpsert`, {
+					Schema: `DotF`,
+					Table: `Texture`,
+					JSON: values,
+				})
+					.then(result => console.log(result))
+					//NOTE: If there is a DB error, it will surface meaningfully here -- use this to display a toast or something
+					.catch(err => console.error(err))
+					.finally(() => setHasSent(true));
+			}
+		};
+		save();
+	}, [ nominatorData ]);
+
 
 	return (
 		<div className="m-2">

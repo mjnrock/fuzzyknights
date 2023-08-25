@@ -361,10 +361,14 @@ export const Reducers = {
 			const { phrase, form, pattern } = state;
 			const { data } = form;
 			const nominations = {};
+			
+			if(!Object.values(data).every(v => !!v)) return state;
 
 			let $i = 0,
 				$x = 0,
-				$y = 0;
+				$y = 0,
+				$r4 = 0,
+				$r8 = 0;
 
 			for(let y = 0; y < tiles.length; y++) {
 				const row = tiles[ y ];
@@ -379,13 +383,15 @@ export const Reducers = {
 							if(p === "$i") return $i;
 							if(p === "$x") return $x;
 							if(p === "$y") return $y;
+							if(p === "$r4") return $y * 90;
+							if(p === "$r8") return $y * 45;
 						}
 
 						const entry = data?.[ p ];
 						const v = entry?.startsWith("({") ? eval(entry) : entry?.toString();
 
 						if(typeof v === "function") {
-							return v({ $i, $x, $y, tile });
+							return v({ $i, $x, $y, $r4, $r8, tile });
 						} else {
 							return v;
 						}
@@ -471,7 +477,7 @@ export const Nodes = Chord.Node.Node.CreateMany({
 	},
 	nominator: {
 		state: {
-			phrase: "entity-{entityType}-{entitySubType}-{state}-{$y}-{$x}",
+			phrase: "entity-{entityType}-{entitySubType}-{state}-{$r8}-{$x}",
 			form: {
 				schema: Form.Templates.SimpleForm(),
 				data: {},

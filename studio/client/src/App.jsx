@@ -7,14 +7,6 @@ import { Struct as StructRoute } from "./routes/Struct.jsx";
 import { Spriteski as SpriteskiRoute } from "./routes/Spriteski.jsx";
 import { Sandbox as SandboxRoute } from "./routes/Sandbox.jsx";
 
-import SqlHelper from "./lib/SqlHelper.js";
-
-setTimeout(() => {
-	SqlHelper.query(`SELECT GETDATE() AS CurrentDateTime`).then(result => console.log(result));
-	SqlHelper.exec(`spTEST`).then(result => console.log(result));
-	SqlHelper.tvf(`tvfTEST`).then(result => console.log(result));
-}, 500);
-
 export function App() {
 	return (
 		<Routes>

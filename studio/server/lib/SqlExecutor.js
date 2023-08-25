@@ -7,6 +7,7 @@ export const localhostConfig = {
 	database: "your_database_name",    // replace with your database name
 	user: "your_username",             // replace with your SQL Server username
 	password: "your_password",         // replace with your SQL Server password
+	requestTimeout: 300000,            // request timeout
 	options: {
 		encrypt: true,                 // for AzureDB users, this should be set to true
 		trustServerCertificate: true   // use this when connecting to a local instance, for production you'd want proper certificates
