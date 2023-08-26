@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BsChevronRight } from "react-icons/bs";
+import { BsChevronRight, BsChevronExpand, BsChevronContract, BsDatabase } from "react-icons/bs";
 
 export const NamespaceViewer = ({ data, selected, onSelect, onHover }) => {
 	const [ expandedNodes, setExpandedNodes ] = useState([]);
@@ -12,7 +12,8 @@ export const NamespaceViewer = ({ data, selected, onSelect, onHover }) => {
 		return targetNamespace.startsWith(namespace + "-") || targetNamespace === namespace;
 	};
 
-	const toggleExpand = (namespace) => {
+	const toggleExpand = (namespace, e) => {
+		e.stopPropagation();
 		if(!isLeaf(namespace)) {
 			setExpandedNodes((prev) => {
 				const ancestors = prev.filter((item) => isAncestorOrSelf(item, namespace));
@@ -21,6 +22,14 @@ export const NamespaceViewer = ({ data, selected, onSelect, onHover }) => {
 					: [ ...ancestors, namespace ];
 			});
 		}
+	};
+
+	const expandAll = () => {
+		setExpandedNodes(data.map(item => item.Namespace));
+	};
+
+	const collapseAll = () => {
+		setExpandedNodes([]);
 	};
 
 	const renderNamespace = (namespace) => {
@@ -47,9 +56,11 @@ export const NamespaceViewer = ({ data, selected, onSelect, onHover }) => {
 					<li key={ item.Namespace } className="">
 						<button
 							className={ `flex items-center w-full p-2 text-left rounded text-neutral-700 hover:bg-neutral-50 hover:text-sky-500 focus:outline-none justify-left ${ item.Namespace === selected ? "text-sky-500 font-bold" : "" }` }
-							onClick={ () => {
-								toggleExpand(item.Namespace);
+							onClick={ e => {
 								onSelect?.(item.Namespace);
+							} }
+							onDoubleClick={ e => {
+								toggleExpand(item.Namespace, e);
 							} }
 							onMouseOver={ () => {
 								onHover?.(item.Namespace);
@@ -57,10 +68,13 @@ export const NamespaceViewer = ({ data, selected, onSelect, onHover }) => {
 						>
 							{ isLeaf(item.Namespace) && <div className="ml-2">&nbsp;</div> }
 							{ !isLeaf(item.Namespace) && (
-								<BsChevronRight
-									size={ 10 }
-									className={ `mr-1 transition-transform duration-200 ${ expandedNodes.includes(item.Namespace) ? "transform rotate-90" : "" }` }
-								/>
+								<div className="p-2 mr-1 rounded-full hover:bg-neutral-50 hover:text-sky-500">
+									<BsChevronRight
+										size={ 12 }
+										className={ `transition-transform duration-200 ${ expandedNodes.includes(item.Namespace) ? "transform rotate-90" : "" }` }
+										onClick={ e => toggleExpand(item.Namespace, e) }
+									/>
+								</div>
 							) }
 							<div className="">{ renderNamespace(item.Namespace) }</div>
 							{ !isLeaf(item.Namespace) && (
@@ -78,9 +92,34 @@ export const NamespaceViewer = ({ data, selected, onSelect, onHover }) => {
 	);
 
 	return (
-		<div className="p-2 font-mono text-xs font-light border border-b-2 border-r-2 border-solid rounded shadow-md bg-neutral-100 border-neutral-300">
+		<>
+			<div className="flex items-center mb-2">
+				<BsDatabase size={ 16 } className="mr-2 text-neutral-400" />
+				<div
+					className="flex-grow p-2 font-mono font-bold border rounded"
+				>
+					Database Textures
+				</div>
+				{
+					expandedNodes?.length > 0 ? (
+						<button
+							onClick={ collapseAll }
+							className="flex items-center justify-center w-8 h-8 p-1 ml-2 rounded text-neutral-700 hover:bg-neutral-50 hover:text-sky-500 focus:outline-none"
+						>
+							<BsChevronContract size={ 16 } />
+						</button>
+					) : (
+						<button
+							onClick={ expandAll }
+							className="flex items-center justify-center w-8 h-8 p-1 ml-2 rounded text-neutral-700 hover:bg-neutral-50 hover:text-sky-500 focus:outline-none"
+						>
+							<BsChevronExpand size={ 16 } />
+						</button>
+					)
+				}
+			</div>
 			{ buildTree(null, 1) }
-		</div>
+		</>
 	);
 };
 

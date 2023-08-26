@@ -6,6 +6,7 @@ import { LTRTTB } from "./modules/tessellator/data/algorithms/LTRTTB";
 import Form from "./modules/nominator/Form";
 import Base64 from "../../util/Base64";
 import Serialize from "../../util/Serialize";
+import SqlHelper from "../../lib/SqlHelper";
 
 export const Helpers = {
 	tessellator: {
@@ -186,6 +187,9 @@ export const Helpers = {
 			return next;
 		},
 	},
+	viewer: {
+
+	},
 };
 
 export const Reducers = {
@@ -361,7 +365,7 @@ export const Reducers = {
 			const { phrase, form, pattern } = state;
 			const { data } = form;
 			const nominations = {};
-			
+
 			//TODO: Implement after sql testing is done
 			// if(!Object.values(data).every(v => !!v)) return state;
 
@@ -411,6 +415,20 @@ export const Reducers = {
 			};
 		}
 	},
+	viewer: {
+		setTextures(state, textures) {
+			return {
+				...state,
+				textures,
+			};
+		},
+		setNamespaces(state, namespaces) {
+			return {
+				...state,
+				namespaces,
+			};
+		}
+	},
 };
 
 const Effects = {
@@ -444,6 +462,7 @@ const Effects = {
 			},
 		],
 	},
+	viewer: {},
 };
 
 
@@ -494,6 +513,35 @@ export const Nodes = Chord.Node.Node.CreateMany({
 			//NOTE: Since setPhrase also kicks off the pattern and form process, invoke it here to seed with that behavior
 			self.dispatch("setPhrase", self.state.phrase);
 			self.dispatch("setFormData", Helpers.nominator.getFormData(self.state, self.state.form.schema));
+		},
+	},
+	viewer: {
+		state: {
+			textures: [],
+			namespaces: [],
+		},
+		reducers: Reducers.viewer,
+		effects: Effects.viewer,
+
+		$run: true,
+		$init: (self) => {
+			SqlHelper.query(`SELECT * FROM DotF.Texture`)
+				.then(result => {
+					// gather and dispatch all of the promises from the Base64.Decode() calls to every texture in textures
+					const promises = result.map(async (texture) => {
+						texture.Base64 = await Base64.Decode(texture.Base64);
+						return texture;
+					});
+
+					// wait for all of the promises to resolve, then dispatch the decoded textures
+					Promise.all(promises)
+						.then(textures => self.dispatch("setTextures", textures));
+				})
+				.catch(err => console.error(err));
+
+			SqlHelper.query(`SELECT * FROM DotF.vwTextureNamespace`)
+				.then(result => self.dispatch("setNamespaces", result))
+				.catch(err => console.error(err));
 		},
 	},
 });
