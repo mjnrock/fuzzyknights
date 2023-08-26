@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { NamespaceViewer } from "../components/NamespaceViewer.jsx";
 import { TileContainer } from "../components/TIleContainer.jsx";
 
-export const AssetViewer = ({ data, update }) => {
+export const AssetViewer = ({ data, update, ...props }) => {
 	const { tessellatorData, nominatorData, viewerData } = data;
 	const { tessellatorDispatch, tessellatorDispatchAsync, nominatorDispatch, nominatorDispatchAsync } = update;
 
@@ -26,7 +26,7 @@ export const AssetViewer = ({ data, update }) => {
 	}, [ namespace, viewerData?.textures ]);
 
 	return (
-		<div className="flex flex-row items-start justify-start h-full">
+		<div className="flex flex-row items-start justify-start h-full" { ...props }>
 			<div className="flex-grow h-full p-2 font-mono text-xs font-light border border-b-2 border-r-2 border-solid rounded shadow-md basis-1/3 bg-neutral-100 border-neutral-300">
 				<NamespaceViewer
 					data={ viewerData?.namespaces }

@@ -12,7 +12,7 @@ import clone from "../../../../../util/clone.js";
 setTimeout(() => {
 }, 500);
 
-export function Tessellator({ data, update }) {
+export function Tessellator({ data, update, ...props }) {
 	const { tessellatorData, nominatorData } = data;
 	const { tessellatorDispatch, tessellatorDispatchAsync, nominatorDispatch, nominatorDispatchAsync } = update;
 
@@ -59,7 +59,7 @@ export function Tessellator({ data, update }) {
 
 
 	return (
-		<div className="m-2">
+		<div className="m-2" { ...props }>
 			<FileSource
 				data={ { tessellatorData, nominatorData } }
 				update={ { nominatorDispatch, tessellatorDispatch, tessellatorDispatchAsync } }
