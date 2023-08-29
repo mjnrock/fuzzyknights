@@ -207,7 +207,7 @@ export async function main() {
 
 		/* Config */
 		config: {
-			scale: 3.0,
+			scale: 1.0,
 			tiles: {
 				width: 32,
 				height: 32,
@@ -271,6 +271,7 @@ export async function main() {
 
 			this.realm.tick({ dt: dts, ip, startTime, lastTime, fps });
 
+			//TODO: Move this to the appropriate Input manager's .tick() method
 			if(this.input.key.hasUp) player.physics.vy = -player.physics.speed;
 			else if(this.input.key.hasDown) player.physics.vy = player.physics.speed;
 			else player.physics.vy = 0;
@@ -319,6 +320,7 @@ export async function main() {
 
 		tick: function ({ observer, dt, ip, startTime, lastTime, fps }) {
 			if(observer.subject) {
+				/* If the observer has a subject, retrieve the x,y position from it and set accordingly */
 				let { x: dx, y: dy } = observer.subject({ dt, ip, startTime, lastTime, fps });
 
 				observer.position.x = dx;
@@ -326,10 +328,11 @@ export async function main() {
 			}
 
 			if(observer.shape.type === EnumModelType.RECTANGLE) {
-				// only update the tiles that are visible to the observer, with the observer at the center
+				/* only update the tiles that are visible to the observer, with the observer at the center */
 				const { x, y } = observer.position;
 				const { width, height } = observer.shape;
 
+				/* Calculate the edges of the bounding box of the observer's view */
 				const rowStart = Math.max(0, Math.floor(y - (height / 2)));
 				const rowEnd = Math.min(this.rows, Math.ceil(y + (height / 2)));
 				const colStart = Math.max(0, Math.floor(x - (width / 2)));
@@ -340,6 +343,7 @@ export async function main() {
 						const { x, y } = entity.physics;
 
 						if(x >= colStart && x <= colEnd && y >= rowStart && y <= rowEnd) {
+							/* If the entity is within the observer's view, tick it */
 							entity.physics.x += entity.physics.vx * dt;
 							entity.physics.y += entity.physics.vy * dt;
 
@@ -354,11 +358,13 @@ export async function main() {
 			}
 		},
 		draw: function ({ observer, dt }) {
+			//TODO: Lock the screen to the player, with the player at the center
 			if(observer.shape.type === EnumModelType.RECTANGLE) {
-				// only update the tiles that are visible to the observer, with the observer at the center
+				/* only update the tiles that are visible to the observer, with the observer at the center */
 				const { x, y } = observer.position;
 				const { width, height } = observer.shape;
 
+				/* Calculate the edges of the bounding box of the observer's view */
 				const rowStart = Math.max(0, Math.floor(y - (height / 2)));
 				const rowEnd = Math.min(this.rows, Math.ceil(y + (height / 2)));
 				const colStart = Math.max(0, Math.floor(x - (width / 2)));
@@ -370,6 +376,7 @@ export async function main() {
 						const graphics = entity.render.sprite;
 
 						if(x >= colStart && x <= colEnd && y >= rowStart && y <= rowEnd) {
+							/* If the entity is within the observer's view, render it */
 							graphics.visible = true;
 
 							// clear previous line
@@ -402,6 +409,7 @@ export async function main() {
 
 							// entity.draw({ observer, dt });
 						} else {
+							/* If it's not, hide it */
 							graphics.visible = false;
 						}
 					}

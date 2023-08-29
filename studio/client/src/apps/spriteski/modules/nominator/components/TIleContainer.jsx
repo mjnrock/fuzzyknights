@@ -4,7 +4,6 @@ export const TileContainer = ({ current }) => {
 	return (
 		<>
 			{ current.map((record) => {
-				console.log(record)
 				const tile = {
 					$name: record.Name,
 					data: record.Base64,

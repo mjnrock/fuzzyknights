@@ -188,7 +188,26 @@ export const Helpers = {
 		},
 	},
 	viewer: {
+		loadTextures: async (self) => {
+			SqlHelper.query(`SELECT * FROM DotF.Texture`)
+				.then(result => {
+					// gather and dispatch all of the promises from the Base64.Decode() calls to every texture in textures
+					const promises = result.map(async (texture) => {
+						texture.Base64 = await Base64.Decode(texture.Base64);
+						return texture;
+					});
 
+					// wait for all of the promises to resolve, then dispatch the decoded textures
+					Promise.all(promises)
+						.then(textures => self.dispatch("setTextures", textures));
+				})
+				.catch(err => console.error(err));
+		},
+		loadNamespaces: async (self) => {
+			SqlHelper.query(`SELECT * FROM DotF.vwTextureNamespace`)
+				.then(result => self.dispatch("setNamespaces", result))
+				.catch(err => console.error(err));
+		},
 	},
 };
 
@@ -525,23 +544,12 @@ export const Nodes = Chord.Node.Node.CreateMany({
 
 		$run: true,
 		$init: (self) => {
-			SqlHelper.query(`SELECT * FROM DotF.Texture`)
-				.then(result => {
-					// gather and dispatch all of the promises from the Base64.Decode() calls to every texture in textures
-					const promises = result.map(async (texture) => {
-						texture.Base64 = await Base64.Decode(texture.Base64);
-						return texture;
-					});
+			Helpers.viewer.loadTextures(self);
+			Helpers.viewer.loadNamespaces(self);
 
-					// wait for all of the promises to resolve, then dispatch the decoded textures
-					Promise.all(promises)
-						.then(textures => self.dispatch("setTextures", textures));
-				})
-				.catch(err => console.error(err));
-
-			SqlHelper.query(`SELECT * FROM DotF.vwTextureNamespace`)
-				.then(result => self.dispatch("setNamespaces", result))
-				.catch(err => console.error(err));
+			self.addEventListeners("syncTextures", () => {
+				Helpers.viewer.loadTextures(self);
+			});
 		},
 	},
 });

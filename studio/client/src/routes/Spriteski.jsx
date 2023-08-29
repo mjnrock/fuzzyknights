@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Chord from "@lespantsfancy/chord";
 
 import { Nodes } from "../apps/spriteski/main.js";
 import Tessellator from "../apps/spriteski/modules/nominator/view/Tessellator.jsx";
 import AssetViewer from "../apps/spriteski/modules/nominator/view/AssetViewer.jsx";
-import { BsDatabase, BsGrid } from "react-icons/bs";
+import Animator from "../apps/spriteski/modules/nominator/view/Animator.jsx";
+import { BsCameraReels, BsDatabase, BsGrid } from "react-icons/bs";
 
 const PaneIcons = ({ setActivePane, activePane }) => {
 	return (
@@ -23,15 +24,29 @@ const PaneIcons = ({ setActivePane, activePane }) => {
 			>
 				<BsGrid className="w-6 h-6 text-white" />
 			</button>
+			<button
+				onClick={ () => setActivePane("Animator") }
+				className={ `p-2 m-1 ${ activePane === "Tessellator" ? "bg-gray-600" : "bg-transparent" } hover:bg-gray-700 focus:outline-none rounded` }
+				title={ "Animator" }
+			>
+				<BsCameraReels className="w-6 h-6 text-white" />
+			</button>
 		</div>
 	);
 };
 
 export function Spriteski() {
-	const [ activePane, setActivePane ] = useState("AssetViewer");
+	const [ activePane, setActivePane ] = useState("Animator");
 	const { state: tessellatorData, dispatch: tessellatorDispatch, dispatchAsync: tessellatorDispatchAsync } = Chord.Node.React.useNode(Nodes.tessellator);
 	const { state: nominatorData, dispatch: nominatorDispatch, dispatchAsync: nominatorDispatchAsync } = Chord.Node.React.useNode(Nodes.nominator);
 	const { state: viewerData, dispatch: viewerDispatch, dispatchAsync: viewerDispatchAsync } = Chord.Node.React.useNode(Nodes.viewer);
+
+	const data = { tessellatorData, nominatorData, viewerData };
+	const update = { tessellatorDispatch, tessellatorDispatchAsync, nominatorDispatch, nominatorDispatchAsync, viewerDispatch, viewerDispatchAsync };
+
+	useEffect(() => {
+		Nodes.viewer.emit("syncTextures");
+	}, [ activePane ]);
 
 	return (
 		<div className="flex h-full min-h-screen">
@@ -40,14 +55,20 @@ export function Spriteski() {
 			<div className="flex-1 m-2">
 				{ activePane === "AssetViewer" && (
 					<AssetViewer
-						data={ { tessellatorData, nominatorData, viewerData } }
-						update={ { tessellatorDispatch, tessellatorDispatchAsync, nominatorDispatch, nominatorDispatchAsync, viewerDispatch, viewerDispatchAsync } }
+						data={ data }
+						update={ update }
 					/>
 				) }
 				{ activePane === "Tessellator" && (
 					<Tessellator
-						data={ { tessellatorData, nominatorData, viewerData } }
-						update={ { tessellatorDispatch, tessellatorDispatchAsync, nominatorDispatch, nominatorDispatchAsync, viewerDispatch, viewerDispatchAsync } }
+						data={ data }
+						update={ update }
+					/>
+				) }
+				{ activePane === "Animator" && (
+					<Animator
+						data={ data }
+						update={ update }
 					/>
 				) }
 			</div>

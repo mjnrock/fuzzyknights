@@ -9,6 +9,8 @@ export const EnumEntityType = {
 	FAUNA: "FAUNA",				// X/Y-based fauna (e.g. harvestable fish pool, birds, etc.)
 	PORTAL: "PORTAL",			// The interactable portal
 	DECORATION: "DECORATION",	// Any decoration that can be rendered and/or interacted with (e.g. a signpost, picture frame, etc.)
+	TREASURE: "TREASURE",		// Any treasure that can be interacted with (e.g. a chest, a barrel, etc.)
+	SPAWNER: "SPAWNER",			// Any spawner that can spawn entities (e.g. a monster spawner, a chest, etc.)
 
 	// (Pseudo) Entities
 	CREATURE: "CREATURE",		// Any creature that uses AI

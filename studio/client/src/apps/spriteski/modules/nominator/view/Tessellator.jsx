@@ -9,9 +9,6 @@ import SqlHelper from "../../../../../lib/SqlHelper.js";
 import Base64 from "../../../../../util/Base64.js";
 import clone from "../../../../../util/clone.js";
 
-setTimeout(() => {
-}, 500);
-
 export function Tessellator({ data, update, ...props }) {
 	const { tessellatorData, nominatorData } = data;
 	const { tessellatorDispatch, tessellatorDispatchAsync, nominatorDispatch, nominatorDispatchAsync } = update;
