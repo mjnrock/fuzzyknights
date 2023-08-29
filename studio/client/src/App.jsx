@@ -7,16 +7,6 @@ import { Struct as StructRoute } from "./routes/Struct.jsx";
 import { Spriteski as SpriteskiRoute } from "./routes/Spriteski.jsx";
 import { Sandbox as SandboxRoute } from "./routes/Sandbox.jsx";
 
-// FIXME: Once you integrate the Node changes from Game into Chord, you *must* set the `config` allowShallowPrevious to `false` AND allowTrivialUpdate to `false`; otherwise state history will be mutated
-// FIXME: Once you integrate the Node changes from Game into Chord, you *must* set the `config` allowShallowPrevious to `false` AND allowTrivialUpdate to `false`; otherwise state history will be mutated
-// FIXME: Once you integrate the Node changes from Game into Chord, you *must* set the `config` allowShallowPrevious to `false` AND allowTrivialUpdate to `false`; otherwise state history will be mutated
-// FIXME: Once you integrate the Node changes from Game into Chord, you *must* set the `config` allowShallowPrevious to `false` AND allowTrivialUpdate to `false`; otherwise state history will be mutated
-// FIXME: Once you integrate the Node changes from Game into Chord, you *must* set the `config` allowShallowPrevious to `false` AND allowTrivialUpdate to `false`; otherwise state history will be mutated
-// FIXME: Once you integrate the Node changes from Game into Chord, you *must* set the `config` allowShallowPrevious to `false` AND allowTrivialUpdate to `false`; otherwise state history will be mutated
-// NOTE: Editor won't work correctly until you do this.
-
-// NOTE: (From the future): Testing seems to suggest that the above is *not* required -- do more rigorous testing to confirm this (but the refactor may have fixed this issue)
-
 export function App() {
 	return (
 		<Routes>

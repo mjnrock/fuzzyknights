@@ -1,0 +1,2 @@
+SELECT
+	GETDATE() AS RightMeow

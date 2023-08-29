@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 export function Default() {
 	return (
 		<div className="flex flex-col items-center justify-center h-screen bg-gray-200">
-			<div class="flex items-start justify-center mb-6 text-gray-600">
-				<div class="text-3xl font-bold">FuzzyKnights<sup class="self-start text-sm">™</sup></div>
+			<div className="flex items-start justify-center mb-6 text-gray-600">
+				<div className="text-3xl font-bold">FuzzyKnights<sup className="self-start text-sm">™</sup></div>
 			</div>
 
 			<div className="flex flex-col items-center justify-center text-gray-600">

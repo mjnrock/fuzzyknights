@@ -94,7 +94,7 @@ export function FileSource({ data, update }) {
 			ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 			ctx.drawImage(sourceImage, 0, 0, sourceImage.width, sourceImage.height, 0, 0, canvasRef.current.width, canvasRef.current.height);
 		}
-	}, [ tessellatorData.parameters, preview ]);
+	}, [ tessellatorData.form.data, preview ]);
 
 	return (
 		<>

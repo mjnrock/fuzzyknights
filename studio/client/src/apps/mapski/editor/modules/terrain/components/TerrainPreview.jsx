@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { PhotoshopPicker } from "react-color";
 
 import { Base64 } from "../../../../../../util/Base64";
-import { Canvas } from "../../../components/Canvas";
+import { Canvas } from "../../../../../../components/Canvas";
 
 export const TerrainPreview = ({ terrain, colorHandler, imageHandler }) => {
 	const fileInputRef = useRef();

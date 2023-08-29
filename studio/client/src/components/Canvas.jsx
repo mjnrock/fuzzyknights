@@ -7,7 +7,9 @@ export function Canvas({ source, width, height, ...props }) {
 		if(!source) return;
 
 		const canvas = canvasRef.current;
-		const context = canvas.getContext("2d");
+		const context = canvas?.getContext("2d");
+
+		if(!canvas || !context) return;
 
 		// Set the width and height
 		canvas.width = width || source.width;
