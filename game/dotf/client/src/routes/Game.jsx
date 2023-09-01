@@ -2,7 +2,8 @@ import React from "react";
 
 import Chord from "@lespantsfancy/chord";
 
-import { Nodes, main } from "../core/main.js";
+// import { Nodes, main } from "../core/main.js";
+import { Nodes, main } from "../core/nextMain.js";
 
 import { PixiView } from "../components/PixiView.jsx";
 

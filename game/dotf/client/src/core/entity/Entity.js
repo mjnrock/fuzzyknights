@@ -31,12 +31,14 @@ export const EnumEntityType = {
 export class Entity extends IdentityClass {
 	static EnumType = EnumEntityType;
 
-	constructor ({ ...args } = {}) {
-		super({ ...args });
+	constructor ({ id, tags, type, ...components } = {}) {
+		super({ id, tags });
 
-		this.type = Entity.EnumType.GENERIC;
+		this.type = type ?? Entity.EnumType.GENERIC;
 		this.reducers = {};
-		this.state = {};
+		this.state = {
+			...components,
+		};
 	}
 
 	[ Symbol.iterator ]() {
