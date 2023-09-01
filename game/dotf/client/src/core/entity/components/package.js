@@ -9,10 +9,12 @@ export default {
 	State,
 	Model,
 
-	Generators: ({ ...args } = {}) => ({
-		[ Physics.Name ]: Physics.State(args?.[ Physics.Name ]),
-		[ Render.Name ]: Render.State(args?.[ Render.Name ]),
-		[ State.Name ]: State.State(args?.[ State.Name ]),
-		[ Model.Name ]: Model.State(args?.[ Model.Name ]),
-	}),
+	Generators: {
+		DemoEntity: ({ ...args } = {}) => ({
+			[ Physics.Name ]: Physics.State(args?.[ Physics.Name ]),
+			[ Render.Name ]: Render.State(args?.[ Render.Name ]),
+			[ State.Name ]: State.State(args?.[ State.Name ]),
+			[ Model.Name ]: Model.State(args?.[ Model.Name ]),
+		}),
+	},
 };

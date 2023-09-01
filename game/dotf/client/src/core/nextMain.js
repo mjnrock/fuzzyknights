@@ -6,6 +6,14 @@ import { Game } from "./Game.js";
 import Entity from "./entity/Entity.js";
 import Components from "./entity/components/package.js";
 
+
+import { Realm } from "./world/Realm.js";
+import { EntityManager } from "./entity/EntityManager.js";
+import { Zone } from "./world/Zone.js";
+console.log(new Realm());
+console.log(new EntityManager());
+console.log(new Zone());
+
 export const EnumModelType = {
 	CIRCLE: "CIRCLE",
 	RECTANGLE: "RECTANGLE",
@@ -89,16 +97,32 @@ export async function main() {
 				entity: new Entity({
 					id: uuid(),
 					tags: [],
-					type: "CREATURE",
+					type: Entity.EnumType.CREATURE,
 
-					...Components.Generators({}),
+					...Components.Generators.DemoEntity({
+						physics: {
+							x: 3,
+							y: 3,
+							speed: 1.7,
+						},
+					}),
 				}),
 			},
 		},
 	});
 	//#endregion
 
+	console.log(game)
 	console.log(game.players.player.entity);
+	
+	//STUB: Draw the player
+	game.renderer.stage.addChild(game.players.player.entity.state.render.sprite);	
+	const graphics = game.players.player.entity.state.render.sprite;
+	graphics.beginFill("#fff", 1.0);
+	graphics.drawRect(0, 0, game.config.tiles.width * game.config.scale, game.config.tiles.height * game.config.scale);
+	graphics.endFill();
+	graphics.x = game.players.player.entity.state.physics.x * game.config.tiles.width * game.config.scale; // game.config.scale the position
+	graphics.y = game.players.player.entity.state.physics.y * game.config.tiles.height * game.config.scale; // game.config.scale the position
 
 	return {
 		game,

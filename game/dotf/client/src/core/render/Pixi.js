@@ -17,7 +17,8 @@ export class Pixi extends IdentityClass {
 			...pixi,
 		});
 		this.stage = stage ?? new PIXI.Container();
-		
+
+		this.app.stage = this.stage;		
 		this.app.ticker.add((delta) => onDraw(delta / 1000));
 	}
 
