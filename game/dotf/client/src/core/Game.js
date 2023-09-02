@@ -6,6 +6,7 @@ import { Pixi } from "./render/Pixi.js";
 import Input from "./input/package.js";
 import Realm from "./world/Realm";
 import AssetManager from "./assets/AssetManager";
+import InputManager from "./input/InputManager";
 
 export class Game extends Node {
 	static Instances = new Map();
@@ -62,16 +63,10 @@ export class Game extends Node {
 		 * The input object contains all of the input handlers for the game,
 		 * such as keyboard and mouse.
 		 */
-		this.input = {
-			key: new Input.KeyInput({
-				$game: this,
-				...(input.key ?? {}),
-			}),
-			mouse: new Input.MouseInput({
-				$game: this,
-				...(input.mouse ?? {}),
-			}),
-		};
+		this.input = new InputManager({
+			$game: this,
+			...input,
+		})
 
 		/**
 		 * The game loop is the main loop that handles the game's tick.

@@ -43,6 +43,13 @@ export class Realm extends IdentityClass {
 
 	tick({ game, dt, ip, startTime, lastTime, fps }) {
 		const { zone, player: { observer } } = this.current;
+
+		if(observer.subject) {
+			const { x, y } = observer.subject();
+			observer.position.x = x;
+			observer.position.y = y;
+		}
+
 		zone.tick({ observer, game, dt, ip, startTime, lastTime, fps });
 	}
 	draw({ game, dt }) {

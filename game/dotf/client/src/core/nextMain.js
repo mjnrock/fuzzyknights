@@ -14,10 +14,6 @@ import { Realm } from "./world/Realm.js";
 import { EntityManager } from "./entity/EntityManager.js";
 import { Zone } from "./world/Zone.js";
 import { Factory } from "./world/package.js";
-console.log(new Realm());
-console.log(new EntityManager());
-console.log(new Zone());
-console.log(CommonDataMap);
 
 export const EnumModelType = {
 	CIRCLE: "CIRCLE",
@@ -42,6 +38,7 @@ export async function main() {
 	const game = new Game({
 		$run: true,
 		$init: (game) => {
+			//STUB: Create a generic Zone from a Mapski map
 			game.realm.claim(Factory.genericWorlds([
 				[
 					{
@@ -109,7 +106,22 @@ export async function main() {
 		/* Players */
 		players: {
 			player: {
-				observer: {},
+				observer: {
+					zone: null,
+					position: {
+						x: 0,
+						y: 0,
+					},
+					shape: {
+						type: EnumModelType.RECTANGLE,
+						width: 16,	// +/- 8
+						height: 16,	// +/- 8
+					},
+					subject: () => ({
+						x: game.players.player.entity.state.physics.x,
+						y: game.players.player.entity.state.physics.y,
+					}),
+				},
 				entity: new Entity({
 					type: Entity.EnumType.CREATURE,
 
@@ -117,30 +129,66 @@ export async function main() {
 						physics: {
 							x: 3,
 							y: 3,
-							speed: 1.7,
+							speed: 3.7,
 						},
 					}),
+
+					tick({ observer, game, dt, ip, startTime, lastTime, fps }) { },
+					draw({ observer, game, dt, now }) {
+						const graphics = this.state.render.sprite;
+						const entity = this.state;
+
+						/* If the entity is within the observer's view, render it */
+						graphics.visible = true;
+
+						// clear previous line
+						graphics.clear();
+
+						graphics.x = entity.physics.x * game.config.tiles.width * game.config.scale;
+						graphics.y = entity.physics.y * game.config.tiles.height * game.config.scale;
+
+						// redraw entity
+						graphics.beginFill("#FFF", 1.0);
+
+						switch(entity.model.type) {
+							case EnumModelType.CIRCLE:
+								graphics.drawCircle(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.radius * game.config.scale);
+								break;
+							case EnumModelType.RECTANGLE:
+								graphics.drawRect(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.width * game.config.scale, entity.model.height * game.config.scale);
+								graphics.rotation = entity.physics.theta;
+								break;
+							default:
+								break;
+						}
+						graphics.endFill();
+					},
 				}),
 			},
 		},
 
 		tick({ dt, ip, startTime, lastTime, fps }) {
-			this.realm.tick({
+			const obj = {
 				game: this,
 				dt,
 				ip,
 				startTime,
 				lastTime,
 				fps,
-			});
+			};
+
+			this.input.tick(obj);
+			this.realm.tick(obj);
 		},
 		draw({ dt, ip, now }) {
-			this.realm.draw({
+			const obj = {
 				game: this,
 				dt,
 				ip,
 				now,
-			});
+			};
+
+			this.realm.draw(obj);
 		},
 	});
 	//#endregion
@@ -148,54 +196,7 @@ export async function main() {
 	const demoZone = game.realm.worlds[ 0 ].zones[ 0 ];
 	demoZone.register(game.players.player.entity);
 	game.renderer.stage.addChild(demoZone.stage);
-
-	game.players.player.observer = {
-		zone: demoZone,
-		position: {
-			x: 0,
-			y: 0,
-		},
-		shape: {
-			type: EnumModelType.RECTANGLE,
-			width: 16,	// +/- 8
-			height: 16,	// +/- 8
-		},
-		subject: () => ({
-			x: game.players.player.entity.physics.x,
-			y: game.players.player.entity.physics.y,
-		}),
-	};
-
-
-	const entity = game.players.player.entity.state;
-	const graphics = game.players.player.entity.state.render.sprite;
-	/* If the entity is within the observer's view, render it */
-	graphics.visible = true;
-
-	// clear previous line
-	graphics.clear();
-
-	graphics.x = entity.physics.x * game.config.tiles.width * game.config.scale;
-	graphics.y = entity.physics.y * game.config.tiles.height * game.config.scale;
-
-	// redraw entity
-	graphics.beginFill("#FFF", 1.0);
-
-	switch(entity.model.type) {
-		case EnumModelType.CIRCLE:
-			graphics.drawCircle(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.radius * game.config.scale);
-			break;
-		case EnumModelType.RECTANGLE:
-			graphics.drawRect(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.width * game.config.scale, entity.model.height * game.config.scale);
-			graphics.rotation = entity.physics.theta;
-			break;
-		default:
-			break;
-	}
-	graphics.endFill();
-
-	console.log(game)
-	console.log(game.players.player.entity);
+	game.players.player.observer.zone = demoZone;
 
 	return {
 		game,

@@ -1,10 +1,10 @@
 import { IdentityClass } from "../../@node/Identity";
 
 export class KeyInput extends IdentityClass {
-	static LEFT = [ "ArrowLeft", "KeyA"];
-	static RIGHT = [ "ArrowRight", "KeyD"];
-	static UP = [ "ArrowUp", "KeyW"];
-	static DOWN = [ "ArrowDown", "KeyS"];
+	static LEFT = [ "ArrowLeft", "KeyA" ];
+	static RIGHT = [ "ArrowRight", "KeyD" ];
+	static UP = [ "ArrowUp", "KeyW" ];
+	static DOWN = [ "ArrowDown", "KeyS" ];
 
 	constructor ({ events = {}, $game, ...self } = {}) {
 		super({ ...self });

@@ -36,6 +36,10 @@ export function Game() {
 			fnFocus = null;
 
 		main().then(({ game, nodes } = {}) => {
+			console.log(game)
+			console.log(game.players.player.entity);
+
+
 			const app = game.renderer.app;
 
 			setState(app);
