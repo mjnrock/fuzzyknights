@@ -49,6 +49,14 @@ export class Game extends Node {
 			pixi,
 			onDraw: (...args) => this.draw.call(this, ...args),
 		});
+		this.renderer.app.ticker.add((delta) => {
+			this.draw.call(this, {
+				game: this,
+				dt: delta,
+				ip: (delta * 1000) / this.loop.spf,
+				now: Date.now(),
+			});
+		});
 
 		/**
 		 * The input object contains all of the input handlers for the game,
@@ -87,8 +95,8 @@ export class Game extends Node {
 		Game.Instances.delete(this.$id);
 	}
 
-	tick({ dt, ip, startTime, lastTime, fps }) { }
-	draw(dt) { }
+	tick({ game, dt, ip, startTime, lastTime, fps }) { }
+	draw({ game, dt, now }) { }
 };
 
 export default Game;

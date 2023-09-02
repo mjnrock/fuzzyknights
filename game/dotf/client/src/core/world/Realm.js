@@ -10,7 +10,21 @@ export class Realm extends IdentityClass {
 
 		this.$game = $game;
 
+		this.worlds = {};
+		this.claim(worlds);
+	}
+	claim(worlds) {
+		for(const key in worlds) {
+			worlds[ key ].$realm = this;
+
+			for(const zone of worlds[ key ].zones) {
+				zone.$world = worlds[ key ];
+			}
+		}
+
 		this.worlds = worlds;
+
+		return this;
 	}
 
 	get current() {
@@ -27,15 +41,13 @@ export class Realm extends IdentityClass {
 		return Object.entries(this.worlds)[ Symbol.iterator ]();
 	}
 
-	tick({ dt, ip, startTime, lastTime, fps }) {
-		const { zone, player: { observer } } = this.$game.realm.current;
-
-		zone.tick({ observer, dt, ip, startTime, lastTime, fps });
+	tick({ game, dt, ip, startTime, lastTime, fps }) {
+		const { zone, player: { observer } } = this.current;
+		zone.tick({ observer, game, dt, ip, startTime, lastTime, fps });
 	}
-	draw({ dt }) {
-		const { zone, player: { observer } } = this.$game.realm.current;
-
-		zone.draw({ observer, dt });
+	draw({ game, dt }) {
+		const { zone, player: { observer } } = this.current;
+		zone.draw({ observer, game, dt });
 	}
 };
 

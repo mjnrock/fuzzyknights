@@ -1,3 +1,6 @@
+//STUB: Example map import
+import CommonDataMap from "../common/data/map/14802e55-defd-4ba4-a82f-697bc6f95c46.json";
+
 import * as PIXI from "pixi.js";
 import { v4 as uuid } from "uuid";
 
@@ -10,9 +13,11 @@ import Components from "./entity/components/package.js";
 import { Realm } from "./world/Realm.js";
 import { EntityManager } from "./entity/EntityManager.js";
 import { Zone } from "./world/Zone.js";
+import { Factory } from "./world/package.js";
 console.log(new Realm());
 console.log(new EntityManager());
 console.log(new Zone());
+console.log(CommonDataMap);
 
 export const EnumModelType = {
 	CIRCLE: "CIRCLE",
@@ -37,6 +42,17 @@ export async function main() {
 	const game = new Game({
 		$run: true,
 		$init: (game) => {
+			game.realm.claim(Factory.genericWorlds([
+				[
+					{
+						terrain: CommonDataMap?.terrain?.terrains,
+						tiles: CommonDataMap?.map?.tiles,
+						entities: [],
+					},
+				]
+			]));
+
+
 			const pixi = game.renderer.app;
 
 			//STUB: START FPS COUNTER
@@ -95,8 +111,6 @@ export async function main() {
 			player: {
 				observer: {},
 				entity: new Entity({
-					id: uuid(),
-					tags: [],
 					type: Entity.EnumType.CREATURE,
 
 					...Components.Generators.DemoEntity({
@@ -109,20 +123,79 @@ export async function main() {
 				}),
 			},
 		},
+
+		tick({ dt, ip, startTime, lastTime, fps }) {
+			this.realm.tick({
+				game: this,
+				dt,
+				ip,
+				startTime,
+				lastTime,
+				fps,
+			});
+		},
+		draw({ dt, ip, now }) {
+			this.realm.draw({
+				game: this,
+				dt,
+				ip,
+				now,
+			});
+		},
 	});
 	//#endregion
 
+	const demoZone = game.realm.worlds[ 0 ].zones[ 0 ];
+	demoZone.register(game.players.player.entity);
+	game.renderer.stage.addChild(demoZone.stage);
+
+	game.players.player.observer = {
+		zone: demoZone,
+		position: {
+			x: 0,
+			y: 0,
+		},
+		shape: {
+			type: EnumModelType.RECTANGLE,
+			width: 16,	// +/- 8
+			height: 16,	// +/- 8
+		},
+		subject: () => ({
+			x: game.players.player.entity.physics.x,
+			y: game.players.player.entity.physics.y,
+		}),
+	};
+
+
+	const entity = game.players.player.entity.state;
+	const graphics = game.players.player.entity.state.render.sprite;
+	/* If the entity is within the observer's view, render it */
+	graphics.visible = true;
+
+	// clear previous line
+	graphics.clear();
+
+	graphics.x = entity.physics.x * game.config.tiles.width * game.config.scale;
+	graphics.y = entity.physics.y * game.config.tiles.height * game.config.scale;
+
+	// redraw entity
+	graphics.beginFill("#FFF", 1.0);
+
+	switch(entity.model.type) {
+		case EnumModelType.CIRCLE:
+			graphics.drawCircle(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.radius * game.config.scale);
+			break;
+		case EnumModelType.RECTANGLE:
+			graphics.drawRect(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.width * game.config.scale, entity.model.height * game.config.scale);
+			graphics.rotation = entity.physics.theta;
+			break;
+		default:
+			break;
+	}
+	graphics.endFill();
+
 	console.log(game)
 	console.log(game.players.player.entity);
-	
-	//STUB: Draw the player
-	game.renderer.stage.addChild(game.players.player.entity.state.render.sprite);	
-	const graphics = game.players.player.entity.state.render.sprite;
-	graphics.beginFill("#fff", 1.0);
-	graphics.drawRect(0, 0, game.config.tiles.width * game.config.scale, game.config.tiles.height * game.config.scale);
-	graphics.endFill();
-	graphics.x = game.players.player.entity.state.physics.x * game.config.tiles.width * game.config.scale; // game.config.scale the position
-	graphics.y = game.players.player.entity.state.physics.y * game.config.tiles.height * game.config.scale; // game.config.scale the position
 
 	return {
 		game,

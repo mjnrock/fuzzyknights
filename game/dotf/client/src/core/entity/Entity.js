@@ -31,14 +31,27 @@ export const EnumEntityType = {
 export class Entity extends IdentityClass {
 	static EnumType = EnumEntityType;
 
-	constructor ({ id, tags, type, ...components } = {}) {
+	constructor ({ id, tags, type, tick, draw, ...components } = {}) {
 		super({ id, tags });
 
 		this.type = type ?? Entity.EnumType.GENERIC;
 		this.reducers = {};
-		this.state = {
-			...components,
-		};
+		this.state = {};
+
+		for(const key in components) {
+			if(key[ 0 ] === "$") {
+				this[ key ] = components[ key ];
+			} else {
+				this.state[ key ] = components[ key ];
+			}
+		}
+
+		if(tick) {
+			this.tick = tick.bind(this);
+		}
+		if(draw) {
+			this.draw = draw.bind(this);
+		}
 	}
 
 	[ Symbol.iterator ]() {
