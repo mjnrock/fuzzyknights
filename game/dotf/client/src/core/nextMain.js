@@ -1,8 +1,8 @@
 //STUB: Example map import
 import CommonDataMap from "../common/data/map/14802e55-defd-4ba4-a82f-697bc6f95c46.json";
 
-import * as PIXI from "pixi.js";
 import { v4 as uuid } from "uuid";
+import * as PIXI from "pixi.js";
 
 import { Game } from "./Game.js";
 
@@ -14,6 +14,8 @@ import { Realm } from "./world/Realm.js";
 import { EntityManager } from "./entity/EntityManager.js";
 import { Zone } from "./world/Zone.js";
 import { Factory } from "./world/package.js";
+import Observer from "./viewport/class/Observer";
+import { View } from "./viewport/class/View";
 
 export const EnumModelType = {
 	CIRCLE: "CIRCLE",
@@ -50,9 +52,12 @@ export async function main() {
 			]));
 
 
-			const pixi = game.renderer.app;
+			game.viewport.current.prepend(new View({
+				observer: game.players.player.observer,
+			}));
 
 			//STUB: START FPS COUNTER
+			const pixi = game.renderer.app;
 			const fpsText = new PIXI.Text("FPS: 0", { fill: 0xffffff });
 			fpsText.x = 10;
 			fpsText.y = 10;
@@ -106,7 +111,7 @@ export async function main() {
 		/* Players */
 		players: {
 			player: {
-				observer: {
+				observer: new Observer({
 					zone: null,
 					position: {
 						x: 0,
@@ -121,14 +126,14 @@ export async function main() {
 						x: game.players.player.entity.state.physics.x,
 						y: game.players.player.entity.state.physics.y,
 					}),
-				},
+				}),
 				entity: new Entity({
 					type: Entity.EnumType.CREATURE,
 
 					...Components.Generators.DemoEntity({
 						physics: {
-							x: 3,
-							y: 3,
+							x: 8,
+							y: 8,
 							speed: 3.7,
 						},
 					}),
@@ -146,6 +151,10 @@ export async function main() {
 
 						graphics.x = entity.physics.x * game.config.tiles.width * game.config.scale;
 						graphics.y = entity.physics.y * game.config.tiles.height * game.config.scale;
+
+						const { px, py, pw, ph } = observer.getScope(game);
+						graphics.x -= px * game.config.scale;
+						graphics.y -= py * game.config.scale;
 
 						// redraw entity
 						graphics.beginFill("#FFF", 1.0);
@@ -167,6 +176,8 @@ export async function main() {
 			},
 		},
 
+		viewport: {},
+
 		tick({ dt, ip, startTime, lastTime, fps }) {
 			const obj = {
 				game: this,
@@ -187,6 +198,10 @@ export async function main() {
 				ip,
 				now,
 			};
+
+			const scope = this.viewport.current.getObservers(1, game);
+			const { px, py, pw, ph } = scope;
+			const { zone, tx, ty, tw, th } = scope;
 
 			this.realm.draw(obj);
 		},

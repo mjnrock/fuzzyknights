@@ -22,6 +22,13 @@ export class Pixi extends IdentityClass {
 		this.app.ticker.add((delta) => onDraw(delta / 1000));
 	}
 
+	get size() {
+		return {
+			width: this.app.renderer.width,
+			height: this.app.renderer.height,
+		};
+	}
+
 	register(container) {
 		this.app.stage.addChild(container);
 

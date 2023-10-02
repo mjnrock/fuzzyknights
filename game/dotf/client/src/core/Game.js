@@ -7,6 +7,7 @@ import Input from "./input/package.js";
 import Realm from "./world/Realm";
 import AssetManager from "./assets/AssetManager";
 import InputManager from "./input/InputManager";
+import { ViewPort } from "./viewport/class/ViewPort";
 
 export class Game extends Node {
 	static Instances = new Map();
@@ -21,7 +22,7 @@ export class Game extends Node {
 		return game;
 	}
 
-	constructor ({ input = {}, players = {}, realm = {}, pixi = {}, loop = {}, assets = {}, config = {}, $registry = {}, $run, ...self } = {}) {
+	constructor ({ input = {}, players = {}, realm = {}, pixi = {}, loop = {}, assets = {}, config = {}, viewport = {}, $registry = {}, $run, ...self } = {}) {
 		super({ ...self, $run: false });	// Don't run the init function quite yet
 
 		/**
@@ -79,6 +80,10 @@ export class Game extends Node {
 
 		this.realm = new Realm({ $game: this, ...realm });
 		this.players = players;
+
+		this.viewport = {
+			current: new ViewPort({ $game: this, ...viewport }),
+		};
 
 		if($run) {
 			this.init.call(this, ...(Array.isArray($run) ? $run : []));

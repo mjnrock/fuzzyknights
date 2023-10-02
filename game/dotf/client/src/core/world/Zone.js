@@ -65,7 +65,7 @@ export class Zone extends IdentityClass {
 			if(entity.state.physics.x < observer.position.x - 8 || entity.state.physics.x > observer.position.x + 8) continue;
 			if(entity.state.physics.y < observer.position.y - 8 || entity.state.physics.y > observer.position.y + 8) continue;
 
-			entity.draw({ game, dt, now });
+			entity.draw({ observer, game, dt, now });
 		}
 	}
 };
