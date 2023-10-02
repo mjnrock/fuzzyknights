@@ -1,5 +1,10 @@
 import { IdentityClass } from "../../@node/Identity";
 
+export const EnumShape = {
+	CIRCLE: "CIRCLE",
+	RECTANGLE: "RECTANGLE",
+};
+
 export const EnumEntityType = {
 	GENERIC: "GENERIC",
 
@@ -74,8 +79,38 @@ export class Entity extends IdentityClass {
 		});
 	}
 
-	tick() { }
-	draw() { }
+
+	tick({ observer, game, dt, ip, startTime, lastTime, fps }) { }
+	draw({ observer, offset, game, dt, now }) {
+		const graphics = this.state.render.sprite;
+		const entity = this.state;
+
+		/* If the entity is within the observer's view, render it */
+		graphics.visible = true;
+
+		// clear previous line
+		graphics.clear();
+
+		const { sx, sy } = offset;
+		graphics.x = entity.physics.x * sx;
+		graphics.y = entity.physics.y * sy;
+
+		// redraw entity
+		graphics.beginFill("#FFF", 1.0);
+
+		switch(entity.model.type) {
+			case EnumShape.CIRCLE:
+				graphics.drawCircle(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.radius * game.config.scale);
+				break;
+			case EnumShape.RECTANGLE:
+				graphics.drawRect(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.width * game.config.scale, entity.model.height * game.config.scale);
+				graphics.rotation = entity.physics.theta;
+				break;
+			default:
+				break;
+		}
+		graphics.endFill();
+	}
 };
 
 export default Entity;

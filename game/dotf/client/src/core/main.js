@@ -11,7 +11,7 @@ import { Zone } from "./world/Zone.js";
 //STUB: Example map import
 import CommonDataMap from "../common/data/map/14802e55-defd-4ba4-a82f-697bc6f95c46.json";
 
-export const EnumModelType = {
+export const EnumShape = {
 	CIRCLE: "CIRCLE",
 	RECTANGLE: "RECTANGLE",
 };
@@ -84,7 +84,7 @@ export const summonFireball = (self, e) => {
 			default: EnumEntityState.MOVING,
 		},
 		model: {
-			type: EnumModelType.CIRCLE,
+			type: EnumShape.CIRCLE,
 			radius: 6,	//px
 			ox: 0,	//px
 			oy: 0,	//px
@@ -145,7 +145,7 @@ export const summonArrow = (self, e) => {
 			default: EnumEntityState.MOVING,
 		},
 		model: {
-			type: EnumModelType.RECTANGLE,
+			type: EnumShape.RECTANGLE,
 			width: 16,	//px
 			height: 1,	//px
 			ox: 0,	//px
@@ -327,7 +327,7 @@ export async function main() {
 				observer.position.y = dy;
 			}
 
-			if(observer.shape.type === EnumModelType.RECTANGLE) {
+			if(observer.shape.type === EnumShape.RECTANGLE) {
 				/* only update the tiles that are visible to the observer, with the observer at the center */
 				const { x, y } = observer.position;
 				const { width, height } = observer.shape;
@@ -359,7 +359,7 @@ export async function main() {
 		},
 		draw: function ({ observer, dt }) {
 			//TODO: Lock the screen to the player, with the player at the center
-			if(observer.shape.type === EnumModelType.RECTANGLE) {
+			if(observer.shape.type === EnumShape.RECTANGLE) {
 				/* only update the tiles that are visible to the observer, with the observer at the center */
 				const { x, y } = observer.position;
 				const { width, height } = observer.shape;
@@ -395,10 +395,10 @@ export async function main() {
 							}
 
 							switch(entity.model.type) {
-								case EnumModelType.CIRCLE:
+								case EnumShape.CIRCLE:
 									graphics.drawCircle(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.radius * game.config.scale);
 									break;
-								case EnumModelType.RECTANGLE:
+								case EnumShape.RECTANGLE:
 									graphics.drawRect(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.width * game.config.scale, entity.model.height * game.config.scale);
 									graphics.rotation = entity.physics.theta;
 									break;
@@ -444,7 +444,7 @@ export async function main() {
 			y: 0,
 		},
 		shape: {
-			type: EnumModelType.RECTANGLE,
+			type: EnumShape.RECTANGLE,
 			width: 16,	// +/- 8
 			height: 16,	// +/- 8
 		},

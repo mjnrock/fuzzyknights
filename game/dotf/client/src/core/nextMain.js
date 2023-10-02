@@ -17,7 +17,7 @@ import { Factory } from "./world/package.js";
 import Observer from "./viewport/Observer";
 import { View } from "./viewport/View";
 
-export const EnumModelType = {
+export const EnumShape = {
 	CIRCLE: "CIRCLE",
 	RECTANGLE: "RECTANGLE",
 };
@@ -118,7 +118,7 @@ export async function main() {
 						y: 0,
 					},
 					shape: {
-						type: EnumModelType.RECTANGLE,
+						type: EnumShape.RECTANGLE,
 						width: 16,	// +/- 8
 						height: 16,	// +/- 8
 					},
@@ -137,74 +137,11 @@ export async function main() {
 							speed: 3.7,
 						},
 					}),
-
-					tick({ observer, game, dt, ip, startTime, lastTime, fps }) { },
-					draw({ observer, game, dt, now }) {
-						const graphics = this.state.render.sprite;
-						const entity = this.state;
-
-						/* If the entity is within the observer's view, render it */
-						graphics.visible = true;
-
-						// clear previous line
-						graphics.clear();
-
-						graphics.x = entity.physics.x * game.config.tiles.width * game.config.scale;
-						graphics.y = entity.physics.y * game.config.tiles.height * game.config.scale;
-
-						const { px, py, pw, ph } = observer.getScope(game);
-						graphics.x -= px * game.config.scale;
-						graphics.y -= py * game.config.scale;
-
-						// redraw entity
-						graphics.beginFill("#FFF", 1.0);
-
-						switch(entity.model.type) {
-							case EnumModelType.CIRCLE:
-								graphics.drawCircle(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.radius * game.config.scale);
-								break;
-							case EnumModelType.RECTANGLE:
-								graphics.drawRect(entity.model.ox * game.config.scale, entity.model.oy * game.config.scale, entity.model.width * game.config.scale, entity.model.height * game.config.scale);
-								graphics.rotation = entity.physics.theta;
-								break;
-							default:
-								break;
-						}
-						graphics.endFill();
-					},
 				}),
 			},
 		},
 
 		viewport: {},
-
-		tick({ dt, ip, startTime, lastTime, fps }) {
-			const obj = {
-				game: this,
-				dt,
-				ip,
-				startTime,
-				lastTime,
-				fps,
-			};
-
-			this.input.tick(obj);
-			this.realm.tick(obj);
-		},
-		draw({ dt, ip, now }) {
-			const obj = {
-				game: this,
-				dt,
-				ip,
-				now,
-			};
-
-			const scope = this.viewport.current.getObservers(1, game);
-			const { px, py, pw, ph } = scope;
-			const { zone, tx, ty, tw, th } = scope;
-
-			this.realm.draw(obj);
-		},
 	});
 	//#endregion
 

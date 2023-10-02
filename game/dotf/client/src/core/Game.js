@@ -95,8 +95,34 @@ export class Game extends Node {
 		Game.Instances.delete(this.$id);
 	}
 
-	tick({ game, dt, ip, startTime, lastTime, fps }) { }
-	draw({ game, dt, now }) { }
+
+	tick({ dt, ip, startTime, lastTime, fps }) {
+		const obj = {
+			game: this,
+			dt,
+			ip,
+			startTime,
+			lastTime,
+			fps,
+		};
+
+		this.input.tick(obj);
+		this.realm.tick(obj);
+	}
+	draw({ dt, ip, now }) {
+		const obj = {
+			game: this,
+			dt,
+			ip,
+			now,
+		};
+
+		const scope = this.viewport.current.getObservers(1, this);
+		const { px, py, pw, ph } = scope;
+		const { zone, tx, ty, tw, th } = scope;
+
+		this.realm.draw(obj);
+	}
 };
 
 export default Game;

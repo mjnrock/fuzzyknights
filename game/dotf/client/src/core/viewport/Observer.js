@@ -1,5 +1,5 @@
 import { IdentityClass } from "../../@node/Identity";
-import { EnumModelType } from "../nextMain";
+import { EnumShape } from "../nextMain";
 
 export class Observer extends IdentityClass {
 	constructor ({ zone, position, shape, subject, ...args } = {}) {
@@ -23,7 +23,7 @@ export class Observer extends IdentityClass {
 			this.position = this.subject(game) ?? this.position;
 		}
 
-		if(this.shape.type === EnumModelType.RECTANGLE) {
+		if(this.shape.type === EnumShape.RECTANGLE) {
 			const obj = {
 				zone: this.zone,
 				tx: this.position.x - (this.shape.width / 2),
