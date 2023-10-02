@@ -14,8 +14,8 @@ import { Realm } from "./world/Realm.js";
 import { EntityManager } from "./entity/EntityManager.js";
 import { Zone } from "./world/Zone.js";
 import { Factory } from "./world/package.js";
-import Observer from "./viewport/class/Observer";
-import { View } from "./viewport/class/View";
+import Observer from "./viewport/Observer";
+import { View } from "./viewport/View";
 
 export const EnumModelType = {
 	CIRCLE: "CIRCLE",

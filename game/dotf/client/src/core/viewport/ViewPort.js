@@ -1,58 +1,63 @@
-import Identity from "../../@node/Identity";
+import { IdentityClass } from "../../@node/Identity";
 
-export const Helpers = ({ $game } = {}) => ({
-	getZoneDetail: (viewport) => {
-		// first, get the current zone
-		const { current, views } = viewport;
-		const zone = current.observer.zone;
-		const pane = views[ 0 ].panes[ 0 ];
+export class ViewPort extends IdentityClass {
+	static LayoutType = {
+		FLEX: `flex`,
+		GRID: `grid`,
+		LIST: `list`,
+	};
 
-		// using $game, get the tile boundaries of the zone.  pane x,y,width,height are in pixels, so we need to convert to tiles and offsets
-		const scale = $game.config.scale;
-		const tileWidth = $game.config.tiles.width;
-		const tileHeight = $game.config.tiles.height;
+	constructor ({ panes = [], $game, ...args } = {}) {
+		super({
+			$game,
+			...args
+		});
 
-		// get the tx,ty coordinates of the pane
-		const tx0 = Math.floor(pane.x / (tileWidth * scale));
-		const ty0 = Math.floor(pane.y / (tileHeight * scale));
-		const tx1 = Math.floor((pane.x + pane.width) / (tileWidth * scale));
-		const ty1 = Math.floor((pane.y + pane.height) / (tileHeight * scale));
+		this.layout = ViewPort.LayoutType.FLEX;
+		this.panes = panes;
+	}
 
-		console.log(pane)
-		console.log(scale, tileWidth, tileHeight)
+	prepend(...panes) {
+		this.panes.unshift(...panes);
+	}
+	append(...panes) {
+		this.panes.push(...panes);
+	}
+	remove(...panes) {
+		this.panes = this.panes.filter((pane) => !panes.includes(pane));
+	}
+	placeAt(index, ...panes) {
+		this.panes.splice(index, 0, ...panes);
+	}
 
-		return {
-			zone,
+	/**
+	 * To make Observer find a bit easier, this function will return the @count number
+	 * of Observers that the ViewPort has within its Views.  If @count is 1, then the
+	 * Observer will be returned directly.  If @count is greater than 1, then an array
+	 * of Observers will be returned.  For additional use cases, if @scopeArgs is provided,
+	 * then the Observer's getScope function will be called with those arguments
+	 * (i.e. get the scope of the Observers, rather than the Observers themselves).
+	 * @param {int} count | default = 1
+	 * @param  {...any} scopeArgs 
+	 * @returns 
+	 */
+	getObservers(count = 1, ...scopeArgs) {
+		const observers = this.panes.slice(0, count).map((pane) => pane.observer);
 
-			// pixels
-			px0: pane.x,
-			py0: pane.y,
-			px1: pane.x + pane.width,
-			py1: pane.y + pane.height,
+		if(observers.length === 1) {
+			if(scopeArgs.length) {
+				return observers[ 0 ].getScope(...scopeArgs);
+			}
 
-			// tiles
-			tx0: tx0,
-			ty0: ty0,
-			tx1: tx1,
-			ty1: ty1,
-		};
-	},
-});
+			return observers[ 0 ];
+		} else {
+			if(scopeArgs.length) {
+				return observers.map((observer) => observer.getScope(...scopeArgs));
+			}
 
-export const Reducers = ({ $game } = {}) => ({
-	merge: (state, viewport) => ({ ...state, ...viewport }),
-	setCurrent: (state, current) => ({ ...state, current }),
-	setViews: (state, views) => ({ ...state, views }),
-	setAsView: (state, view) => ({ ...state, views: [ view ], current: view }),
-});
-export const ViewPort = ({ views = [], ...args } = {}) => Identity.Identity.Next({
-	current: Object.keys(views).length ? Object.keys(views)[ 0 ] : null,
-	views,
-	...args,
-});
-
-export default {
-	Helpers,
-	Reducers,
-	State: ViewPort,
+			return observers;
+		}
+	}
 };
+
+export default ViewPort;

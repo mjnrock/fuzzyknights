@@ -7,7 +7,7 @@ import Input from "./input/package.js";
 import Realm from "./world/Realm";
 import AssetManager from "./assets/AssetManager";
 import InputManager from "./input/InputManager";
-import { ViewPort } from "./viewport/class/ViewPort";
+import { ViewPort } from "./viewport/ViewPort";
 
 export class Game extends Node {
 	static Instances = new Map();
