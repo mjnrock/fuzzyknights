@@ -36,6 +36,13 @@ export const EnumTerrainType = {
 	ROCK: { type: "ROCK", color: "#999999" },
 };
 
+//TODO: Create a few test Entities to ensure .tick and .draw are working properly
+const stubEntities = [
+	new Entity({ type: Entity.EnumType.CREATURE, ...Components.Generators.DemoEntity({ physics: { x: 8, y: 8, speed: 3.7 } }) }),
+	new Entity({ type: Entity.EnumType.CREATURE, ...Components.Generators.DemoEntity({ physics: { x: 16, y: 16, speed: 3.7 } }) }),
+	new Entity({ type: Entity.EnumType.CREATURE, ...Components.Generators.DemoEntity({ physics: { x: 24, y: 24, speed: 3.7 } }) }),
+];
+
 export async function main() {
 	const game = new Game({
 		$run: true,
